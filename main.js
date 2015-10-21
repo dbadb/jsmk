@@ -1,6 +1,7 @@
 var jmod = require('./lib/jsmk.js');
 var err = false;
-var jsmk = jmod.NewJsmk();
+
+global.jsmk = jmod.NewJsmk();
 
 try {
     jsmk.BeginSession();
