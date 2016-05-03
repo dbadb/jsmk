@@ -1,0 +1,13 @@
+* toolset class
+
+* tool base class
+** verify that derived plugin base classes work and are uncluttered
+
+* framework class
+** convert teensy to framework - separating g++-arm compiler.
+
+* project class
+
+* settings container class
+** do we need more that __proto__ ?
+** lazy substitution of  env & buildsettings vars

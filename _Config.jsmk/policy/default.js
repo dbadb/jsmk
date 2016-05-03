@@ -1,4 +1,4 @@
-exports.BuildPolicy = {
+exports.Policy = {
     Stages: ["build", "install"],
     Deployment: "debug",
     Flavor:  "vanilla",
