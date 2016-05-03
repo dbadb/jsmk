@@ -12,8 +12,8 @@ jsmk is yet-another build system. This one is based on nodejs and can be used to
 * Clone this repo
 * Make sure nodejs is installed and in your path
 * We are currently using extra modules - installed under node_modules.
-** minimist (arg parsing)
-** winston (loggin)
-** xregexp 
+    * minimist (arg parsing)
+    * winston (loggin)
+    * xregexp 
 * Make sure jsmk can find configuration settings
-** you'll probably want to augment the ones present in _Config.jsmk
+    * you'll probably want to augment the ones present in _Config.jsmk
