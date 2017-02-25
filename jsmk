@@ -1,6 +1,7 @@
 #!/bin/sh
 basedir=`dirname "$0"`
 
+# cygpath -w means convert to native windows representation
 case `uname` in
     *CYGWIN*) basedir=`cygpath -w "$basedir"`;;
 esac

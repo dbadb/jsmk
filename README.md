@@ -1,6 +1,7 @@
 # README #
 
-jsmk is yet-another build system. This one is based on nodejs and can be used to build / compile complex projects in today's common languages and deployment modalities.
+jsmk is yet-another build system. This one is based on nodejs and can be used
+to build / compile complex projects in today's common languages and deployment modalities.
 
 ### This repo holds the jsmk build system ###
 
@@ -14,6 +15,6 @@ jsmk is yet-another build system. This one is based on nodejs and can be used to
 * We are currently using extra modules - installed under node_modules.
     * minimist (arg parsing)
     * winston (loggin)
-    * xregexp 
+    * xregexp
 * Make sure jsmk can find configuration settings
     * you'll probably want to augment the ones present in _Config.jsmk

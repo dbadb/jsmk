@@ -1,19 +1,16 @@
 //
 // toolset/foundation.js:
-//      - establishes cross-toolset behavior
+//      - establishes cross-toolset behavior for a wide range of "rules"
+//
 
-Toolset = require("Toolset.js");
-
-exports.Foundation = Foundation;
-
+Toolset = require("lib/toolset.js");
 
 class Foundation extends Toolset
 {
-    constructor()
+    constructor(filename, tsname)
     {
-        super.constructor();
-        this.Name = "foundation",
-        this.Tools =  {
+        super.constructor(filename, tsname);
+        this.MergeToolMap( {
             copy:       "jsmk:copy -stage build",
             install:    "jsmk:copy -stage install",
 
@@ -29,6 +26,12 @@ class Foundation extends Toolset
             // shader development
             "osl->oso": undefined, // "oslcompiler"
             "sl->slo": undefined   // "rslcompiler"
-        }
+        } );
     }
 };
+
+exports.Foundation = Foundation;
+exports.GetToolsets = function()
+{
+    return Foundation(__file, "Foundation");
+}

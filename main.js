@@ -1,13 +1,26 @@
-var jmod = require('./lib/jsmk.js');
 var err = false;
 
-global.jsmk = jmod.NewJsmk();
+global.jsmk = require('./lib/jsmk.js').NewJsmk();
 
-try {
+try
+{
     jsmk.BeginSession();
+    try
+    {
+        jsmk.DoBuilds();
+    }
+    catch(ex)
+    {
+        if(ex)
+        {
+            jsmk.ERROR(ex);
+            err = true;
+        }
+    }
 }
 
-catch (ex) {
+catch (ex)
+{
     if (ex)
     {
         jsmk.ERROR(ex);
@@ -15,7 +28,7 @@ catch (ex) {
     }
 }
 
-finally  {
+finally
+{
     jsmk.EndSession(err);
 }
-

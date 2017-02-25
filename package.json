@@ -1,0 +1,12 @@
+{
+    "name": "@dbadb/jsmk",
+    "version": "1.0-alpha.0",
+    "description": "yet another super-powerful build system.",
+    "license": "SEE LICENSE IN jsmk.license",
+    "main": "main.js",
+    "bin": "jsmk",
+    "repository": {
+        "type": "git",
+        "url": "https://bitbucket.com/dbadb/jsmk"
+    }
+}

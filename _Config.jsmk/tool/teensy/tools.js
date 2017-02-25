@@ -82,7 +82,7 @@ var link = {
         "-Wl,--gc-sections,--relax,--defsym=__rtc_localtime=1432291410",
         "-mthumb",
     ],
-    flag_DEPLOYMENT: {
+    flag_${DEPLOYMENT}: {
         TEENSY31: [
             "-T${TEENSYSRC}/mk20dx256.ld",
             "-mcpu=cortex-m4"
@@ -97,7 +97,7 @@ var link = {
         "-L${TEENSYSRC}",
         "_inheritlist:lib.${TEENSYBOARD}",
         "-lm",
-    lib_
+    lib_:
         {
             TEENSY31: ["-larm_cortexM4l_math"],
             TEENSYLC:  ["-larm_cortexM0l_math"]
