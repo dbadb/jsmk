@@ -1,6 +1,6 @@
 {
     "name": "@dbadb/jsmk",
-    "version": "1.0-alpha.0",
+    "version": "1.0.0",
     "description": "yet another super-powerful build system.",
     "license": "SEE LICENSE IN jsmk.license",
     "main": "main.js",
@@ -8,5 +8,9 @@
     "repository": {
         "type": "git",
         "url": "https://bitbucket.com/dbadb/jsmk"
+    },
+    "dependencies": {
+        "winston": "~2.3.0",
+        "minimist": "~1.2.0"
     }
 }
