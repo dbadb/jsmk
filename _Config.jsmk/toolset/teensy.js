@@ -1,4 +1,4 @@
-Foundation = require("foundation.js").Foundation;
+var Foundation = require("./foundation.js").Foundation;
 
 class Teensy extends Foundation
 {

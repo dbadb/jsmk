@@ -1,46 +1,46 @@
-Foundation = require("./foundation.js");
+var Foundation = require("./foundation.js").Foundation;
 
-class VS12 extends Foundation
+class vs12 extends Foundation
 {
-    constructor(filename, tsname)
+    constructor(arch)
     {
-        super.constructor(filename, tsname);
+        super(__filename, "vs12_"+arch);
 
         var vsroot = "C:/Progra~1/Microsoft Visual Studio 12.0";
-        var vs12jtools = jsmk.GetTools("tool/windows/vs12.js");
 
+        var map = {};
+        map.BuildVars =
+        {
+            VSROOT: vsroot,
+            VS_SDK: jsmk.path.join(vsroot, "Windows_Kits/8.1"),
+        };
+        map.Environment = {};
+
+        switch(arch)
+        {
+        case "x86":
+            map.Environment.PATH = jsmk.path.join(vsroot, "VC/bin/amd64") + ';' +
+                                  jsmk.path.join(vsroot, "Common7/IDE/amd64");
+            break;
+        case "x86_64":
+            map.Environment.PATH = jsmk.path.join(vsroot, "VC/bin") + ';' +
+                                   jsmk.path.join(vsroot, "Common7/IDE");
+            break;
+        default:
+            throw("Unimplemented arch for vs12 toolset");
+        }
+        this.MergeSettings(map);
+
+        this.MergeToolMap({
+            "c->o":     new (jsmk.LoadConfig("tool/windows/vs12/cc.js").Tool)(this),
+            //"c->a":     jsmk.LoadConfig("tools/windows/vs12/ar.js").Tool(this),
+            //"c.o->exe": jsmk.LoadConfig("tools/windows/vs12/link.js").Tool(this),
+            //"cpp->o":   jsmk.LoadConfig("tools/windows/vs12/cpp.js").Tool(this),
+            //"cpp->a":   jsmk.LoadConfig("tools/windows/vs12/ar.js").Tool(this),
+            //"cpp.o->exe": jsmk.LoadConfig("tools/windows/vs12/link.js").Tool(this),
+            //"link":     jsmk.LoadConfig("tools/windows/vs12/link.js").Tool(this),
+        });
     }
-
-var vs12: {
-    name: "vs12",
-    buildsettings: {
-        VSROOT: vsroot,
-        VS_SDK: jsmk.path.join(vsroot, "Windows_Kits/8.1"),
-    },
-    environment_x64: {
-        PATH: jsmk.path.join(vsroot, "VC/bin/amd64") + ';' +
-              jsmk.path.join(vsroot, "Common7/IDE/amd64");
-    },
-    environment_x86: {
-        PATH: jsmk.path.join(vsroot, "VC/bin") + ';' +
-              jsmk.path.join(vsroot, "Common7/IDE");
-    }
-    tools: {
-        __proto__: foundation.tools,
-
-        // for cpp dev (platform+toolset specific)
-        "c->o":     jsmk.GetConfig("tool/windows/vs12cc.js"),
-        "c->a":     jsmk.GetConfig("tools/windows/vs12ar.js"),
-        "c.o->exe": jsmk.GetConfig("tools/windows/vs12link.js"),
-        "cpp->o":   jsmk.GetConfig("tools/windows/vs12cpp.js"),
-        "cpp->a":   jsmk.GetConfig("tools/windows/vs12ar.js"),
-        "cpp.o->exe": jsmk.GetConfig("tools/windows/vs12link.js"),
-        "link":     jsmk.GetConfig("tools/windows/vs12link.js"),
-    },
-};
-
-exports.VS12 = VS12;
-exports.GetToolsets = function()
-{
-    return VS12(__file, "VS12");
 }
+
+exports.Toolset = vs12;

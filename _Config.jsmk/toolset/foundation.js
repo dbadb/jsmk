@@ -1,15 +1,19 @@
 //
 // toolset/foundation.js:
 //      - establishes cross-toolset behavior for a wide range of "rules"
+//      - since we're not a concrete toolset, we don't export GetToolsets
 //
 
-Toolset = require("lib/toolset.js");
+var Toolset = jsmk.Require("toolset.js").Toolset;
 
 class Foundation extends Toolset
 {
     constructor(filename, tsname)
     {
-        super.constructor(filename, tsname);
+        super(filename, tsname);
+
+        // no settings in foundation?
+
         this.MergeToolMap( {
             copy:       "jsmk:copy -stage build",
             install:    "jsmk:copy -stage install",
@@ -31,7 +35,3 @@ class Foundation extends Toolset
 };
 
 exports.Foundation = Foundation;
-exports.GetToolsets = function()
-{
-    return Foundation(__file, "Foundation");
-}
