@@ -1,13 +1,14 @@
-* toolset class
-
-* tool base class
-** verify that derived plugin base classes work and are uncluttered
-
-* framework class
-** convert teensy to framework - separating g++-arm compiler.
-
-* project class
+* project loader
+    * project class
 
 * settings container class
 ** do we need more that __proto__ ?
 ** lazy substitution of  env & buildsettings vars
+
+
+* scheduler class
+    * exec via child_process.exec, tool_cli
+        -- are promises useful? Perhaps not per-file, but perhaps per-proj?
+
+* framework class
+** convert teensy to framework - separating g++-arm compiler.
