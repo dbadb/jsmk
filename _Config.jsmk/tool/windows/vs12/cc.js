@@ -1,15 +1,21 @@
-var cli = jsmk.Require("tool_cli.js").Tool;
+var ToolCli = jsmk.Require("tool_cli.js").Tool;
 
-class vs12cc extends cli
+class vs12cc extends ToolCli
 {
     constructor(toolset)
     {
         super(toolset, "vs12cc",
                 {
                     Role: "compiler/c",
-                    Semantics: cli.Semantics.ManyToMany,
+                    Semantics: ToolCli.Semantics.ManyToMany,
                     DstExt: "obj",
                     ActionStage: "build",
+                    Invocation: "cl",
+                    Syntax: {
+                        define: "/D${KEY}=${VAL}",
+                        include: "/I${VAL}",
+                        flag: "${VAL}"
+                    },
                 });
 
     }
