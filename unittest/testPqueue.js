@@ -1,4 +1,4 @@
-let WorkgenQueue = require("../lib/workgenQueue").WorkgenQueue;
+let Scheduler = require("../lib/Scheduler").Scheduler;
 
 let maxc = 5;
 
@@ -8,7 +8,7 @@ function *genWork(nm)
 	while(c <= maxc)
 	{
         let nmc = `${nm}.${c}`;
-        let block = (c === maxc) ? "before" : null;
+        let block = (c === 3) ? "before" : null;
         if(block)
             nmc += ".----block-----";
         console.log("gen " + nmc);
@@ -38,15 +38,15 @@ function *genWork(nm)
 }
 
 
-var pqueue = new WorkgenQueue(
+var pqueue = new Scheduler(
                         {
-                            maxConcurrency: 2,
+                            maxConcurrency: 3,
                             onDone: function() { console.log("Queue empty"); }
                         }
                         );
 
-pqueue.Append(genWork("one"));
-//pqueue.Append(genWork("two"));
-//pqueue.Append(genWork("three"));
-//pqueue.Append(genWork("4"));
+for(let i=0;i<1000;i++)
+{
+    pqueue.Append(genWork("p"+i));
+}
 
