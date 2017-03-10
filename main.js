@@ -1,34 +1,13 @@
 var err = false;
-
 global.jsmk = require('./lib/jsmk.js').NewJsmk();
 
-try
-{
-    jsmk.BeginSession();
-    try
+jsmk.BeginSession();
+jsmk.DoBuilds()
+    .catch( (err) =>
     {
-        jsmk.DoBuilds();
-    }
-    catch(ex)
+        jsmk.ERROR(err);
+    })
+    .finally( () =>
     {
-        if(ex)
-        {
-            jsmk.ERROR(ex);
-            err = true;
-        }
-    }
-}
-
-catch (ex)
-{
-    if (ex)
-    {
-        jsmk.ERROR(ex);
-        err = true;
-    }
-}
-
-finally
-{
-    jsmk.EndSession(err);
-}
+        jsmk.EndSession(err);
+    });
