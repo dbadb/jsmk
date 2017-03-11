@@ -15,10 +15,17 @@ class Foundation extends Toolset
         // no settings in foundation?
 
         this.MergeToolMap( {
-            copy:       "jsmk:copy -stage build",
-            install:    "jsmk:copy -stage install",
+            copy:       "jsmk/copy -stage build",
+            install:    "jsmk/copy -stage install",
 
-            // for cpp dev (platform+toolset specific)
+            // for javascript development -------------------
+            ".js->.js.min": "jsmk/minify", // aka uglify
+
+            // for Android ----------------------------------
+
+            // for iPhone -----------------------------------
+
+            // for cpp dev (platform+toolset specific) ------
             "c->o":     undefined,
             "c->a":     undefined,
             "c.o->exe": undefined,
@@ -27,7 +34,7 @@ class Foundation extends Toolset
             "cpp.o->exe": undefined,
             "link":     undefined,
 
-            // shader development
+            // shader development ---------------------------
             "osl->oso": undefined, // "oslcompiler"
             "sl->slo": undefined   // "rslcompiler"
         } );

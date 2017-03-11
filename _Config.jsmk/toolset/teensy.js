@@ -6,41 +6,44 @@ class Teensy extends Foundation
      {
         super(__filename, "teensy");
 
-        var ardroot = "C:Proga~2/Arduino";
+        var ardroot = "D:/dana/arduino-1.6.12";
         var teensytools = jsmk.path.join(ardroot, "hardware/tools");
         var teensybin = jsmk.path.join(teensytools, "arm/bin");
-        var jtools = jsmk.GetTools("tool/teensy/tools.js");
 
-        var config = {};
+        var map = {};
 
-        config.BuildVars =
+        map.BuildVars =
         {
             ARDROOT: ardroot,
-            TEENSYSRC: "D:/dana//src/teensy/libs/libcore/teensy-cores/teensy3",
+            TEENSYSRC: jsmk.path.join(ardroot, "hardware/teensy/avr/cores/teensy3"),
             TEENSYLIBS: jsmk.path.join(ardroot, "hardware/teensy/avr/libraries"),
             TEENSYTOOLS: teensytools,
             // TEENSYBOARD: "TEENSY31",
             TEENSYBOARD: "TEENSYLC",
         };
-        config.Environment =
+        map.Environment =
         {
-            PATH: teensybin + ';' + teensytools;
+            PATH: teensybin + ';' + teensytools,
         };
 
-        this.MergeSettings(config);
+        this.MergeSettings(map);
+
+        let cc = jsmk.LoadConfig("tool/teensy/cc.js");
+        let link = jsmk.LoadConfig("tool/teensy/link.js");
+        let misc = jsmk.LoadConfig("tool/teensy/misc.js");
 
         this.MergeToolMap(
             {
-                "cpp->o": jtools.cpp,
-                "c->o": jtools.cc,
-                "cpp.o->elf": jtools.link,
-                "o->a": jtools.ar,
-                "elf->eep": jtools.objcopy, // eeprom (data)
-                "elf->hex": jtools.objcopy, // non-data
-                "postcompile": jtools.postcompile,
+                "cpp->o": new cc.CPP(this),
+                "c->o": new cc.CC(this),
+                "cpp.o->elf": new link.Link(this),
+                "o->a": new misc.AR(this),
+                "elf->eep": new misc.ObjCopy(this, "elf->eep"), // eeprom (data)
+                "elf->hex": new misc.ObjCopy(this, "elf->hex"), // non-data
+                "postcompile": new misc.PostCompile(this)
             }
         );
-    }
+    } // end constructor
 }
 
 exports.Toolset = Teensy;
