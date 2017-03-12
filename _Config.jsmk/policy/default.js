@@ -24,10 +24,10 @@ class DefaultPolicy extends Policy
             ProjectMatch: null,
             ToolsetMatch: null,
             SubsetMatch: null,
-            BuildStrTmplt: "${OS}_${ARCH}_${TOOLSET}_${DEPLOY}_${FLAVOR}_${BUILDID}",
-            BuiltDirTmplt: "${BRANCHDIR}/.built",
-            InstallDirTmplt: "${ROOTDIR}/.install",
-            PackageDirTmplt: "${ROOTDIR}/.package"
+            BuildTargetTmplt: "${HostPlatform}-${Toolset}-${Flavor}-${Deployment}",
+            BuiltDirTmplt: "${DomainDir}/_built/${Module}", // add BuildID
+            InstallDirTmplt: "${RootDir}/_install",
+            PackageDirTmplt: "${RootDir}/_package"
         }
         super(config);
     }
