@@ -6,11 +6,10 @@ class Teensy extends Foundation
      {
         super(__filename, "teensy");
 
-        var ardroot = "D:/dana/arduino-1.6.12";
-        var teensytools = jsmk.path.join(ardroot, "hardware/tools");
-        var teensybin = jsmk.path.join(teensytools, "arm/bin");
-
-        var map = {};
+        let ardroot = "D:/dana/arduino-1.6.12";
+        let teensytools = jsmk.path.join(ardroot, "hardware/tools");
+        let teensybin = jsmk.path.join(teensytools, "arm/bin");
+        let map = {};
 
         map.BuildVars =
         {
@@ -20,10 +19,7 @@ class Teensy extends Foundation
             TEENSYTOOLS: teensytools,
             // TEENSYBOARD: "TEENSY31",
             TEENSYBOARD: "TEENSYLC",
-        };
-        map.Environment =
-        {
-            PATH: teensybin + ';' + teensytools,
+            TEENSYPATH:  [teensybin, teensytools],
         };
 
         this.MergeSettings(map);

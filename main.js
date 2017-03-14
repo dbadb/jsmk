@@ -5,7 +5,7 @@ jsmk.BeginSession();
 jsmk.DoBuilds()
     .catch( (err) =>
     {
-        jsmk.ERROR(err);
+        jsmk.ERROR(err + " " + jsmk.StackTrace());
     })
     .finally( () =>
     {

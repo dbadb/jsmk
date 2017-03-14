@@ -8,31 +8,29 @@ let ToolCli = jsmk.Require("tool_cli.js").Tool;
 // its collection of compiler flags).
 class CC extends ToolCli
 {
-    constructor(toolset, invoc)
+    constructor(ts, invoc)
     {
         let gcc = invoc ? invoc : "gcc";
-        super(toolset, "teensy/cc",
+        let exefile = `arm-none-eabi-${gcc}`;
+        let arg0 = jsmk.path.resolveExeFile(exefile, ts.BuildVars.TEENSYPATH);
+        if(!arg0) throw("Can't resolve teensy CC executable");
+        super(ts, "teensy/cc",
             {
                 Role: "compiler/c",
                 Semantics: ToolCli.Semantics.ManyToMany,
                 DstExt: "o",
                 ActionStage: "build",
-                Invocation: `arm-none-eabi-${gcc}` +
-                             " ${SRCFILE} -o ${DSTFILE}" +
-                             " ${FLAGS} ${DEFINES} ${INCLUDES}",
+                Invocation: [arg0, " ${SRCFILE} -o ${DSTFILE}" +
+                                   " ${FLAGS} ${DEFINES} ${INCLUDES}"],
                 Syntax: {
-                    define: "-D${KEY}=${VAL}",
-                    include: "-I${VAL}",
-                    flag: "${VAL}"
+                    Define: "-D${KEY}=${VAL}",
+                    DefineNoVal: "-D${KEY}",
+                    Include: "-I${VAL}",
+                    Flag: "${VAL}"
                 },
             });
-    }
 
-    ConfigureTaskSettings(settings)
-    {
-        super.ConfigureTaskSettings(settings);
-
-        settings.Define( {
+        this.Define( {
             ARDUINO: "10605",
             TEENSYDUINO: "124",
             ARDUINO: "10605",
@@ -43,7 +41,7 @@ class CC extends ToolCli
             __TEENSYBOARD:  null
         });
 
-        settings.AddFlags([
+        this.AddFlags([
                 "-c",
                 "-Wall",
                 "-ffunction-sections",
@@ -57,23 +55,32 @@ class CC extends ToolCli
                 "-felide-constructors",
             ]);
 
-        switch(settings.BuildVars.TEENSYBOARD)
+        this.Include( [
+            "${TEENSYSRC}",
+            "${TEENSYLIBS}"
+        ]);
+    } // end constructor
+
+    ConfigureTaskSettings(task)
+    {
+        super.ConfigureTaskSettings(task);
+        switch(task.BuildVars.TEENSYBOARD)
         {
         case "TEENSY31":
-            settings.Define({
+            task.Define({
                     F_CPU: "96000000",
                     "__MK20DX256__": null,
                 });
-            settings.AddFlags([
+            task.AddFlags([
                     "-mcpu=cortex-m4",
                 ]);
             break;
         case "TEENSYLC":
-            settings.Define({
+            task.Define({
                     F_CPU: "48000000",
                     "__MKL26Z64__":  null,
                 }),
-            settings.AddFlags([
+            task.AddFlags([
                     "-mcpu=cortex-m0plus",
                 ]);
             break;
@@ -81,15 +88,15 @@ class CC extends ToolCli
             jsmk.WARNING("Teensy compiler requires TEENSYBOARD selection");
         }
 
-        switch(settings.BuildVars.DEPLOYMENT)
+        switch(task.BuildVars.Deployment)
         {
         case "debug":
-            settings.AddFlags([
+            task.AddFlags([
                 "-g",
             ]);
             break;
         case "release":
-            settings.AddFlags([
+            task.AddFlags([
                 "-O",
             ]);
             break;

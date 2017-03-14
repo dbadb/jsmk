@@ -2,11 +2,13 @@ var Policy = require("./default.js");
 
 class ReleasePolicy extends Policy
 {
-    constructor()
+    constructor(optConfig)
     {
-        let config = {
+        let config =
+        {
             Deployment: "release",
-        }
+        };
+        Object.assign(config, optConfig);
         super(config);
     }
 }

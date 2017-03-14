@@ -2,9 +2,10 @@ var Policy = jsmk.Require("policy.js").Policy;
 
 class DefaultPolicy extends Policy
 {
-    constructor()
+    constructor(optConfig)
     {
-        let config = {
+        let config =
+        {
             RootFile: "_Root.jsmk",
             ProjFile: "_Proj.jsmk",
             AllStages: ["nuke",
@@ -29,6 +30,7 @@ class DefaultPolicy extends Policy
             InstallDirTmplt: "${RootDir}/_install",
             PackageDirTmplt: "${RootDir}/_package"
         }
+        Object.assign(config, optConfig);
         super(config);
     }
 }

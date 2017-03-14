@@ -2,48 +2,52 @@ let ToolCli = jsmk.Require("tool_cli.js").Tool;
 
 class Link extends ToolCli
 {
-    constructor(toolset)
+    constructor(ts)
     {
-        super(toolset, "teensy/link",
+        let exefile = "arm-none-eabi-gcc";
+        let arg0 = jsmk.path.resolveExeFile(exefile, ts.BuildVars.TEENSYPATH);
+        super(ts, "teensy/link",
             {
                 Role: "linker/c",
                 Semantics: ToolCli.Semantics.ManyToOne,
                 DstExt: "a",
                 ActionStage: "build",
-                Invocation: "arm-none-eabi-gcc ${FLAGS} " +
-                                "-o ${DSTFILE} ${SRCFILES}",
+                Invocation: ["arm-none-eabi-gcc",
+                             "${FLAGS} -o ${DSTFILE} ${SRCFILES}"],
                 Syntax:
                 {
-                    flag: "${VAL}"
+                    Flag: "${VAL}"
                 },
             }
         );
     }
 
-    ConfigureTaskSettings(settings)
+    ConfigureTaskSettings(task)
     {
-        super.ConfigureTaskSettings(settings);
-        settings.AddFlags([
+        super.ConfigureTaskSettings(task);
+        let tsrc = task.BuildVars.TEENSYSRC;
+        let tboard = task.BuildVars.TEENSYBOARD;
+        task.AddFlags([
             "-O",
             "-Wl,--gc-sections,--relax,--defsym=__rtc_localtime=1432291410",
             "-mthumb",
-            "-L${TEENSYSRC}",
-            "_inheritlist:lib.${TEENSYBOARD}",
+            `-L${tsrc}`,
+            `_inheritlist:lib.${tboard}`,
             "-lm",
         ]);
 
-        switch(settings.BuildVars.TEENSYBOARD)
+        switch(tboard)
         {
         case "TEENSY31":
-            settings.AddFlags([
-                "-T${TEENSYSRC}/mk20dx256.ld",
+            task.AddFlags([
+                `-T${tsrc}/mk20dx256.ld`,
                 "-mcpu=cortex-m4",
                 "-larm_cortexM4l_math",
             ]);
             break;
         case "TEENSYLC":
-            settings.AddFlags([
-                "-T${TEENSYSRC}/mkl26z64.ld",
+            task.AddFlags([
+                `-T${tsrc}/mkl26z64.ld`,
                 "--specs=nano.specs",
                 "-mcpu=cortex-m0plus",
                 "-larm_cortexM0l_math",

@@ -14,16 +14,16 @@ class vs12 extends Foundation
             VSROOT: vsroot,
             VS_SDK: jsmk.path.join(vsroot, "Windows_Kits/8.1"),
         };
-        map.Environment = {};
+        map.EnvMap = {};
 
         switch(arch)
         {
         case "x86":
-            map.Environment.PATH = jsmk.path.join(vsroot, "VC/bin/amd64") + ';' +
+            map.EnvMap.PATH = jsmk.path.join(vsroot, "VC/bin/amd64") + ';' +
                                   jsmk.path.join(vsroot, "Common7/IDE/amd64");
             break;
         case "x86_64":
-            map.Environment.PATH = jsmk.path.join(vsroot, "VC/bin") + ';' +
+            map.EnvMap.PATH = jsmk.path.join(vsroot, "VC/bin") + ';' +
                                    jsmk.path.join(vsroot, "Common7/IDE");
             break;
         default:
