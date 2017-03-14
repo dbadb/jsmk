@@ -26,9 +26,9 @@ class DefaultPolicy extends Policy
             ToolsetMatch: null,
             SubsetMatch: null,
             BuildTargetTmplt: "${HostPlatform}-${Toolset}-${Flavor}-${Deployment}",
-            BuiltDirTmplt: "${DomainDir}/_built/${Module}", // add BuildID
-            InstallDirTmplt: "${RootDir}/_install",
-            PackageDirTmplt: "${RootDir}/_package"
+            BuiltDirTmplt: "${DomainDir}/.built/${Module}", // add BuildID
+            InstallDirTmplt: "${RootDir}/.install",
+            PackageDirTmplt: "${RootDir}/.package"
         }
         Object.assign(config, optConfig);
         super(config);
