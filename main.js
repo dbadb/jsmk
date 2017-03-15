@@ -1,13 +1,25 @@
-var err = false;
 global.jsmk = require('./lib/jsmk.js').NewJsmk();
 
-jsmk.BeginSession();
+try
+{
+    jsmk.BeginSession();
+}
+catch(e)
+{
+    jsmk.ERROR("bootstrap:" + e.stack);
+    jsmk.EndSession(e);
+    process.exit(-1);
+}
+
+let err = null;
 jsmk.DoBuilds()
-    .catch( (err) =>
-    {
-        jsmk.ERROR(err + " " + jsmk.StackTrace());
+    .then(()=>{
+        jsmk.NOTICE("done with builds");
     })
-    .finally( () =>
-    {
+    .catch((e)=>{
+        err = e;
+        jsmk.ERROR("main: " + e);
+    })
+    .finally(() => {
         jsmk.EndSession(err);
     });
