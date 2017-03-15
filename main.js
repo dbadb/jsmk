@@ -6,7 +6,7 @@ try
 }
 catch(e)
 {
-    jsmk.ERROR("bootstrap:" + e.stack);
+    jsmk.ERROR("bootstrap:" + e.stack ? e.stack : e);
     jsmk.EndSession(e);
     process.exit(-1);
 }

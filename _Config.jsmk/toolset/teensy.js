@@ -7,7 +7,7 @@ class Teensy extends Foundation
         super(__filename, "teensy");
 
         let ardroot = "D:/dana/arduino-1.6.12";
-        let dbcore  =  "D:/dana/src/teensy/libs/libcore/teensy-cores/teensy3";
+        let dbcore  =  "D:/dana/src/teensy/nih/libcore/teensy-cores/teensy3";
         let teensycore  = jsmk.path.join(ardroot, "hardware/teensy/avr/cores/teensy3");
         let teensytools = jsmk.path.join(ardroot, "hardware/tools");
         let teensybin = jsmk.path.join(teensytools, "arm/bin");
@@ -42,6 +42,7 @@ class Teensy extends Foundation
                 "postcompile": new misc.PostCompile(this)
             }
         );
+        jsmk.DEBUG("Teensy toolset loaded");
     } // end constructor
 }
 

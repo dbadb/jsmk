@@ -50,10 +50,16 @@ class CC extends ToolCli
                 "-nostdlib",
                 "-fno-exceptions",
                 "-mthumb",
+            ]);
+            
+        if(gcc === "g++")
+        {
+            this.AddFlags([
                 "-fno-rtti",
                 "-std=gnu++0x",
                 "-felide-constructors",
             ]);
+        }
 
         this.Include( [
             "${TEENSYSRC}",
