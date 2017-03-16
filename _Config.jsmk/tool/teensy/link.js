@@ -10,7 +10,7 @@ class Link extends ToolCli
             {
                 Role: "linker/c",
                 Semantics: ToolCli.Semantics.ManyToOne,
-                DstExt: "a",
+                DstExt: "elf",
                 ActionStage: "build",
                 Invocation: ["arm-none-eabi-gcc",
                              "${FLAGS} -o ${DSTFILE} ${SRCFILES}"],
@@ -29,10 +29,9 @@ class Link extends ToolCli
         let tboard = task.BuildVars.TEENSYBOARD;
         task.AddFlags([
             "-O",
-            "-Wl,--gc-sections,--relax,--defsym=__rtc_localtime=1432291410",
+            "-Wl,--gc-sections,--relax,--defsym=__rtc_localtime="+Date.now(),
             "-mthumb",
             `-L${tsrc}`,
-            `_inheritlist:lib.${tboard}`,
             "-lm",
         ]);
 

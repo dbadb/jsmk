@@ -1,4 +1,4 @@
-let ToolCli = jsmk.Require("tool_cli.js").Tool;
+let GCC = require("../gcc.js").GCC;
 
 // Here we define two classes,  CC and CPP..
 //
@@ -6,7 +6,7 @@ let ToolCli = jsmk.Require("tool_cli.js").Tool;
 // rather than a compiler.  On the other hand, the choice of compiler
 // is pretty-well tied down by teensy (and tightly coupled with
 // its collection of compiler flags).
-class CC extends ToolCli
+class CC extends GCC
 {
     constructor(ts, invoc)
     {
@@ -14,22 +14,7 @@ class CC extends ToolCli
         let exefile = `arm-none-eabi-${gcc}`;
         let arg0 = jsmk.path.resolveExeFile(exefile, ts.BuildVars.TEENSYPATH);
         if(!arg0) throw("Can't resolve teensy CC executable");
-        super(ts, "teensy/cc",
-            {
-                Role: "compiler/c",
-                Semantics: ToolCli.Semantics.ManyToMany,
-                DstExt: "o",
-                ActionStage: "build",
-                Invocation: [arg0, " ${SRCFILE} -o ${DSTFILE}" +
-                                   " ${FLAGS} ${DEFINES} ${INCLUDES}"],
-                Syntax: {
-                    Define: "-D${KEY}=${VAL}",
-                    DefineNoVal: "-D${KEY}",
-                    Include: "-I${VAL}",
-                    Flag: "${VAL}"
-                },
-            });
-
+        super(ts, "teensy/cc", arg0);
         this.Define( {
             ARDUINO: "10605",
             TEENSYDUINO: "124",
@@ -107,38 +92,6 @@ class CC extends ToolCli
             ]);
             break;
         }
-    }
-
-    outputIsDirty(output, inputs, cwd)
-    {
-        let dirty = super.outputIsDirty(output, inputs, cwd);
-        if(!dirty)
-        {
-            // also look for MMD output to see if any dependencies have changed
-
-            let depfileTxt = jsmk.file.read(jsmk.file.changeExtension(output, "d"));
-            if(depfileTxt)
-            {
-                let pat = /(?:[^\s]+\\ [^\s]+|[^\s]+)+/g;
-                // pat looks for filenames, potentially with embedded spaces.
-                // This also selects for line-continuation "\\" so we need
-                // to filter that.
-                // First line is the dependent file, so we slice it off.
-                let files = depfileTxt.match(pat)
-                .filter( (value)=>{
-                    if(value[value.length-1] == ':')
-                        return false;
-                    else
-                        return (value.length > 1);
-                })
-                .map((value)=>{
-                    // Program\ Files -> Program Files
-                    return value.replace(/\\ /g, " ");
-                });
-                return super.outputIsDirty(output, files, cwd);
-            }
-        }
-        return dirty;
     }
 }
 
