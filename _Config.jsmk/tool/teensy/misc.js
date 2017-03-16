@@ -8,7 +8,7 @@ class AR extends ToolCli
         let arg0 = jsmk.path.resolveExeFile(exefile, ts.BuildVars.TEENSYPATH);
         if(!arg0) throw("Can't resolve teensy AR executable");
         super(ts, "teensy/ar", {
-            Role:  "teensy/ar",
+            Role:  "archiver/c",
             ActionStage: "build",
             Semantics: ToolCli.Semantics.ManyToOne,
             DstExt: "a",
@@ -25,7 +25,7 @@ class ObjCopy extends ToolCli
         let arg0 = jsmk.path.resolveExeFile(exefile, ts.BuildVars.TEENSYPATH);
         if(!arg0) throw("Can't resolve teensy objcopy executable");
         super(ts, "teensy/objcopy", {
-            Role: "teensy/objcopy",
+            Role: "objcopy/elf",
             ActionStage: "build",
             Semantics: ToolCli.Semantics.OneToOne,
             DstExt: rule === "elf->hex" ? "hex" : "eep",
