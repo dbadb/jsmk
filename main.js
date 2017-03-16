@@ -18,7 +18,7 @@ jsmk.DoBuilds()
     })
     .catch((e)=>{
         err = e;
-        jsmk.ERROR("main: " + e);
+        jsmk.ERROR("main: " + e.stack);
     })
     .finally(() => {
         jsmk.EndSession(err);

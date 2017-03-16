@@ -13,7 +13,7 @@ class Link extends ToolCli
                 DstExt: "elf",
                 ActionStage: "build",
                 Invocation: ["arm-none-eabi-gcc",
-                             "${FLAGS} -o ${DSTFILE} ${SRCFILES}"],
+                             "-o ${DSTFILE} ${SRCFILES} ${FLAGS}"],
                 Syntax:
                 {
                     Flag: "${VAL}"
