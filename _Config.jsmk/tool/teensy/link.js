@@ -12,7 +12,7 @@ class Link extends ToolCli
                 Semantics: ToolCli.Semantics.ManyToOne,
                 DstExt: "elf",
                 ActionStage: "build",
-                Invocation: ["arm-none-eabi-gcc",
+                Invocation: [arg0,
                              "-o ${DSTFILE} ${SRCFILES} ${FLAGS}"],
                 Syntax:
                 {

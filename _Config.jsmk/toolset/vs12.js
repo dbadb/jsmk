@@ -27,7 +27,7 @@ class vs12 extends Foundation
                                    jsmk.path.join(vsroot, "Common7/IDE");
             break;
         default:
-            throw("Unimplemented arch for vs12 toolset");
+            throw new Error("Unimplemented arch for vs12 toolset");
         }
         this.MergeSettings(map);
 

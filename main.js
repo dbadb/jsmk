@@ -17,8 +17,13 @@ jsmk.DoBuilds()
         jsmk.NOTICE("done with builds");
     })
     .catch((e)=>{
+        if(!e)
+            e = new Error("DoBuilds reject");
+        if(typeof e === "string")
+            jsmk.ERROR("jsmk: " + e);
+        else
+            jsmk.ERROR("jsmk: " + e.stack);
         err = e;
-        jsmk.ERROR("main: " + e.stack);
     })
     .finally(() => {
         jsmk.EndSession(err);
