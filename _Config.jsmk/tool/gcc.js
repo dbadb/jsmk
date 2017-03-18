@@ -25,6 +25,9 @@ class GCC extends ToolCli
             },
         };
         super(ts, nm, config);
+        this.AddFlags([
+                "-MMD", // for mkdep
+            ]);
     }
 
     ConfigureTaskSettings(task)

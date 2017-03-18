@@ -51,7 +51,11 @@ class PostCompile extends ToolCli
             Semantics: ToolCli.Semantics.OneToNone,
             ActionStage: "test",
             Invocation: [arg0, "-file=${SRCFILEBASENOEXT} " +
-                       "-path=${BUILTDIR}} ${FLAGS}"],
+                       "-path=${BUILTDIR} ${FLAGS}"],
+            Syntax:
+            {
+                Flag: "${VAL}"
+            },
         });
     }
 

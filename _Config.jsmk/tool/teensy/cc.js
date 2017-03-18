@@ -16,22 +16,32 @@ class CC extends GCC
         if(!arg0) throw new Error("Can't resolve teensy CC executable");
         super(ts, "teensy/cc", arg0);
         this.Define( {
-            ARDUINO: "10605",
-            TEENSYDUINO: "124",
+            ARDUINO: "10612",
+            TEENSYDUINO: "134",
             ARDUINO: "10605",
             ARDUINO_ARCH_AVR: null,
-            //USB_SERIAL_NEWHID:   null,
-            USB_SERIAL_HID:   null,
+            USB_SERIAL_HID:  null, // serial + usb + mouse + joystick
+                                   // modify to change MANUFACTURE and PRODUCT
+            //USB_SERIAL_HID_DB: null, // doesn't work, usb_undef.h
+            // USB_KEYBOARDONLY: null,
             LAYOUT_US_ENGLISH: null,
             __TEENSYBOARD:  null
+
+            // NB  MANUFACTURER_NAME, MANUFACTURE_NAME_LEN
+            //     PRODUCT_NAME, PRODUCT_NAME_LEN are found in
+            //      teensy3/usb_desc.h.
+            //     since F_CPU  >  20000000, we don't need to mod
+            //      teensy3/usb_inst.cpp
         });
 
         this.AddFlags([
                 "-c",
+                "-Os",
+                "--specs=nano.specs",
                 "-Wall",
                 "-ffunction-sections",
                 "-fdata-sections",
-                "-MMD", // for mkdep
+                "-fsingle-precision-constant",
                 "-nostdlib",
                 "-fno-exceptions",
                 "-mthumb",

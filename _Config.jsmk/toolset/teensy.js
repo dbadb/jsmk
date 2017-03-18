@@ -7,8 +7,9 @@ class Teensy extends Foundation
         super(__filename, "teensy");
 
         let ardroot = "D:/dana/arduino-1.6.12";
-        let dbcore  =  "D:/dana/src/teensy/nih/libcore/teensy-cores/teensy3";
-        let teensycore  = jsmk.path.join(ardroot, "hardware/teensy/avr/cores/teensy3");
+        let t3src = jsmk.path.join(ardroot, "hardware/teensy/avr/cores/teensy3");
+        let dbsrc = "D:/dana/src/teensy/nih/libcore/teensy-cores/teensy3";
+        let teensycore = jsmk.path.join(ardroot, "hardware/teensy/avr/cores/teensy3");
         let teensytools = jsmk.path.join(ardroot, "hardware/tools");
         let teensybin = jsmk.path.join(teensytools, "arm/bin");
         let map = {};
@@ -16,8 +17,7 @@ class Teensy extends Foundation
         map.BuildVars =
         {
             ARDROOT: ardroot,
-            //TEENSYSRC: jsmk.path.join(ardroot, "hardware/teensy/avr/cores/teensy3"),
-            TEENSYSRC: jsmk.path.join(dbcore),
+            TEENSYSRC: t3src,
             TEENSYLIBS: jsmk.path.join(ardroot, "hardware/teensy/avr/libraries"),
             TEENSYTOOLS: teensytools,
             // TEENSYBOARD: "TEENSY31",
