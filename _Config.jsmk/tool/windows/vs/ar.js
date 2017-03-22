@@ -9,7 +9,7 @@ class AR extends ToolCli
         if(!arg0) throw new Error("Can't resolve link "+
                                     ts.BuildVars.VSToolsDir);
         super(ts, `vs${vsvers}/ar1`, {
-            Role:  "archiver/c",
+            Role:  ToolCli.Role.Archive,
             ActionStage: "build",
             Semantics: ToolCli.Semantics.ManyToOne,
             DstExt: "a",

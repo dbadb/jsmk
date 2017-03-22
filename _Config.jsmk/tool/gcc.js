@@ -10,7 +10,7 @@ class GCC extends ToolCli
             arg0 = "gcc";
         let config =
         {
-            Role: (arg0.indexOf("++") !== -1) ? "compiler/c++" : "compiler/c",
+            Role: ToolCli.Role.Compile,
             Semantics: ToolCli.Semantics.ManyToMany,
             DstExt: "o",
             ActionStage: "build",

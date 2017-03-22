@@ -8,7 +8,7 @@ class Link extends ToolCli
         let arg0 = jsmk.path.resolveExeFile(exefile, ts.BuildVars.TEENSYPATH);
         super(ts, "teensy/link",
             {
-                Role: "linker/c",
+                Role: ToolCli.Role.Link,
                 Semantics: ToolCli.Semantics.ManyToOne,
                 DstExt: "elf",
                 ActionStage: "build",

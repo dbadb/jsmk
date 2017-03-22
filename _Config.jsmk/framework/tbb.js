@@ -5,9 +5,14 @@ let Framework = jsmk.Require("framework").Framework;
 
 class tbb extends Framework
 {
-    constructor()
+    constructor(version)
     {
+        this.m_rootDir = "D:/Program Files/Intel/tbb2017_20170226oss_win/tbb2017_20170226oss";
+    }
 
+    ConfigureTaskSettings(task)
+    {
+        super.ConfigureTaskSettings(task);
     }
 }
 

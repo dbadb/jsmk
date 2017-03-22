@@ -9,7 +9,7 @@ class Link extends ToolCli
         if(!arg0) throw new Error("Can't resolve link "+
                                     ts.BuildVars.VSToolsDir);
         super(ts, `vs${vsvers}/link`, {
-            Role:  "linker/c",
+            Role:  ToolCli.Role.Link,
             ActionStage: "build",
             Semantics: ToolCli.Semantics.ManyToOne,
             DstExt: "exe",

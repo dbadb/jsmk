@@ -8,7 +8,7 @@ class AR extends ToolCli
         let arg0 = jsmk.path.resolveExeFile(exefile, ts.BuildVars.TEENSYPATH);
         if(!arg0) throw new Error("Can't resolve teensy AR executable");
         super(ts, "teensy/ar", {
-            Role:  "archiver/c",
+            Role:  ToolCli.Role.Archive,
             ActionStage: "build",
             Semantics: ToolCli.Semantics.ManyToOne,
             DstExt: "a",
@@ -25,7 +25,7 @@ class ObjCopy extends ToolCli
         let arg0 = jsmk.path.resolveExeFile(exefile, ts.BuildVars.TEENSYPATH);
         if(!arg0) throw new Error("Can't resolve teensy objcopy executable");
         super(ts, "teensy/objcopy", {
-            Role: "objcopy/elf",
+            Role: ToolCli.Role.Extract,
             ActionStage: "build",
             Semantics: ToolCli.Semantics.OneToOne,
             DstExt: rule === "elf->hex" ? "hex" : "eep",
@@ -47,7 +47,7 @@ class PostCompile extends ToolCli
         let arg0 = jsmk.path.resolveExeFile(exefile, ts.BuildVars.TEENSYPATH);
         if(!arg0) throw new Error("Can't resolve teensy postcompile executable");
         super(ts, "teensy/postcompile", {
-            Role: "teensy/download",
+            Role: ToolCli.Role.Deploy,
             Semantics: ToolCli.Semantics.OneToNone,
             ActionStage: "test",
             Invocation: [arg0, "-file=${SRCFILEBASENOEXT} " +

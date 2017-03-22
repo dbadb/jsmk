@@ -14,7 +14,7 @@ class cl extends ToolCli
             asCC = "";
         super(ts, `vs${vsvers}cc`,
                 {
-                    Role: "compiler/c",
+                    Role: ToolCli.Role.Compile,
                     Semantics: ToolCli.Semantics.ManyToMany,
                     DstExt: "obj",
                     ActionStage: "build",

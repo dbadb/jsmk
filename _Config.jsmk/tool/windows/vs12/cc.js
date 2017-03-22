@@ -6,7 +6,7 @@ class vs12cc extends ToolCli
     {
         super(toolset, "vs12cc",
                 {
-                    Role: "compiler/c",
+                    Role: ToolCli.Role.Compile,
                     Semantics: ToolCli.Semantics.ManyToMany,
                     DstExt: "obj",
                     ActionStage: "build",
