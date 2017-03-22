@@ -88,20 +88,6 @@ class CC extends GCC
         default:
             jsmk.WARNING("Teensy compiler requires TEENSYBOARD selection");
         }
-
-        switch(task.BuildVars.Deployment)
-        {
-        case "debug":
-            task.AddFlags([
-                "-g",
-            ]);
-            break;
-        case "release":
-            task.AddFlags([
-                "-O",
-            ]);
-            break;
-        }
     }
 }
 

@@ -33,6 +33,19 @@ class GCC extends ToolCli
     ConfigureTaskSettings(task)
     {
         super.ConfigureTaskSettings(task);
+        switch(task.BuildVars.Deployment)
+        {
+        case "debug":
+            task.AddFlags([
+                "-g",
+            ]);
+            break;
+        case "release":
+            task.AddFlags([
+                "-O",
+            ]);
+            break;
+        }
     }
 
     outputIsDirty(output, inputs, cwd)
