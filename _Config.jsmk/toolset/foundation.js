@@ -8,9 +8,9 @@ var Toolset = jsmk.Require("toolset.js").Toolset;
 
 class Foundation extends Toolset
 {
-    constructor(filename, tsname)
+    constructor(filename, tsname, arch)
     {
-        super(filename, tsname);
+        super(filename, tsname, arch);
 
         // no settings in foundation?
 

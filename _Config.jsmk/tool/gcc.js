@@ -15,12 +15,12 @@ class GCC extends ToolCli
             DstExt: "o",
             ActionStage: "build",
             Invocation: [arg0, " ${SRCFILE} -o ${DSTFILE}" +
-                               " ${FLAGS} ${DEFINES} ${INCLUDES}"],
+                               " ${FLAGS} ${DEFINES} ${SEARCHPATHS}"],
             Syntax:
             {
                 Define: "-D${KEY}=${VAL}",
                 DefineNoVal: "-D${KEY}",
-                Include: "-I${VAL}",
+                Searchpath: "-I${VAL}",
                 Flag: "${VAL}"
             },
         };

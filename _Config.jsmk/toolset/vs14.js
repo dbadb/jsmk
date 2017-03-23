@@ -4,7 +4,7 @@ class vs14 extends Foundation
 {
     constructor(arch)
     {
-        super(__filename, "vs14_"+arch);
+        super(__filename, "vs14", arch);
 
         let vsDir = "C:/Progra~2/Microsoft Visual Studio 14.0";
         // currently, suffering from win10 link errors looking for kernel32.lib
@@ -15,7 +15,7 @@ class vs14 extends Foundation
         let toolsDir, ideDir;
         let archVariant1, archVariant2;
 
-        if(arch === "x86_64")
+        if(arch === Foundation.Arch.x86_64)
         {
             toolsDir = jsmk.path.join(vsDir, "VC/bin/amd64");
             ideDir = jsmk.path.join(vsDir, "Common7/IDE/amd64");

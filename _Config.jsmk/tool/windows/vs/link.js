@@ -13,10 +13,13 @@ class Link extends ToolCli
             ActionStage: "build",
             Semantics: ToolCli.Semantics.ManyToOne,
             DstExt: "exe",
-            Invocation: [arg0, "${FLAGS} -out:${DSTFILE} ${SRCFILES}"],
+            Invocation: [arg0, "${FLAGS} -out:${DSTFILE} ${SRCFILES} "+
+                               "${SEARCHPATHS} ${LIBS}"],
             Syntax:
             {
-                Flag: "${VAL}"
+                Flag: "${VAL}",
+                Lib: "${VAL}",
+                Searchpath: "/LIBPATH:${VAL}",
             },
         });
 

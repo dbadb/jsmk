@@ -1,23 +1,83 @@
 //
-// a Frameworkf for intel's thread-building-blocks (TBB) c++ library
+// A Framework for Intel's thread-building-blocks (TBB) c++ library
+//
+//  currently we require that the tbb dll's be in path
+//  (the free distro doesn't appear to have a static link option)
 //
 let Framework = jsmk.Require("framework").Framework;
+let Tool = jsmk.Require("tool").Tool;
+let Toolset = jsmk.Require("toolset").Toolset;
 
 class tbb extends Framework
 {
-    constructor(version)
+    constructor(name, version)
     {
-        this.m_rootDir = "D:/Program Files/Intel/tbb2017_20170226oss_win/tbb2017_20170226oss";
+        super(name, version);
+        switch(this.m_version)
+        {
+        case "default":
+        case "2017":
+            this.m_rootDir = "D:/Program Files/Intel/tbb2017_20170226oss_win/tbb2017_20170226oss";
+            this.m_incDir = jsmk.path.join(this.m_rootDir, "include"); // no arch dependency
+            break;
+        default:
+            throw new Exception("tbb frameork version botch: ", version);
+        }
     }
 
     ConfigureTaskSettings(task)
     {
-        super.ConfigureTaskSettings(task);
+        let tool = task.GetTool();
+        let toolset = tool.GetToolset();
+        let arch = toolset.GetArch();
+
+        switch(tool.GetRole())
+        {
+        case Tool.Role.Compile:
+            task.AddSearchpaths([this.m_incDir]);
+            break;
+        case Tool.Role.Link:
+            let libdir;
+            switch(arch)
+            {
+            case Toolset.Arch.x86_64:
+                libdir = jsmk.path.join(this.m_rootDir,"lib/intel64");
+                break;
+            case Toolset.Arch.x86_32:
+                libdir = jsmk.path.join(this.m_rootDir,"lib/ia32");
+                break;
+            }
+            if(!libdir)
+                throw new Error(arch + ": unimplemented arch for tbb framework ")
+
+            let libs;
+            let ts = toolset.GetNameNoArch();
+            switch(ts)
+            {
+            case "vs12":
+            case "vs14":
+                let dir =
+                task.AddSearchpaths([jsmk.path.join(libdir, ts.replace("vs", "vc"))]);
+                if(task.BuildVars.Deployment === "debug")
+                    libs = ["tbb_debug.lib", "tbbmalloc_debug.lib",
+                            "tbbproxy_debug.lib", "tbbpreview_debug.lib"];
+                else
+                    libs = ["tbb.lib", "tbbmalloc.lib",
+                            "tbbproxy.lib", "tbbpreview.lib"];
+                break;
+            }
+            if(!libs)
+                throw new Error("tbb framework missing support for toolset");
+
+            tool.AddLibraries(libs);
+            break;
+        }
     }
 }
 
-/*
 exports.Framework = tbb;
+
+/*
 set TBB_BIN_DIR=%~d0%~p0
 
 set TBBROOT=%TBB_BIN_DIR%..

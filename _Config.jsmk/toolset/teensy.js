@@ -4,7 +4,7 @@ class Teensy extends Foundation
 {
      constructor()
      {
-        super(__filename, "teensy");
+        super(__filename, "teensy", Foundation.Arch.unspecified);
 
         let ardroot = "D:/dana/arduino-1.6.12";
         let t3src = jsmk.path.join(ardroot, "hardware/teensy/avr/cores/teensy3");

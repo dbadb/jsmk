@@ -19,11 +19,12 @@ class cl extends ToolCli
                     DstExt: "obj",
                     ActionStage: "build",
                     Invocation: [arg0,
-                            asCC+"${SRCFILE} /Fo${DSTFILE} ${FLAGS} ${DEFINES} ${INCLUDES}"],
+                            asCC+"${SRCFILE} /Fo${DSTFILE} ${SEARCHPATHS} " +
+                            "${FLAGS} ${DEFINES}"],
                     Syntax: {
                         Define: "/D${KEY}=${VAL}",
                         DefineNoVal: "/D${KEY}",
-                        Include: "/I${VAL}",
+                        Searchpath: "/I${VAL}",
                         Flag: "${VAL}"
                     },
                 });
