@@ -101,7 +101,7 @@ class vs14 extends Foundation
             //"link":     jsmk.LoadConfig("tools/windows/vs12/link.js").Tool(this),
         });
 
-        jsmk.DEBUG(this.GetName() + " toolset loaded");
+        jsmk.DEBUG(this.ToolsetHandle + " toolset loaded");
     }
 }
 

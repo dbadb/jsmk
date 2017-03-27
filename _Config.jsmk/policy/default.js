@@ -25,7 +25,8 @@ class DefaultPolicy extends Policy
             ProjectMatch: null,
             ToolsetMatch: null,
             SubsetMatch: null,
-            BuildTargetTmplt: "${HostPlatform}-${Toolset}-${Flavor}-${Deployment}",
+            ToolsetNameTmplt: "${ToolsetName}-${TargetArch}-${TargetPlatform}",
+            BuildTargetTmplt: "${Toolset}-${Flavor}-${Deployment}",
             BuiltDirTmplt: "${DomainDir}/.built/${Module}", // add BuildID
             InstallDirTmplt: "${RootDir}/.install",
             PackageDirTmplt: "${RootDir}/.package"

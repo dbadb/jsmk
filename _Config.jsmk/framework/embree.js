@@ -8,74 +8,57 @@ let Framework = jsmk.Require("framework").Framework;
 let Tool = jsmk.Require("tool").Tool;
 let Toolset = jsmk.Require("toolset").Toolset;
 
-class tbb extends Framework
+class embree extends Framework
 {
     constructor(name, version)
     {
         super(name, version);
+        this.m_toolset = jsmk.GetActiveToolset();
+        this.m_arch = this.m_toolset.TargetArch;
+        let eArch;
+        switch(this.m_arch)
+        {
+        case Toolset.Arch.x86_64:
+            eArch = "x64";
+            break;
+        default:
+            break;
+        }
+        if(!eArch)
+            throw new Error("embree toolset arch not supported:" + this.m_arch);
+
         switch(this.m_version)
         {
         case "default":
-        case "2017":
-            this.m_rootDir = "D:/Program Files/Intel/tbb2017_20170226oss_win/tbb2017_20170226oss";
-            this.m_incDir = jsmk.path.join(this.m_rootDir, "include"); // no arch dependency
+        case "2.15":
+            this.m_rootDir = `D:/Program Files/Intel/Embree v2.15.0 ${eArch}`;
             break;
         default:
-            throw new Exception("tbb frameork version botch: ", version);
+            throw new Exception("embree frameork version botch: ", version);
         }
+
+        this.m_incDir = jsmk.path.join(this.m_rootDir, "include");
+        this.m_libDir = jsmk.path.join(this.m_rootDir, "bin");
     }
 
     ConfigureTaskSettings(task)
     {
-        let arch = Toolset.TargetArch;
-        let platform = Toolset.TargetPlatform;
-        let tsname = Toolset.ToolsetName;
-
+        let tool = task.GetTool();
         switch(tool.GetRole())
         {
         case Tool.Role.Compile:
             task.AddSearchpaths([this.m_incDir]);
             break;
         case Tool.Role.Link:
-            let libdir;
-            switch(arch)
-            {
-            case Toolset.Arch.x86_64:
-                libdir = jsmk.path.join(this.m_rootDir,"lib/intel64");
-                break;
-            case Toolset.Arch.x86_32:
-                libdir = jsmk.path.join(this.m_rootDir,"lib/ia32");
-                break;
-            }
-            if(!libdir)
-                throw new Error(arch + ": unimplemented arch for tbb framework ")
-
-            let libs;
-            let ts = toolset.Name;
-            switch(ts)
-            {
-            case "vs12":
-            case "vs14":
-                let dir =
-                task.AddSearchpaths([jsmk.path.join(libdir, ts.replace("vs", "vc"))]);
-                if(task.BuildVars.Deployment === "debug")
-                    libs = ["tbb_debug.lib", "tbbmalloc_debug.lib",
-                            "tbbproxy_debug.lib", "tbbpreview_debug.lib"];
-                else
-                    libs = ["tbb.lib", "tbbmalloc.lib",
-                            "tbbproxy.lib", "tbbpreview.lib"];
-                break;
-            }
-            if(!libs)
-                throw new Error("tbb framework missing support for toolset");
-
+            task.AddSerachpaths([this.m_libDir]);
+            let libs= ["embree.dll"]; // also? freeglut, tbband tbbmalloc?
             tool.AddLibraries(libs);
             break;
         }
     }
 }
 
-exports.Framework = tbb;
+exports.Framework = embree;
 
 /*
 set TBB_BIN_DIR=%~d0%~p0
