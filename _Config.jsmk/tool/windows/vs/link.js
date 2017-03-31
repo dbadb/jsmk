@@ -1,4 +1,5 @@
 let ToolCli = jsmk.Require("tool_cli.js").Tool;
+let Arch = jsmk.Require("toolset.js").Arch;
 
 class Link extends ToolCli
 {
@@ -23,11 +24,32 @@ class Link extends ToolCli
             },
         });
 
+        let machine;
+        switch(ts.TargetArch)
+        {
+        case Arch.x86_32:
+            machine="/machine:X86";
+            break;
+        case Arch.x86_64:
+            machine="/machine:X64";
+            break;
+        case Arch.arm_32:
+            machine="/machine:ARM";
+            break;
+        case Arch.arm_64:
+            machine="/machine:ARM64";
+            break;
+        default:
+            throw new Error("Link: unknown arch " + ts.TargetArch);
+        }
+
         this.AddFlags([
-            "-nologo",
-            "-incremental:no",
-            "-manifest"
+            "/nologo",
+            "/incremental:no",
+            "/manifest",
+            machine
         ]);
+
     }
 
     ConfigureTaskSettings(task)
@@ -37,7 +59,8 @@ class Link extends ToolCli
         {
         case "debug":
             task.AddFlags([
-
+                "/debug",
+                "/W3"
             ]);
         case "release":
             task.AddFlags([

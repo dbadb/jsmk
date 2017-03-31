@@ -8,10 +8,6 @@ class cl extends ToolCli
         let arg0 = jsmk.path.resolveExeFile("cl", ts.BuildVars.VSToolsDir);
         if(!arg0) throw new Error("Can't resolve cl.exe " +
                                     ts.BuildVars.VSToolsDir);
-        if(asCC)
-            asCC = "/Tc";
-        else
-            asCC = "";
         super(ts, `vs${vsvers}cc`,
                 {
                     Role: ToolCli.Role.Compile,
@@ -19,20 +15,27 @@ class cl extends ToolCli
                     DstExt: "obj",
                     ActionStage: "build",
                     Invocation: [arg0,
-                            asCC+"${SRCFILE} /Fo${DSTFILE} ${SEARCHPATHS} " +
+                            "${SRCFILE} -Fo${DSTFILE} ${SEARCHPATHS} " +
                             "${FLAGS} ${DEFINES}"],
                     Syntax: {
-                        Define: "/D${KEY}=${VAL}",
-                        DefineNoVal: "/D${KEY}",
-                        Searchpath: "/I${VAL}",
+                        Define: "-D${KEY}=${VAL}",
+                        DefineNoVal: "-D${KEY}",
+                        Searchpath: "-I${VAL}",
                         Flag: "${VAL}"
                     },
                 });
 
         this.AddFlags([
-                "/c",
-                "/GR", // RTTI
-                "/EHsc", // C++ exceptions
+                "-c",
+                "-EHsc", // C++ exceptions
+                "-fp:precise",
+                "-Gd",   // specifies __cdecl calling convention for ...
+                "-Gm-", // minimal rebuild disabled (for now)
+                "-GR", // RTTI
+                "-W3", // warning level
+                "-WX-",
+                asCC ?  "-TC" : "-TP",
+                "-Zc:inline", //
             ]);
     }
 
@@ -42,33 +45,45 @@ class cl extends ToolCli
         switch(task.BuildVars.Deployment)
         {
         case "debug":
-            task.AddFlags([
-                "/MDd", // debugging dynamic c runtime (crt)
-            ]);
             task.Define({
                 "_DEBUG": null,
             });
             task.AddFlags([
-                "/Zi",
-                "/Fd${DSTFILE}.pdb"
+                "-Fd${DSTFILE}.pdb",
+                "-GS",   // buffers security checks
+                "-MDd", // debugging dynamic c runtime (crt)
+                "-Ob0", // inline expansion
+                "-Od",  // disable optimizations
+                "-RTC1", // runtime error checking
+                "-Zi",  // generates complete debugging info
             ]);
             break;
         case "release":
-            task.AddFlags([
-                "/MD", // non-debugging crt
-            ]);
             task.Define({
                 "NDEBUG": null,
             });
             task.AddFlags([
-                "/O2",
+                "-MD", // non-debugging crt
+                "-O2",
+                "-Ob2", // inline expansion
+            ]);
+            break;
+        case "releasesym":
+            task.Define({
+                "NDEBUG": null,
+            });
+            task.AddFlags([
+                "-MD", // non-debugging crt
+                "-O2",
+                "-Ob1", // inline expansion
+                "-Zi",  // debugging symbols
             ]);
             break;
         }
     }
 }
 
-class CC extends cl
+class cc extends cl
 {
     constructor(ts, vcvers)
     {
@@ -76,7 +91,7 @@ class CC extends cl
     }
 }
 
-exports.CC = cl;
+exports.CC = cc;
 exports.CPP = cl;
 
 /*
@@ -254,4 +269,17 @@ Copyright (C) Microsoft Corporation.  All rights reserved.
 /analyze:autolog:ext<ext> Log to *.<ext>/analyze:autolog- No log file
 /analyze:WX- Warnings not fatal         /analyze:stacksize<num> Max stack frame
 /analyze:max_paths<num> Max paths       /analyze:only Analyze, no code gen
+
+
+
+
+ C:/Progra~2/Microsoft\ Visual\ Studio 14.0/VC/bin/amd64/cl.exe civetweb/civetweb.c  \
+    /FoD:/dana/src/c++/github.com/tungsten/.built/vs14-x86_64-win32--debug/libthirdparty/civetweb.obj \
+    /ID:/dana/src/c++/github.com/tungsten/src/core /ID:/dana/src/c++/github.com/tungsten/src/thirdparty \
+    /c /EHsc /fp:precise /Gd /Gm- /GR /W3 /WX- /TP /Zc:inline \
+    /FdD:/dana/src/c++/github.com/tungsten/.built/vs14-x86_64-win32--debug/libthirdparty/civetweb.obj.pdb \
+    /GS /MDd /Ob0 /Od /RTC1 /Zi /DEMBREE_STATIC_LIB=1 /DLODEPNG_NO_COMPILE_DISK=1 \
+    /DRAPIDJSON_HAS_STDSTRING=1 /DSTBI_NO_STDIO=1 /DUSE_IPV6=1 /D_MBCS \
+    /DINSTALL_PREFIX="dbadb_" /D__SSE__ /DCONSTEXPR=const /DNOMINMAX /D_DEBUG /DWIN32 \
+    /D_WIN32 /D_WINDOWS /D_CRT_SECURE_NO_WARNINGS
 */

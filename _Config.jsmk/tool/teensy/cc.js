@@ -56,7 +56,7 @@ class CC extends GCC
             ]);
         }
 
-        this.AddSearchpaths( [
+        this.AddSearchpaths( "Compile", [
             "${TEENSYSRC}",
             "${TEENSYLIBS}"
         ]);

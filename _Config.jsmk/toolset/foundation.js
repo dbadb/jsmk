@@ -4,7 +4,8 @@
 //      - since we're not a concrete toolset, we don't export GetToolsets
 //
 
-var Toolset = jsmk.Require("toolset.js").Toolset;
+let Toolset = jsmk.Require("toolset.js").Toolset;
+let CopyFiles = jsmk.LoadConfig("tool/copyfiles.js").CopyFiles;
 
 class Foundation extends Toolset
 {
@@ -15,11 +16,15 @@ class Foundation extends Toolset
         // no settings in foundation?
 
         this.MergeToolMap( {
-            copy:       "jsmk/copy -stage build",
-            install:    "jsmk/copy -stage install",
+            copyfiles:  new CopyFiles(this, "<novers>", {
+                            ActionStage: "build"
+                        }),
+            install:    new CopyFiles(this, "<novers>", {
+                            ActionStage: "install"
+                        }),
 
             // for javascript development -------------------
-            ".js->.js.min": "jsmk/minify", // aka uglify
+            ".js->.js.min": null, // aka uglify
 
             // for Android ----------------------------------
 

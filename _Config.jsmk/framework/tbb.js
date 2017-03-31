@@ -27,14 +27,15 @@ class tbb extends Framework
 
     ConfigureTaskSettings(task)
     {
-        let arch = Toolset.TargetArch;
-        let platform = Toolset.TargetPlatform;
-        let tsname = Toolset.ToolsetName;
-
+        let toolset = global.Toolset;
+        let arch = toolset.TargetArch;
+        let platform = toolset.TargetPlatform;
+        let tsname = toolset.Name;
+        let tool = task.GetTool();
         switch(tool.GetRole())
         {
         case Tool.Role.Compile:
-            task.AddSearchpaths([this.m_incDir]);
+            task.AddSearchpaths(Tool.Role.Compile, [this.m_incDir]);
             break;
         case Tool.Role.Link:
             let libdir;
@@ -48,16 +49,14 @@ class tbb extends Framework
                 break;
             }
             if(!libdir)
-                throw new Error(arch + ": unimplemented arch for tbb framework ")
+                throw new Error(arch + " is an unimplemented arch for tbb framework ")
 
             let libs;
-            let ts = toolset.Name;
-            switch(ts)
+            switch(tsname)
             {
             case "vs12":
             case "vs14":
-                let dir =
-                task.AddSearchpaths([jsmk.path.join(libdir, ts.replace("vs", "vc"))]);
+                task.AddSearchpaths(Tool.Role.Link, [jsmk.path.join(libdir, tsname.replace("vs", "vc"))]);
                 if(task.BuildVars.Deployment === "debug")
                     libs = ["tbb_debug.lib", "tbbmalloc_debug.lib",
                             "tbbproxy_debug.lib", "tbbpreview_debug.lib"];
@@ -67,7 +66,7 @@ class tbb extends Framework
                 break;
             }
             if(!libs)
-                throw new Error("tbb framework missing support for toolset");
+                throw new Error("tbb framework missing support for toolset " + tsname);
 
             tool.AddLibraries(libs);
             break;
