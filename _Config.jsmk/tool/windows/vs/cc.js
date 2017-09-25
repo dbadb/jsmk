@@ -1,5 +1,5 @@
-var ToolCli = jsmk.Require("tool_cli.js").Tool;
-
+let ToolCli = jsmk.Require("tool_cli.js").Tool;
+let Arch = jsmk.Require("toolset.js").Arch;
 
 class cl extends ToolCli
 {
@@ -31,11 +31,14 @@ class cl extends ToolCli
                 "-fp:precise",
                 "-Gd",   // specifies __cdecl calling convention for ...
                 "-Gm-", // minimal rebuild disabled (for now)
-                "-GR", // RTTI
+                "-GR", // RTTI // warnings aren't errors
+                "-GS-", // no security checks
                 "-W3", // warning level
-                "-WX-",
+                "-WX-", // warnings aren't errors
                 asCC ?  "-TC" : "-TP",
                 "-Zc:inline", //
+                "-Zc:wchar_t",
+                "-Zc:forScope"
             ]);
     }
 
@@ -50,7 +53,6 @@ class cl extends ToolCli
             });
             task.AddFlags([
                 "-Fd${DSTFILE}.pdb",
-                "-GS",   // buffers security checks
                 "-MDd", // debugging dynamic c runtime (crt)
                 "-Ob0", // inline expansion
                 "-Od",  // disable optimizations
@@ -80,6 +82,53 @@ class cl extends ToolCli
             ]);
             break;
         }
+
+        let config = task.GetToolConfig();
+        if(config)
+        {
+            let flags, defs;
+            switch(config.isa)
+            {
+            case "SSE2":
+                flags = ["-QxSSE2"];
+                break;
+            case "SSE3":
+                flags = ["-QxSSE3"];
+                break;
+            case "SSE42":
+                flags = ["-QxSSE4.2"];
+                break;
+            case "AVX":
+                flags = ["-arch:AVX"];
+                break;
+            case "AVX2":
+                flags = ["-arch:AVX2", "-QxCORE-AVX2"];
+                break;
+            case "AVX512":
+                break;
+            }
+            if(defs)
+                task.Define(defs);
+            if(flags)
+                task.AddFlags(flags);
+        }
+    }
+
+    filterOutput(chan, txt)
+    {
+        if(chan === "stdout")
+        {
+            // eliminate compiler version dump
+            if(0 === txt.indexOf("Microsoft"))
+                return "";
+        }
+        else
+        {
+            if(-1 === txt.indexOf("warning") &&
+               -1 === txt.indexOf("error"))
+               return "";
+        }
+        return txt;
     }
 }
 

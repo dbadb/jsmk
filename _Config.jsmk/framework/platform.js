@@ -63,17 +63,18 @@ class platform extends Framework
             WIN32: null,
             _WIN32: null,
             _WINDOWS: null,
-            _CRT_SECURE_NO_WARNINGS: null,
+            // _CRT_SECURE_NO_WARNINGS: null,
         });
     }
 
     linkWin32(task)
     {
         // NB: the toolset, itself, may have a set of platform behaviors
-        if(false) {
-            task.AddFlags([
-                "-nodefaultlib",
-            ]);
+        if(true)
+        {
+            //task.AddFlags([
+                //"-nodefaultlib",
+            //]);
             task.AddLibraries([
                 "kernel32.lib",
                 "user32.lib",

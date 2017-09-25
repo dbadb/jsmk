@@ -45,8 +45,12 @@ class Link extends ToolCli
 
         this.AddFlags([
             "/nologo",
-            "/incremental:no",
-            "/manifest",
+            "/incremental",
+            "/manifest:embed",
+            "/dynamicbase",
+            "/nxcompat",
+            "/subsystem:console",
+            "/tlbid:1",
             machine
         ]);
 
@@ -60,7 +64,6 @@ class Link extends ToolCli
         case "debug":
             task.AddFlags([
                 "/debug",
-                "/W3"
             ]);
         case "release":
             task.AddFlags([

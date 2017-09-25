@@ -12,6 +12,7 @@ class embree extends Framework
 {
     constructor(name, version)
     {
+        if(!version) version = "default";
         super(name, version);
         this.m_toolset = jsmk.GetActiveToolset();
         this.m_arch = this.m_toolset.TargetArch;

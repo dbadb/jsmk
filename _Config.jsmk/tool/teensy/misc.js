@@ -65,7 +65,7 @@ class PostCompile extends ToolCli
         task.AddFlags([
             task.Interpolate("-tools=${TEENSYTOOLS}"),
             task.Interpolate("-board=${TEENSYBOARD}"),
-            "-reboot"
+            // "-reboot"
         ]);
     }
 }

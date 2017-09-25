@@ -20,9 +20,9 @@ jsmk.DoBuilds()
         if(!e)
             e = new Error("DoBuilds reject");
         if(typeof e === "string")
-            jsmk.ERROR("jsmk: " + e);
+            jsmk.ERROR("jsmk " + e);
         else
-            jsmk.ERROR("jsmk: " + e.stack);
+            jsmk.ERROR("jsmk " + e.stack);
         err = e;
     })
     .finally(() => {

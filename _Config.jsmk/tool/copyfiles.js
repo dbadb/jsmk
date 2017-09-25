@@ -20,6 +20,7 @@ class CopyFiles extends Tool
         if(inputs.length !== outputs.length)
             throw new Error("CopyFiles requires equal inputs and outputs");
 
+        let cwd = task.GetWorkingDir();
         let outputdir = task.GetOutputDir();
         jsmk.path.makedirs(outputdir);
 
@@ -29,7 +30,8 @@ class CopyFiles extends Tool
         {
             let infile = inputs[i];
             let outfile = outputs[i];
-            yield this.makeWork(infile, outfile, filter);
+            if(this.outputIsDirty(outfile, infile, cwd))
+                yield this.makeWork(infile, outfile, filter);
         }
     }
 
@@ -56,7 +58,6 @@ class CopyFiles extends Tool
                 istream.on('data', (chunk) => {
                     ostream.write(filter(infile, chunk));
                 });
-
             }
         });
         w._name = "copyfile";

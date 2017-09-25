@@ -85,7 +85,12 @@ class vs14 extends Foundation
                 jsmk.path.join(vsDir, "VC/ATLMFC/LIB", archVariant2),
                 jsmk.path.join(sdkDir, "8.1/References/CommonConfiguration/Neutral"),
                 jsmk.path.join(sdkDir, "10/ExtensionSDKs/Microsoft.VCLibs/14.0/References/CommonConfiguration/neutral"),
-            ]
+            ],
+
+            PATH: [
+                // linker needs to find rc.exe
+                jsmk.path.join(sdkDir, `10/bin/${archVariant1}`),
+            ],
         };
 
         this.MergeSettings(map);
