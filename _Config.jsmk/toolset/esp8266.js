@@ -26,8 +26,6 @@ class esp8266 extends Foundation
         // let OBJCOPY = jsmk.path.join(tsbin, "xtensa-lx106-elf-objcopy");
         let ESPTOOL = jsmk.path.join(tsdir, "esptool/0.4.9/esptool");
         let map = {};
-
-
         map.BuildVars =
         {
             ARD_VERS: 10612,
@@ -41,6 +39,7 @@ class esp8266 extends Foundation
             ARD_BOARD: board,
             ARD_PORT: "COM9",
             ARD_CPU_FREQ: "80000000L",
+            ARD_BOOTFILE: jsmk.path.join(hardware, "bootloaders/eboot/eboot.elf"),
         };
 
         this.MergeSettings(map);
