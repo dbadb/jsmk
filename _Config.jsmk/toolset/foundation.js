@@ -1,4 +1,4 @@
-//
+/* global jsmk */
 // toolset/foundation.js:
 //      - establishes cross-toolset behavior for a wide range of "rules"
 //      - since we're not a concrete toolset, we don't export GetToolsets

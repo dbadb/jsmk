@@ -1,3 +1,4 @@
+/* global jsmk */
 var Foundation = require("./foundation.js").Foundation;
 
 class Teensy extends Foundation

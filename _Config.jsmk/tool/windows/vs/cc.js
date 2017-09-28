@@ -1,3 +1,4 @@
+/* global jsmk */
 let ToolCli = jsmk.Require("tool_cli.js").Tool;
 let Arch = jsmk.Require("toolset.js").Arch;
 

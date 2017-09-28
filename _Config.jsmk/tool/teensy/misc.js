@@ -1,3 +1,4 @@
+/* global jsmk */
 let ToolCli = jsmk.Require("tool_cli.js").Tool;
 
 class AR extends ToolCli
@@ -30,11 +31,11 @@ class ObjCopy extends ToolCli
             Semantics: ToolCli.Semantics.OneToOne,
             DstExt: rule === "elf->hex" ? "hex" : "eep",
             Invocation: rule === "elf->hex" ?
-                        [arg0, "-O ihex -R .eepprop ${SRCFILE} ${DSTFILE}"] :
-                        [arg0, "-O ihex -j .eeprom " +
-                            "--set-section-flags=.eeprom=alloc,load " +
-                            "--no-change-warnings --change-section-lma "+
-                            ".eeprom=0 ${SRCFILE} ${DSTFILE}"],
+                [arg0, "-O ihex -R .eepprop ${SRCFILE} ${DSTFILE}"] :
+                [arg0, "-O ihex -j .eeprom " +
+                        "--set-section-flags=.eeprom=alloc,load " +
+                        "--no-change-warnings --change-section-lma "+
+                        ".eeprom=0 ${SRCFILE} ${DSTFILE}"],
         });
     }
 }

@@ -1,3 +1,4 @@
+/* global jsmk */
 let Tool = jsmk.Require("tool.js").Tool;
 let fs = require("fs");
 
@@ -37,11 +38,10 @@ class CopyFiles extends Tool
 
     makeWork(infile, outfile, filter)
     {
-        let self = this;
         let w  = new Promise( (resolve,reject) => {
-            let istream = fs.createReadStream(infile, {encoding: 'utf8'});
+            let istream = fs.createReadStream(infile, {encoding: "utf8"});
             istream.on("error", reject);
-            let ostream = fs.createWriteStream(outfile, {encoding: 'utf8'});
+            let ostream = fs.createWriteStream(outfile, {encoding: "utf8"});
             ostream.on("error", reject);
             if(!filter)
             {
@@ -50,12 +50,12 @@ class CopyFiles extends Tool
             }
             else
             {
-                istream.on('end', () => {
+                istream.on("end", () => {
                     ostream.end();
                     jsmk.file.touch(outfile);  // updates timestamp cache
                     resolve();
                 });
-                istream.on('data', (chunk) => {
+                istream.on("data", (chunk) => {
                     ostream.write(filter(infile, chunk));
                 });
             }

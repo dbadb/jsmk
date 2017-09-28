@@ -1,21 +1,24 @@
+/* global jsmk */
 let ToolCli = jsmk.Require("tool_cli.js").Tool;
 
 class GCC extends ToolCli
 {
-    constructor(ts, nm, arg0)
+    constructor(ts, nm, arg0, plistOverride)
     {
         if(!nm)
             nm = "compiler/gcc";
         if(!arg0)
             arg0 = "gcc";
+        let plistStr = " ${SRCFILE} -o ${DSTFILE} ${FLAGS} ${DEFINES} ${SEARCHPATHS}";
+        if(plistOverride)
+            plistStr = plistOverride;
         let config =
         {
             Role: ToolCli.Role.Compile,
             Semantics: ToolCli.Semantics.ManyToMany,
             DstExt: "o",
             ActionStage: "build",
-            Invocation: [arg0, " ${SRCFILE} -o ${DSTFILE}" +
-                               " ${FLAGS} ${DEFINES} ${SEARCHPATHS}"],
+            Invocation: [arg0, plistStr],
             Syntax:
             {
                 Define: "-D${KEY}=${VAL}",
@@ -26,8 +29,8 @@ class GCC extends ToolCli
         };
         super(ts, nm, config);
         this.AddFlags([
-                "-MMD", // for mkdep
-            ]);
+            "-MMD", // for mkdep
+        ]);
     }
 
     ConfigureTaskSettings(task)
@@ -42,7 +45,7 @@ class GCC extends ToolCli
             break;
         case "release":
             task.AddFlags([
-                "-O",
+                "-Os", // optimize for size
             ]);
             break;
         }
@@ -63,14 +66,12 @@ class GCC extends ToolCli
                 // This also selects for line-continuation "\\" so we need
                 // to filter that.
                 // First line is the dependent file, so we slice it off.
-                let files = depfileTxt.match(pat)
-                .filter( (value)=>{
-                    if(value[value.length-1] == ':')
+                let files = depfileTxt.match(pat).filter((value)=>{
+                    if(value[value.length-1] == ":")
                         return false;
                     else
                         return (value.length > 1);
-                })
-                .map((value)=>{
+                }).map((value)=>{
                     // Program\ Files -> Program Files
                     return value.replace(/\\ /g, " ");
                 });

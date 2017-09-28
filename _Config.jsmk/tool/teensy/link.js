@@ -1,3 +1,4 @@
+/* global jsmk */
 let ToolCli = jsmk.Require("tool_cli.js").Tool;
 
 class Link extends ToolCli
@@ -12,8 +13,7 @@ class Link extends ToolCli
                 Semantics: ToolCli.Semantics.ManyToOne,
                 DstExt: "elf",
                 ActionStage: "build",
-                Invocation: [arg0,
-                             "-o ${DSTFILE} ${SRCFILES} ${FLAGS}"],
+                Invocation: [arg0, "-o ${DSTFILE} ${SRCFILES} ${FLAGS}"],
                 Syntax:
                 {
                     Flag: "${VAL}"

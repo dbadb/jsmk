@@ -1,3 +1,4 @@
+/* global jsmk */
 let GCC = require("../gcc.js").GCC;
 
 // Here we define two classes,  CC and CPP..
@@ -18,7 +19,6 @@ class CC extends GCC
         this.Define( {
             ARDUINO: "10612",
             TEENSYDUINO: "134",
-            ARDUINO: "10605",
             ARDUINO_ARCH_AVR: null,
             USB_SERIAL_HID:  null, // serial + usb + mouse + joystick
                                    // modify to change MANUFACTURE and PRODUCT
@@ -36,7 +36,6 @@ class CC extends GCC
 
         this.AddFlags([
                 "-c",
-                "-Os",
                 "--specs=nano.specs",
                 "-Wall",
                 "-ffunction-sections",
