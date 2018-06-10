@@ -6,6 +6,7 @@
 
 let Toolset = jsmk.Require("toolset.js").Toolset;
 let CopyFiles = jsmk.LoadConfig("tool/copyfiles.js").CopyFiles;
+let Printenv = jsmk.LoadConfig("tool/printenv.js").Printenv;
 
 class Foundation extends Toolset
 {
@@ -22,6 +23,7 @@ class Foundation extends Toolset
             install:    new CopyFiles(this, "<novers>", {
                             ActionStage: "install"
                         }),
+            printenv: new Printenv(this),
 
             // for javascript development -------------------
             ".js->.js.min": null, // aka uglify
