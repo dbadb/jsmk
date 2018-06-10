@@ -1,7 +1,8 @@
+/* global jsmk */
 let ToolCli = jsmk.Require("tool_cli.js").Tool;
 let Arch = jsmk.Require("toolset.js").Arch;
 
-class Link extends ToolCli
+exports.Link = class Link extends ToolCli
 {
     constructor(ts, vsvers)
     {
@@ -45,7 +46,7 @@ class Link extends ToolCli
 
         this.AddFlags([
             "/nologo",
-            "/incremental",
+            "/incremental:no",
             "/manifest:embed",
             "/dynamicbase",
             "/nxcompat",
@@ -54,6 +55,16 @@ class Link extends ToolCli
             machine
         ]);
 
+        // currently unused, but here for reference
+        this.defaultSysLibs = [
+            "-nodefaultlib", "oldnames.lib",
+            "imm32.lib",
+            "comctl32.lib", "Iphlpapi.lib", "advapi32.lib",
+            "kernel32.lib", "ws2_32.lib", "mswsock.lib",
+            "advapi32.lib", "user32.lib", "gdi32.lib",
+            "comdlg32.lib", "shell32.lib", "winspool.lib",
+            "netapi32.lib", "mpr.lib", "ole32.lib",
+            "commode.obj"];
     }
 
     ConfigureTaskSettings(task)
@@ -65,6 +76,7 @@ class Link extends ToolCli
             task.AddFlags([
                 "/debug",
             ]);
+            break;
         case "release":
             task.AddFlags([
 
@@ -72,9 +84,8 @@ class Link extends ToolCli
             break;
         }
     }
-}
+};
 
-exports.Link = Link;
 
 /* https://msdn.microsoft.com/en-us/library/y0zzbyt4.aspx
 usage: LINK [options] [files] [@commandfile]
