@@ -4,17 +4,17 @@ let Arch = jsmk.Require("toolset.js").Arch;
 
 exports.Link = class Link extends ToolCli
 {
-    constructor(ts, vsvers)
+    constructor(ts, vsvers, dll)
     {
         let exefile = "link";
         let arg0 = jsmk.path.resolveExeFile(exefile, ts.BuildVars.VSToolsDir);
         if(!arg0) throw new Error("Can't resolve link "+
                                     ts.BuildVars.VSToolsDir);
         super(ts, `vs${vsvers}/link`, {
-            Role:  ToolCli.Role.Link,
+            Role:  dll ? ToolCli.Role.ArchiveDynamic : ToolCli.Role.Link,
             ActionStage: "build",
             Semantics: ToolCli.Semantics.ManyToOne,
-            DstExt: "exe",
+            DstExt: dll ? "dll" : "exe",
             Invocation: [arg0, "${FLAGS} -out:${DSTFILE} ${SRCFILES} "+
                                "${SEARCHPATHS} ${LIBS}"],
             Syntax:
@@ -29,31 +29,40 @@ exports.Link = class Link extends ToolCli
         switch(ts.TargetArch)
         {
         case Arch.x86_32:
-            machine="/machine:X86";
+            machine="/MACHINE:X86";
             break;
         case Arch.x86_64:
-            machine="/machine:X64";
+            machine="/MACHINE:X64";
             break;
         case Arch.arm_32:
-            machine="/machine:ARM";
+            machine="/MACHINE:ARM";
             break;
         case Arch.arm_64:
-            machine="/machine:ARM64";
+            machine="/MACHINE:ARM64";
             break;
         default:
             throw new Error("Link: unknown arch " + ts.TargetArch);
         }
 
         this.AddFlags([
-            "/nologo",
-            "/incremental:no",
-            "/manifest:embed",
-            "/dynamicbase",
-            "/nxcompat",
-            "/subsystem:console",
-            "/tlbid:1",
+            "/NOLOGO",
+            "/INCREMENTAL:NO",
+            "/DYNAMICBASE",
+            "/MANIFEST",
+            "/NXCOMPAT",
+            "/TLBID:1",
+            "/DEBUG",
+            "/OPT:ICF",
+            "/ERRORREPORT:PROMPT",
             machine
         ]);
+
+        if(dll)
+        {
+            this.AddFlags([
+                "-dll", // XXX:  need to ensure console is dynamic
+            ]);
+        }
 
         // currently unused, but here for reference
         this.defaultSysLibs = [
@@ -85,11 +94,40 @@ exports.Link = class Link extends ToolCli
         }
     }
 };
+    /* vs2017 link example:
+        /OUT:"..\..\win64_vs2017\bin\examplesDebug.exe" 
+        /MANIFEST 
+        /NXCOMPAT 
+        /PDB:"..\..\win64_vs2017\bin\examplesDebug.pdb" 
+        /DYNAMICBASE 
+        "DelayImp.lib" "gdi32.lib" "psapi.lib" 
+        "kernel32.lib" "user32.lib" "winspool.lib" 
+        "comdlg32.lib" "advapi32.lib" "shell32.lib" 
+        "ole32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" 
+        "odbccp32.lib" 
+        "E:\dana\src\dbadbapp\nih\bgfx\bgfx\.build\win64_vs2017\bin\example-commonDebug.lib" 
+        "E:\dana\src\dbadbapp\nih\bgfx\bgfx\.build\win64_vs2017\bin\example-glueDebug.lib" 
+        "E:\dana\src\dbadbapp\nih\bgfx\bgfx\.build\win64_vs2017\bin\bgfxDebug.lib" 
+        "E:\dana\src\dbadbapp\nih\bgfx\bgfx\.build\win64_vs2017\bin\bimg_decodeDebug.lib" 
+        "E:\dana\src\dbadbapp\nih\bgfx\bgfx\.build\win64_vs2017\bin\bimgDebug.lib" 
+        "E:\dana\src\dbadbapp\nih\bgfx\bgfx\.build\win64_vs2017\bin\bxDebug.lib" 
+        /DEBUG 
+        /MACHINE:X64 
+        /ENTRY:"mainCRTStartup" 
+        /INCREMENTAL 
+        /PGD:"..\..\win64_vs2017\bin\examplesDebug.pgd" 
+        /SUBSYSTEM:WINDOWS 
+        /MANIFESTUAC:"level='asInvoker' uiAccess='false'" 
+        /ManifestFile:"e:\dana\src\bgfx\nih\bgfx\bgfx\.build\projects\vs2017\..\..\win64_vs2017\obj\x64\Debug\examples\examplesDebug.exe.intermediate.manifest" 
+        /ERRORREPORT:PROMPT 
+        /NOLOGO 
+        /LIBPATH:"..\..\..\3rdparty\lib\win64_vs2017" 
+        /TLBID:1 
+    */
 
-
-/* https://msdn.microsoft.com/en-us/library/y0zzbyt4.aspx
-usage: LINK [options] [files] [@commandfile]
-   options:
+    /* https://docs.microsoft.com/en-us/cpp/build/reference/linker-options
+    usage: LINK [options] [files] [@commandfile]
+    options:
 
       /ALIGN:#
       /ALLOWBIND[:NO]

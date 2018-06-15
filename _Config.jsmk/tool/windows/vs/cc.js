@@ -24,23 +24,30 @@ class cl extends ToolCli
                         Searchpath: "-I${VAL}",
                         Flag: "${VAL}"
                     },
-                });
+            });
 
         this.AddFlags([
-                "-c",
-                "-EHsc", // C++ exceptions
-                "-fp:precise",
-                "-Gd",   // specifies __cdecl calling convention for ...
-                "-Gm-", // minimal rebuild disabled (for now)
-                "-GR", // RTTI // warnings aren't errors
-                "-GS-", // no security checks
-                "-W3", // warning level
-                "-WX-", // warnings aren't errors
-                asCC ?  "-TC" : "-TP",
-                "-Zc:inline", //
-                "-Zc:wchar_t",
-                "-Zc:forScope"
-            ]);
+            "-c",
+            "-EHsc", // C++ exceptions
+            "-fp:precise",
+            "-Gd",   // specifies __cdecl calling convention for ...
+            "-Gm-", // minimal rebuild disabled (for now)
+            "-GR-", // disabled RTTI 
+            "-GS-", // no security checks
+            "-Gy", // separate functions for linker
+            "-MT", // multithreaded libc (MTd for dynamic vers)
+            "-W3", // warning level
+            "-WX-", // warnings aren't errors
+            asCC ?  "-TC" : "-TP",
+            "-Zc:inline", //
+            "-Zc:wchar_t",
+            "-Zc:forScope"
+        ]);
+
+        this.Define({
+            "WIN32": null,
+            "_WIN32": null,
+        });
     }
 
     ConfigureTaskSettings(task)
@@ -144,13 +151,57 @@ class cc extends cl
 exports.CC = cc;
 exports.CPP = cl;
 
+
+/* bgfx example:
+    /I"..\..\..\..\bx\include\compat\msvc" 
+    /I"..\..\..\..\bx\include" 
+    /I"..\..\..\..\bimg\include" 
+    /I"..\..\..\include" 
+    /I"..\..\..\3rdparty" 
+    /Fd"..\..\win64_vs2017\bin\example-glueRelease.pdb" # names a .pdb file
+    /D "__STDC_LIMIT_MACROS" 
+    /D "__STDC_FORMAT_MACROS" 
+    /D "__STDC_CONSTANT_MACROS" 
+    /D "NDEBUG" 
+    /D "WIN32" 
+    /D "_WIN32" 
+    /D "_HAS_EXCEPTIONS=0" 
+    /D "_HAS_ITERATOR_DEBUGGING=0" 
+    /D "_SCL_SECURE=0" 
+    /D "_SECURE_SCL=0" 
+    /D "_SCL_SECURE_NO_WARNINGS" 
+    /D "_CRT_SECURE_NO_WARNINGS" 
+    /D "_CRT_SECURE_NO_DEPRECATE" 
+    /D "_WIN64" /errorReport:prompt 
+    /FC  # fullpaths in diagnostics
+    /Gd  # cdecl calling convention
+    /GF # read-only string pooling 
+    /Gm- # minimal rebuild disabled
+    /GR-  # disabled RTTI
+    /GS-  # no security checks
+    /Gy   # separate functions for linker
+    /O2   # creates fast code
+    /Oy # omit frame pointers on call stack
+    /fp:precise 
+    /MP   # parallel build
+    /MT  # multithreaded
+    /W4  # warnings
+    /WX-  # warnings aren't errors
+    /Zc:inline /Zc:forScope /Zc:wchar_t 
+    /Zi 
+    /nologo 
+    /Fa"e:\dana\src\bgfx\nih\bgfx\bgfx\.build\projects\vs2017\..\..\win64_vs2017\obj\x64\Release\example-glue\" 
+    /Fo"e:\dana\src\bgfx\nih\bgfx\bgfx\.build\projects\vs2017\..\..\win64_vs2017\obj\x64\Release\example-glue\" 
+    /Fp"e:\dana\src\bgfx\nih\bgfx\bgfx\.build\projects\vs2017\..\..\win64_vs2017\obj\x64\Release\example-glue\example-glueRelease.pch" 
+    /diagnostics:classic
 /*
 
 Microsoft (R) C/C++ Optimizing Compiler Version 19.00.24215.1 for x86
 Copyright (C) Microsoft Corporation.  All rights reserved.
 
-                         C/C++ COMPILER OPTIONS
+https://docs.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-alphabetically
 
+                         C/C++ COMPILER OPTIONS
 
                               -OPTIMIZATION-
 

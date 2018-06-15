@@ -104,6 +104,7 @@ exports.Toolset = class vs17 extends Foundation
             "c->o":    new (jsmk.LoadConfig(dir+"cc.js").CC)(this, vers),
             "cpp->o":  new (jsmk.LoadConfig(dir+"cc.js").CPP)(this, vers),
             "o->a":    new (jsmk.LoadConfig(dir+"ar.js").AR)(this, vers),
+            "o->so":new (jsmk.LoadConfig(dir+"link.js").Link)(this, vers, true),
             "c.o->exe":new (jsmk.LoadConfig(dir+"link.js").Link)(this, vers),
             "cpp.o->exe":new (jsmk.LoadConfig(dir+"link.js").Link)(this, vers),
             //"link":     jsmk.LoadConfig("tools/windows/vs12/link.js").Tool(this),
