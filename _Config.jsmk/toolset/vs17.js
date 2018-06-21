@@ -73,6 +73,7 @@ exports.Toolset = class vs17 extends Foundation
                 jsmk.path.join(sdkDir, sdkInc, "cppwinrt"),
             ].join(";"),
 
+            /* LIB is like LIBPATH: ie: places to look */
             LIB: [
                 jsmk.path.join(vsDir, msvcDir, "ATLMFC/lib", archVariant),
                 jsmk.path.join(vsDir, msvcDir, "lib", archVariant),

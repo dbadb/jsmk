@@ -4,6 +4,10 @@ let Arch = jsmk.Require("toolset.js").Arch;
 
 exports.Link = class Link extends ToolCli
 {
+    // reminder:
+    //  our settings are merged with each task during task creation
+    //  this differs from the just-in-time configure opportunity
+    //  that occurs prior to work generation.
     constructor(ts, vsvers, dll)
     {
         let exefile = "link";
@@ -15,7 +19,7 @@ exports.Link = class Link extends ToolCli
             ActionStage: "build",
             Semantics: ToolCli.Semantics.ManyToOne,
             DstExt: dll ? "dll" : "exe",
-            Invocation: [arg0, "${FLAGS} -out:${DSTFILE} ${SRCFILES} "+
+            Invocation: [arg0, "-out:${DSTFILE} ${SRCFILES} ${FLAGS} "+
                                "${SEARCHPATHS} ${LIBS}"],
             Syntax:
             {
@@ -64,21 +68,41 @@ exports.Link = class Link extends ToolCli
             ]);
         }
 
-        // currently unused, but here for reference
-        this.defaultSysLibs = [
-            "-nodefaultlib", "oldnames.lib",
-            "imm32.lib",
-            "comctl32.lib", "Iphlpapi.lib", "advapi32.lib",
-            "kernel32.lib", "ws2_32.lib", "mswsock.lib",
-            "advapi32.lib", "user32.lib", "gdi32.lib",
-            "comdlg32.lib", "shell32.lib", "winspool.lib",
-            "netapi32.lib", "mpr.lib", "ole32.lib",
-            "commode.obj"];
+        // minimum set of libs required to successfully link...add'l
+        // syslibs are provided by module/task (framework).
+        this.AddLibs([
+            // "/nodefaultlib",
+            //"oldnames.lib",
+            //"imm32.lib",
+            //"iphlpapi.lib", 
+            //"mswsock.lib",
+            //"netapi32.lib", 
+            //"mpr.lib", 
+            "gdi32.lib",
+            //"wsock32.lib",
+            //"ws2_32.lib",
+            //"winmm.lib",
+            //"kernel32.lib",
+            "user32.lib",
+            //"winspool.lib",
+            //"commode.obj",
+            //"comctl32.lib", 
+            "comdlg32.lib",
+            //"advapi32.lib",
+            //"shell32.lib",
+            //"ole32.lib",
+            //"oleaut32.lib",
+            //"uuid.lib",
+            //"odbc32.lib",
+            //"odbccp32.lib"
+        ]);
+
     }
 
     ConfigureTaskSettings(task)
     {
-        super.ConfigureTaskSettings(task);
+        // jsmk.INFO(`vslink ${this.m_name} configure task: ${task.GetName()}`);
+        super.ConfigureTaskSettings(task)        ;
         switch(task.BuildVars.Deployment)
         {
         case "debug":
