@@ -48,22 +48,22 @@ exports.Link = class Link extends ToolCli
             throw new Error("Link: unknown arch " + ts.TargetArch);
         }
 
-        this.AddFlags([
+        this.AddFlags(ToolCli.Role.Link, [
             "/NOLOGO",
             "/INCREMENTAL:NO",
             "/DYNAMICBASE",
             "/MANIFEST",
             "/NXCOMPAT",
             "/TLBID:1",
-            "/DEBUG",
             "/OPT:ICF",
             "/ERRORREPORT:PROMPT",
+            // wip: "/PDB:${DSTFILE}.pdb",
             machine
         ]);
 
         if(dll)
         {
-            this.AddFlags([
+            this.AddFlags(ToolCli.Role.Link, [
                 "-dll", // XXX:  need to ensure console is dynamic
             ]);
         }
@@ -89,7 +89,7 @@ exports.Link = class Link extends ToolCli
             //"comctl32.lib", 
             "comdlg32.lib",
             //"advapi32.lib",
-            //"shell32.lib",
+            "shell32.lib",  // DragQueryFileA
             //"ole32.lib",
             //"oleaut32.lib",
             //"uuid.lib",
@@ -101,18 +101,17 @@ exports.Link = class Link extends ToolCli
 
     ConfigureTaskSettings(task)
     {
-        // jsmk.INFO(`vslink ${this.m_name} configure task: ${task.GetName()}`);
+        jsmk.INFO(`vslink ${this.m_name} configure task: ${task.GetName()}`);
         super.ConfigureTaskSettings(task)        ;
         switch(task.BuildVars.Deployment)
         {
         case "debug":
-            task.AddFlags([
+            task.AddFlags(ToolCli.Role.Link, [
                 "/debug",
             ]);
             break;
         case "release":
-            task.AddFlags([
-
+            task.AddFlags(ToolCli.Role.Link, [
             ]);
             break;
         }

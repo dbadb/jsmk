@@ -34,7 +34,7 @@ class CC extends GCC
             //      teensy3/usb_inst.cpp
         });
 
-        this.AddFlags([
+        this.AddFlags(this.GetRole(), [
                 "-c",
                 "--specs=nano.specs",
                 "-Wall",
@@ -48,7 +48,7 @@ class CC extends GCC
 
         if(gcc === "g++")
         {
-            this.AddFlags([
+            this.AddFlags(this.GetRole(), [
                 "-fno-rtti",
                 "-std=gnu++0x",
                 "-felide-constructors",

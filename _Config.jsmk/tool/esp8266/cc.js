@@ -47,7 +47,7 @@ class CC extends GCC
             // more board types here.
         }[ts.BuildVars.ARD_BOARD]);
 
-        this.AddFlags([
+        this.AddFlags(this.GetRole(), [
             "-U__STRICT_ANSI__",
             "-c",
             "-g", // optimization should be handled in super
@@ -135,7 +135,7 @@ class CPP extends GCC
             // more board types here.
         }[ts.BuildVars.ARD_BOARD]);
 
-        this.AddFlags([
+        this.AddFlags(this.GetRole(), [
             "-U__STRICT_ANSI__",
             "-c",
             "-g", // optimization should be handled in super
@@ -145,7 +145,7 @@ class CPP extends GCC
             "-std=c++11", "-ffunction-sections", "-fdata-sections",
         ]);
 
-        this.AddSearchpaths( "Compile", [
+        this.AddSearchpaths( this.GetRole(), [
             jsmk.path.join(ts.BuildVars.ARD_SDK, "include"),
             jsmk.path.join(ts.BuildVars.ARD_SDK, "lwip/include"),
             jsmk.path.join(ts.BuildVars.ARD_SDK, "libc/xtensa-lx106-elf/include"),
@@ -195,11 +195,11 @@ class SC extends GCC // arduino uses cc for assembing but using -x below
             },
             // more board types here.
         }[ts.BuildVars.ARD_BOARD]);
-        this.AddFlags([
+        this.AddFlags(this.GetRole(), [
             "-c", "-g", "-mlongcalls",
             ["-x", "assembler-with-cpp"],
         ]);
-        this.AddSearchpaths( "Compile", [
+        this.AddSearchpaths( this.GetRole(), [
             jsmk.path.join(ts.BuildVars.ARD_SDK, "include"),
             jsmk.path.join(ts.BuildVars.ARD_SDK, "lwip/include"),
             jsmk.path.join(ts.BuildVars.ARD_SDK, "libc/xtensa-lx106-elf/include"),

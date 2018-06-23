@@ -26,7 +26,7 @@ class cl extends ToolCli
                     },
             });
 
-        this.AddFlags([
+        this.AddFlags(this.GetRole(), [
             "-c",
             "-EHsc", // C++ exceptions
             "-fp:precise",
@@ -59,7 +59,7 @@ class cl extends ToolCli
             task.Define({
                 "_DEBUG": null,
             });
-            task.AddFlags([
+            task.AddFlags(this.GetRole(), [
                 "-Fd${DSTFILE}.pdb",
                 "-MDd", // debugging dynamic c runtime (crt)
                 "-Ob0", // inline expansion
@@ -72,7 +72,7 @@ class cl extends ToolCli
             task.Define({
                 "NDEBUG": null,
             });
-            task.AddFlags([
+            task.AddFlags(this.GetRole(), [
                 "-MD", // non-debugging crt
                 "-O2",
                 "-Ob2", // inline expansion
@@ -82,7 +82,7 @@ class cl extends ToolCli
             task.Define({
                 "NDEBUG": null,
             });
-            task.AddFlags([
+            task.AddFlags(this.GetRole(), [
                 "-MD", // non-debugging crt
                 "-O2",
                 "-Ob1", // inline expansion
@@ -118,7 +118,7 @@ class cl extends ToolCli
             if(defs)
                 task.Define(defs);
             if(flags)
-                task.AddFlags(flags);
+                task.AddFlags(this.GetRole(), flags);
         }
     }
 

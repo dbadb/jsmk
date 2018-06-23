@@ -28,7 +28,7 @@ class GCC extends ToolCli
             },
         };
         super(ts, nm, config);
-        this.AddFlags([
+        this.AddFlags(this.GetRole(), [
             "-MMD", // for mkdep
         ]);
     }

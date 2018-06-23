@@ -40,7 +40,7 @@ class AR extends ToolCli
             throw new Error("Lib: unknown arch " + ts.TargetArch);
         }
 
-        this.AddFlags([
+        this.AddFlags(this.GetRole(), [
             "-nologo",
             machine
         ]);
