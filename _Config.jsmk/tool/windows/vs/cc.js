@@ -41,7 +41,8 @@ class cl extends ToolCli
             asCC ?  "-TC" : "-TP",
             "-Zc:inline", //
             "-Zc:wchar_t",
-            "-Zc:forScope"
+            "-Zc:forScope",
+            "-showIncludes"
         ]);
 
         this.Define({
@@ -122,7 +123,23 @@ class cl extends ToolCli
         }
     }
 
-    filterOutput(chan, txt)
+    outputIsDirty(output, inputs, cwd)
+    {
+        let dirty = super.outputIsDirty(output, inputs, cwd);
+        if(!dirty)
+        {
+            // look for the .d file next to the output (created below)
+            let depfileTxt = jsmk.file.read(output+".d");
+            if(depfileTxt)
+            {
+                let depfiles = depfileTxt.split("\n");
+                return super.outputIsDirty(output, depfiles, cwd);
+            }
+        }
+        return dirty;
+    }
+
+    filterOutput(chan, txt, task, outfile)
     {
         if(chan === "stdout")
         {
@@ -132,9 +149,47 @@ class cl extends ToolCli
         }
         else
         {
+            // parse showInclude outputs:
+            //  Note: including file: 
+            let depfileMap = {};
+            let lines = txt.split(/\r?\n/);
+            let result = [];
+            let rootDir = task.GetRootDir();
+            for(let i in lines)
+            {
+                let line = lines[i];
+                if(line.indexOf("Note: including file:") == 0)
+                {
+                    let filename = jsmk.path.normalize(line.split(/ +/).slice(3).join(" "));
+                    if(jsmk.path.issubdir(filename, rootDir))
+                    {
+                        if(depfileMap[filename] === undefined)
+                        {
+                            depfileMap[filename] = true;
+                        }
+                    }
+                    //else
+                    // jsmk.DEBUG("skipping dependency: " + filename + ` (${rootDir})`);
+                }
+                else
+                    result.push(line);
+            }
+            let depfiles = Object.keys(depfileMap);
+            if(depfiles.length > 0)
+            {
+                let depfile = outfile + ".d";
+                jsmk.file.write(depfile, depfiles.join("\n"), function(err) {
+                    if(err)
+                        jsmk.ERROR("writing to ${depfile}: ${err}");
+                    else
+                        jsmk.DEBUG(`wrote dependencies to ${depfile}`);
+                });
+            }
             if(-1 === txt.indexOf("warning") &&
                -1 === txt.indexOf("error"))
                return "";
+            else
+                return result.join("\n");
         }
         return txt;
     }
