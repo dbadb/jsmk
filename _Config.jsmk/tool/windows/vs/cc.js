@@ -155,6 +155,7 @@ class cl extends ToolCli
             let lines = txt.split(/\r?\n/);
             let result = [];
             let rootDir = task.GetRootDir();
+            let quiet = true;
             for(let i in lines)
             {
                 let line = lines[i];
@@ -172,7 +173,14 @@ class cl extends ToolCli
                     // jsmk.DEBUG("skipping dependency: " + filename + ` (${rootDir})`);
                 }
                 else
-                    result.push(line);
+                {
+                    if(line.indexOf("warning") != -1 ||
+                        line.indexOf("error") != -1)
+                    {
+                        quiet = false;
+                        result.push(line);
+                    }
+                }
             }
             let depfiles = Object.keys(depfileMap);
             if(depfiles.length > 0)
@@ -185,8 +193,7 @@ class cl extends ToolCli
                         jsmk.DEBUG(`wrote dependencies to ${depfile}`);
                 });
             }
-            if(-1 === txt.indexOf("warning") &&
-               -1 === txt.indexOf("error"))
+            if(quiet)
                return "";
             else
                 return result.join("\n");

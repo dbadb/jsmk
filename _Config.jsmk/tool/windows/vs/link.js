@@ -101,7 +101,7 @@ exports.Link = class Link extends ToolCli
 
     ConfigureTaskSettings(task)
     {
-        jsmk.INFO(`vslink ${this.m_name} configure task: ${task.GetName()}`);
+        // jsmk.DEBUG(`vslink ${this.m_name} configure task: ${task.GetName()}`);
         super.ConfigureTaskSettings(task)        ;
         switch(task.BuildVars.Deployment)
         {
