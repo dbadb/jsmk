@@ -14,7 +14,7 @@ catch(e)
 let err = null;
 jsmk.DoBuilds()
     .then(()=>{
-        jsmk.NOTICE("done with builds");
+        jsmk.NOTICE("-- Done ----");
     })
     .catch((e)=>{
         if(!e)
