@@ -17,13 +17,16 @@ jsmk.DoBuilds()
         jsmk.NOTICE("-- Done ----");
     })
     .catch((e)=>{
-        if(!e)
-            e = new Error("DoBuilds reject");
-        if(typeof e === "string")
-            jsmk.ERROR("jsmk " + e);
+        if(e)
+        {
+            if(typeof e === "string")
+                jsmk.ERROR("jsmk " + e);
+            else
+                jsmk.ERROR("jsmk " + e.stack);
+            err = e;
+        }
         else
-            jsmk.ERROR("jsmk " + e.stack);
-        err = e;
+            err = 1;
     })
     .finally(() => {
         jsmk.EndSession(err);
