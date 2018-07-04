@@ -7,7 +7,7 @@ class AR extends ToolCli
 {
     constructor(ts, vsvers)
     {
-        let exefile = "Lib";
+        let exefile = "lib";
         let arg0 = jsmk.path.resolveExeFile(exefile, ts.BuildVars.VSToolsDir);
         if(!arg0) throw new Error("Can't resolve Lib "+ ts.BuildVars.VSToolsDir);
         super(ts, `vs${vsvers}/archive`, {

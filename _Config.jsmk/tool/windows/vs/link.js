@@ -70,7 +70,22 @@ exports.Link = class Link extends ToolCli
 
         // minimum set of libs required to successfully link...add'l
         // syslibs are provided by module/task (framework).
+        // 
         this.AddLibs([
+            "DelayImp.lib",
+            "gdi32.lib", 
+            "psapi.lib",
+            "kernel32.lib",
+            "user32.lib", 
+            "winspool.lib",
+            "comdlg32.lib",
+            "advapi32.lib",
+            "shell32.lib",
+            "ole32.lib",
+            "oleaut32.lib",
+            "uuid.lib",
+            "odbc32.lib",
+            "odbccp32.lib", 
             // "/nodefaultlib",
             //"oldnames.lib",
             //"imm32.lib",
@@ -78,23 +93,26 @@ exports.Link = class Link extends ToolCli
             //"mswsock.lib",
             //"netapi32.lib", 
             //"mpr.lib", 
-            "gdi32.lib",
+            //"gdi32.lib",
             //"wsock32.lib",
             //"ws2_32.lib",
             //"winmm.lib",
             //"kernel32.lib",
-            "user32.lib",
+            // "user32.lib",
             //"winspool.lib",
             //"commode.obj",
             //"comctl32.lib", 
-            "comdlg32.lib",
+            //"comdlg32.lib",
             //"advapi32.lib",
-            "shell32.lib",  // DragQueryFileA
+            //"shell32.lib",  // DragQueryFileA
             //"ole32.lib",
             //"oleaut32.lib",
             //"uuid.lib",
             //"odbc32.lib",
-            //"odbccp32.lib"
+            //"odbccp32.lib",
+            //"user32.lib",
+            //"glmf32.lib",
+            //"opengl32.lib",
         ]);
 
     }

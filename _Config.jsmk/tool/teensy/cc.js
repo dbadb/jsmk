@@ -14,7 +14,8 @@ class CC extends GCC
         let gcc = invoc ? invoc : "gcc";
         let exefile = `arm-none-eabi-${gcc}`;
         let arg0 = jsmk.path.resolveExeFile(exefile, ts.BuildVars.TEENSYPATH);
-        if(!arg0) throw new Error("Can't resolve teensy CC executable");
+        if(!arg0) 
+            throw new Error("Can't resolve teensy CC executable "+exefile);
         super(ts, "teensy/cc", arg0);
         this.Define( {
             ARDUINO: "10612",

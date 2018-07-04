@@ -12,9 +12,9 @@ class esp8266 extends Foundation
         let board = "d1_mini";
         super(__filename, "esp8266", board);
 
-        let ardroot = "D:/dana/arduino-1.6.12";
-        let userlibs = "C:/Users/danab/Documents/Arduino/libraries";
-        let tsdir = "C:/Users/danab/AppData/Local/Arduino15/packages/esp8266/tools";
+        let ardroot = "d:/dana/arduino-1.6.12";
+        let userlibs = "c:/Users/danab/Documents/Arduino/libraries";
+        let tsdir = "c:/Users/danab/AppData/Local/Arduino15/packages/esp8266/tools";
         let ts = jsmk.path.join(tsdir, "xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2");
         let hardware = jsmk.path.join(ardroot, "hardware/esp8266com/esp8266");
         let tsbin = jsmk.path.join(ts, "bin");

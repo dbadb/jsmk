@@ -20,7 +20,7 @@ class DefaultPolicy extends Policy
                         "benchmark"],
             BuildStages: ["build", "install"],
             Deployment: "debug",
-            Flavor:  "vanilla",
+            Flavor:  jsmk.GetHost().Platform,
             BuildID: "head",
             ProjectMatch: null,
             ToolsetMatch: null,
