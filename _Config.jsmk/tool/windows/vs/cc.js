@@ -170,7 +170,7 @@ class cl extends ToolCli
                         }
                     }
                     //else
-                    // jsmk.DEBUG("skipping dependency: " + filename + ` (${rootDir})`);
+                    //    jsmk.NOTICE("skipping dependency: " + filename + ` (${rootDir})`);
                 }
                 else
                 {
