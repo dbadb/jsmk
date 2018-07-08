@@ -14,7 +14,7 @@ exports.Toolset = class vs17 extends Foundation
         var sdkInc = "10/Include/10.0.17134.0";
         var sdkLib = "10/Lib/10.0.17134.0";
         var sdkBin = "10/bin";
-        let toolsDir, ideDir;
+        let toolsDir, ideDir, sdkToolsDir;
         let archVariant;
 
         if(arch === Foundation.Arch.x86_64)
@@ -38,6 +38,7 @@ exports.Toolset = class vs17 extends Foundation
         //  understand.
         toolsDir = jsmk.path.join(vsDir, msvcDir, "bin/Hostx64", archVariant);
         ideDir = jsmk.path.join(vsDir, "Common7/IDE", archVariant);
+        sdkToolsDir = jsmk.path.join(sdkDir, sdkBin, archVariant);
         var map = {};
         map.BuildVars =
         {
@@ -45,6 +46,7 @@ exports.Toolset = class vs17 extends Foundation
             VSSDKDir: sdkDir,
             VSToolsDir: toolsDir,
             VSIDEDir: ideDir,
+            VSSDKToolsDir: sdkToolsDir, // eg: rc.exe
         };
         map.EnvMap =
         {
@@ -71,7 +73,7 @@ exports.Toolset = class vs17 extends Foundation
             "o->so":new (jsmk.LoadConfig(dir+"link.js").Link)(this, vers, true),
             "c.o->exe":new (jsmk.LoadConfig(dir+"link.js").Link)(this, vers),
             "cpp.o->exe":new (jsmk.LoadConfig(dir+"link.js").Link)(this, vers),
-            //"link":     jsmk.LoadConfig("tools/windows/vs12/link.js").Tool(this),
+            "rc->o": new (jsmk.LoadConfig(dir+"rc.js").RC)(this, vers),
         });
 
         jsmk.DEBUG(this.ToolsetHandle + " toolset loaded");
