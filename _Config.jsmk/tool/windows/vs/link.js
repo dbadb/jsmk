@@ -57,6 +57,8 @@ exports.Link = class Link extends ToolCli
             "/TLBID:1",
             "/OPT:ICF",
             "/ERRORREPORT:PROMPT",
+            "/SUBSYSTEM:CONSOLE",
+            // "/MANIFESTUAC:\"level=asInvoker uiAccess=false\"",
             // wip: "/PDB:${DSTFILE}.pdb",
             machine
         ]);
@@ -65,6 +67,12 @@ exports.Link = class Link extends ToolCli
         {
             this.AddFlags(ToolCli.Role.Link, [
                 "-dll", // XXX:  need to ensure console is dynamic
+            ]);
+        }
+        else
+        {
+            this.AddFlags(ToolCli.Role.Link, [
+                "/ENTRY:mainCRTStartup",
             ]);
         }
 
