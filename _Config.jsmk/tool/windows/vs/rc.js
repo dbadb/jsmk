@@ -51,6 +51,8 @@ class RC extends ToolCli
 
         this.AddFlags(this.GetRole(), [
             "-nologo",
+            "-l409", // english language
+            // "-v"
         ]);
     }
 }
