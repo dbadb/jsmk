@@ -1,4 +1,5 @@
-global.jsmk = require('./lib/jsmk.js').NewJsmk();
+/* global jsmk */
+global.jsmk = require("./lib/jsmk.js").NewJsmk();
 
 try
 {
