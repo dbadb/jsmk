@@ -14,8 +14,9 @@ exports.Link = class Link extends ToolCli
         let arg0 = jsmk.path.resolveExeFile(exefile, ts.BuildVars.VSToolsDir);
         if(!arg0) throw new Error("Can't resolve link "+
                                     ts.BuildVars.VSToolsDir);
+        let role = dll ? ToolCli.Role.ArchiveDynamic : ToolCli.Role.Link;
         super(ts, `vs${vsvers}/link`, {
-            Role:  dll ? ToolCli.Role.ArchiveDynamic : ToolCli.Role.Link,
+            Role:  role,
             ActionStage: "build",
             Semantics: ToolCli.Semantics.ManyToOne,
             DstExt: dll ? "dll" : "exe",
@@ -28,6 +29,7 @@ exports.Link = class Link extends ToolCli
                 Searchpath: "/LIBPATH:${VAL}",
             },
         });
+        this.m_role = role;
 
         let machine;
         switch(ts.TargetArch)
@@ -48,7 +50,7 @@ exports.Link = class Link extends ToolCli
             throw new Error("Link: unknown arch " + ts.TargetArch);
         }
 
-        this.AddFlags(ToolCli.Role.Link, [
+        this.AddFlags(this.m_role, [
             "/NOLOGO",
             "/INCREMENTAL:NO",
             "/DYNAMICBASE",
@@ -65,64 +67,75 @@ exports.Link = class Link extends ToolCli
 
         if(dll)
         {
-            this.AddFlags(ToolCli.Role.Link, [
+            // /OUT:"E:\dana\src\dbadbapp\nih\chuck\chugins\Debug\ABSaturator.chug" 
+            // /MANIFEST /NXCOMPAT 
+            // /PDB:"E:\dana\src\dbadbapp\nih\chuck\chugins\Debug\ABSaturator.pdb" 
+            // /DYNAMICBASE 
+            //  "kernel32.lib" "user32.lib" "gdi32.lib" "winspool.lib" 
+            //  "comdlg32.lib" "advapi32.lib" "shell32.lib" "ole32.lib" 
+            //  "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib" 
+            // /IMPLIB:"E:\dana\src\dbadbapp\nih\chuck\chugins\Debug\ABSaturator.lib" 
+            // /DEBUG /DLL /MACHINE:X86 /INCREMENTAL 
+            // /PGD:"E:\dana\src\dbadbapp\nih\chuck\chugins\Debug\ABSaturator.pgd" 
+            // /SUBSYSTEM:WINDOWS /MANIFESTUAC:"level='asInvoker' uiAccess='false'" 
+            // /ManifestFile:"Debug\ABSaturator.chug.intermediate.manifest" 
+            // /ERRORREPORT:PROMPT /NOLOGO /TLBID:1 
+            this.AddFlags(this.m_role, [
                 "-dll", // XXX:  need to ensure console is dynamic
             ]);
         }
         else
         {
-            this.AddFlags(ToolCli.Role.Link, [
+            this.AddFlags(this.m_role, [
                 "/ENTRY:mainCRTStartup",
             ]);
+            // minimum set of libs required to successfully link...add'l
+            // syslibs are provided by module/task (framework).
+            // 
+            this.AddLibs([
+                "DelayImp.lib",
+                "gdi32.lib", 
+                "psapi.lib",
+                "kernel32.lib",
+                "user32.lib", 
+                "winspool.lib",
+                "comdlg32.lib",
+                "advapi32.lib",
+                "shell32.lib",
+                "ole32.lib",
+                "oleaut32.lib",
+                "uuid.lib",
+                "odbc32.lib",
+                "odbccp32.lib", 
+                // "/nodefaultlib",
+                //"oldnames.lib",
+                //"imm32.lib",
+                //"iphlpapi.lib", 
+                //"mswsock.lib",
+                //"netapi32.lib", 
+                //"mpr.lib", 
+                //"gdi32.lib",
+                //"wsock32.lib",
+                //"ws2_32.lib",
+                //"winmm.lib",
+                //"kernel32.lib",
+                // "user32.lib",
+                //"winspool.lib",
+                //"commode.obj",
+                //"comctl32.lib", 
+                //"comdlg32.lib",
+                //"advapi32.lib",
+                //"shell32.lib",  // DragQueryFileA
+                //"ole32.lib",
+                //"oleaut32.lib",
+                //"uuid.lib",
+                //"odbc32.lib",
+                //"odbccp32.lib",
+                //"user32.lib",
+                //"glmf32.lib",
+                //"opengl32.lib",
+            ]);
         }
-
-        // minimum set of libs required to successfully link...add'l
-        // syslibs are provided by module/task (framework).
-        // 
-        this.AddLibs([
-            "DelayImp.lib",
-            "gdi32.lib", 
-            "psapi.lib",
-            "kernel32.lib",
-            "user32.lib", 
-            "winspool.lib",
-            "comdlg32.lib",
-            "advapi32.lib",
-            "shell32.lib",
-            "ole32.lib",
-            "oleaut32.lib",
-            "uuid.lib",
-            "odbc32.lib",
-            "odbccp32.lib", 
-            // "/nodefaultlib",
-            //"oldnames.lib",
-            //"imm32.lib",
-            //"iphlpapi.lib", 
-            //"mswsock.lib",
-            //"netapi32.lib", 
-            //"mpr.lib", 
-            //"gdi32.lib",
-            //"wsock32.lib",
-            //"ws2_32.lib",
-            //"winmm.lib",
-            //"kernel32.lib",
-            // "user32.lib",
-            //"winspool.lib",
-            //"commode.obj",
-            //"comctl32.lib", 
-            //"comdlg32.lib",
-            //"advapi32.lib",
-            //"shell32.lib",  // DragQueryFileA
-            //"ole32.lib",
-            //"oleaut32.lib",
-            //"uuid.lib",
-            //"odbc32.lib",
-            //"odbccp32.lib",
-            //"user32.lib",
-            //"glmf32.lib",
-            //"opengl32.lib",
-        ]);
-
     }
 
     ConfigureTaskSettings(task)
@@ -132,12 +145,12 @@ exports.Link = class Link extends ToolCli
         switch(task.BuildVars.Deployment)
         {
         case "debug":
-            task.AddFlags(ToolCli.Role.Link, [
+            task.AddFlags(this.m_role, [
                 "/debug",
             ]);
             break;
         case "release":
-            task.AddFlags(ToolCli.Role.Link, [
+            task.AddFlags(this.m_role, [
             ]);
             break;
         }

@@ -35,7 +35,6 @@ class cl extends ToolCli
             "-GR-", // disabled RTTI 
             "-GS-", // no security checks
             "-Gy", // separate functions for linker
-            "-MT", // multithreaded libc (MTd for dynamic vers)
             "-W3", // warning level
             "-WX-", // warnings aren't errors
             asCC ?  "-TC" : "-TP",
@@ -74,7 +73,7 @@ class cl extends ToolCli
                 "NDEBUG": null,
             });
             task.AddFlags(this.GetRole(), [
-                "-MD", // non-debugging crt
+                "-MD", // non-debugging dynamic crt
                 "-O2",
                 "-Ob2", // inline expansion
             ]);

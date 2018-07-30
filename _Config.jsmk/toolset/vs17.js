@@ -66,13 +66,21 @@ exports.Toolset = class vs17 extends Foundation
 
         let vers = "17";
         let dir = "tool/windows/vs/";
+        let ccmod = jsmk.LoadConfig(dir+"cc.js");
+        let CC = new ccmod.CC(this, vers);
+        let CPP = new ccmod.CPP(this, vers);
+        let Link = jsmk.LoadConfig(dir+"link.js").Link;
+        let dlltool = new Link(this, vers, true);
         this.MergeToolMap({
-            "c->o":    new (jsmk.LoadConfig(dir+"cc.js").CC)(this, vers),
-            "cpp->o":  new (jsmk.LoadConfig(dir+"cc.js").CPP)(this, vers),
+            "c->o":    CC,
+            "cpp->o":  CPP,
             "o->a":    new (jsmk.LoadConfig(dir+"ar.js").AR)(this, vers),
-            "o->so":new (jsmk.LoadConfig(dir+"link.js").Link)(this, vers, true),
-            "c.o->exe":new (jsmk.LoadConfig(dir+"link.js").Link)(this, vers),
-            "cpp.o->exe":new (jsmk.LoadConfig(dir+"link.js").Link)(this, vers),
+            "o->so": dlltool,
+            "o->dll": dlltool,
+            "c.o->exe": new Link(this, vers),
+            "cpp.o->exe": new Link(this, vers),
+            "cpp.o->so": dlltool,
+            "cpp.o->dll": dlltool,
             "rc->o": new (jsmk.LoadConfig(dir+"rc.js").RC)(this, vers),
         });
 
