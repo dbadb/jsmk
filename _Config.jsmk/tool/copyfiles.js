@@ -26,12 +26,21 @@ class CopyFiles extends Tool
             let outputs = [];
             for(let input of config.inputs)
             {
-                let output = jsmk.path.join(idir, jsmk.path.basename(input));
-                outputs.push(output);
+                let infile = jsmk.path.basename(input);
+                let outfile = jsmk.path.join(idir, infile);
+                if(config.installext)
+                {
+                    let pathobj = jsmk.path.parse(outfile);
+                    pathobj.ext = config.installext;
+                    pathobj.base = null;
+                    outfile = jsmk.path.format(pathobj);
+                }
+                outputs.push(outfile);
             }
             config.outputs = outputs;
             // let inputs and outputs remain on config
             delete config.installdir;
+            delete config.installext;
         }
     }
 
