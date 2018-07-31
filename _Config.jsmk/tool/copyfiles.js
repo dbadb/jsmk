@@ -57,14 +57,17 @@ class CopyFiles extends Tool
             let infile = inputs[i];
             let outfile = outputs[i];
             if(this.outputIsDirty(outfile, triggers.concat(infile), cwd))
-                yield this.makeWork(infile, outfile, filter);
+                yield this.makeWork(stage, cwd, infile, outfile, filter);
         }
     }
 
-    makeWork(infile, outfile, filter)
+    makeWork(stage, cwd, infile, outfile, filter)
     {
         let w  = new Promise( (resolve,reject) => {
-            jsmk.INFO(`copy from: ${infile}`);
+            if(!jsmk.path.isAbsolute(infile))
+                infile = jsmk.path.join(cwd, infile);
+            if(stage != "install") stage = "copy"; // usually build
+            jsmk.INFO(`${stage} from: ${infile}`);
             jsmk.INFO(`       to: ${outfile}`);
             jsmk.path.makedirs(jsmk.path.dirname(outfile));
             let istream = fs.createReadStream(infile, {encoding: "binary"});
