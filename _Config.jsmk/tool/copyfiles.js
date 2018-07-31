@@ -67,9 +67,9 @@ class CopyFiles extends Tool
             jsmk.INFO(`copy from: ${infile}`);
             jsmk.INFO(`       to: ${outfile}`);
             jsmk.path.makedirs(jsmk.path.dirname(outfile));
-            let istream = fs.createReadStream(infile, {encoding: "utf8"});
+            let istream = fs.createReadStream(infile, {encoding: "binary"});
             istream.on("error", reject);
-            let ostream = fs.createWriteStream(outfile, {encoding: "utf8"});
+            let ostream = fs.createWriteStream(outfile, {encoding: "binary"});
             ostream.on("error", reject);
             if(!filter)
             {
