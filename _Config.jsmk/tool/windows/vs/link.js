@@ -59,7 +59,7 @@ exports.Link = class Link extends ToolCli
             "/TLBID:1",
             "/OPT:ICF",
             "/ERRORREPORT:PROMPT",
-            "/SUBSYSTEM:CONSOLE",
+            "/SUBSYSTEM:WINDOWS", // XXX  /SUBSYSTEM:CONSOLE
             // "/MANIFESTUAC:\"level=asInvoker uiAccess=false\"",
             // wip: "/PDB:${DSTFILE}.pdb",
             machine
