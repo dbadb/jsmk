@@ -63,7 +63,7 @@ class PostCompile extends ToolCli
     ConfigureTaskSettings(task)
     {
         super.ConfigureTaskSettings(task);
-        task.AddFlags([
+        task.AddFlags(this.GetRole(), [
             task.Interpolate("-tools=${TEENSYTOOLS}"),
             task.Interpolate("-board=${TEENSYBOARD}"),
             // "-reboot"

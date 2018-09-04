@@ -39,12 +39,12 @@ class GCC extends ToolCli
         switch(task.BuildVars.Deployment)
         {
         case "debug":
-            task.AddFlags([
+            task.AddFlags(this.GetRole(), [
                 "-g",
             ]);
             break;
         case "release":
-            task.AddFlags([
+            task.AddFlags(this.GetRole(), [
                 "-Os", // optimize for size
             ]);
             break;

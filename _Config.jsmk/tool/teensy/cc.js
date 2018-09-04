@@ -72,7 +72,7 @@ class CC extends GCC
                     F_CPU: "96000000",
                     "__MK20DX256__": null,
                 });
-            task.AddFlags([
+            task.AddFlags(this.GetRole(), [
                     "-mcpu=cortex-m4",
                 ]);
             break;
@@ -81,7 +81,7 @@ class CC extends GCC
                     F_CPU: "48000000",
                     "__MKL26Z64__":  null,
                 }),
-            task.AddFlags([
+            task.AddFlags(this.GetRole(), [
                     "-mcpu=cortex-m0plus",
                 ]);
             break;
