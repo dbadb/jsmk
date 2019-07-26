@@ -14,7 +14,8 @@ class CC extends GCC
         let gcc = invoc ? invoc : "gcc";
         let exefile = `arm-none-eabi-${gcc}`;
         let arg0 = jsmk.path.resolveExeFile(exefile, ts.BuildVars.TEENSYPATH);
-        if(!arg0) throw new Error("Can't resolve teensy CC executable");
+        if(!arg0) 
+            throw new Error("Can't resolve teensy CC executable "+exefile);
         super(ts, "teensy/cc", arg0);
         this.Define( {
             ARDUINO: "10612",
@@ -34,7 +35,7 @@ class CC extends GCC
             //      teensy3/usb_inst.cpp
         });
 
-        this.AddFlags([
+        this.AddFlags(this.GetRole(), [
                 "-c",
                 "--specs=nano.specs",
                 "-Wall",
@@ -48,7 +49,7 @@ class CC extends GCC
 
         if(gcc === "g++")
         {
-            this.AddFlags([
+            this.AddFlags(this.GetRole(), [
                 "-fno-rtti",
                 "-std=gnu++0x",
                 "-felide-constructors",
@@ -71,7 +72,7 @@ class CC extends GCC
                     F_CPU: "96000000",
                     "__MK20DX256__": null,
                 });
-            task.AddFlags([
+            task.AddFlags(this.GetRole(), [
                     "-mcpu=cortex-m4",
                 ]);
             break;
@@ -80,7 +81,7 @@ class CC extends GCC
                     F_CPU: "48000000",
                     "__MKL26Z64__":  null,
                 }),
-            task.AddFlags([
+            task.AddFlags(this.GetRole(), [
                     "-mcpu=cortex-m0plus",
                 ]);
             break;

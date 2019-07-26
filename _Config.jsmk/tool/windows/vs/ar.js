@@ -1,3 +1,5 @@
+/* global jsmk */
+
 let ToolCli = jsmk.Require("tool_cli.js").Tool;
 let Arch = jsmk.Require("toolset.js").Arch;
 
@@ -5,7 +7,7 @@ class AR extends ToolCli
 {
     constructor(ts, vsvers)
     {
-        let exefile = "Lib";
+        let exefile = "lib";
         let arg0 = jsmk.path.resolveExeFile(exefile, ts.BuildVars.VSToolsDir);
         if(!arg0) throw new Error("Can't resolve Lib "+ ts.BuildVars.VSToolsDir);
         super(ts, `vs${vsvers}/archive`, {
@@ -38,7 +40,7 @@ class AR extends ToolCli
             throw new Error("Lib: unknown arch " + ts.TargetArch);
         }
 
-        this.AddFlags([
+        this.AddFlags(this.GetRole(), [
             "-nologo",
             machine
         ]);

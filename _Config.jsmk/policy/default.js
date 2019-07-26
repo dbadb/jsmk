@@ -1,3 +1,4 @@
+/* global jsmk */
 var Policy = jsmk.Require("policy.js").Policy;
 
 class DefaultPolicy extends Policy
@@ -20,17 +21,18 @@ class DefaultPolicy extends Policy
                         "benchmark"],
             BuildStages: ["build", "install"],
             Deployment: "debug",
-            Flavor:  "vanilla",
+            Flavor:  jsmk.GetHost().Platform,
             BuildID: "head",
             ProjectMatch: null,
             ToolsetMatch: null,
             SubsetMatch: null,
+            Package: "UnnamedPackage",
             ToolsetNameTmplt: "${ToolsetName}-${TargetArch}-${TargetPlatform}",
             BuildTargetTmplt: "${Toolset}-${Flavor}-${Deployment}",
             BuiltDirTmplt: "${DomainDir}/.built/${Module}", // add BuildID
-            InstallDirTmplt: "${RootDir}/.install",
-            PackageDirTmplt: "${RootDir}/.package"
-        }
+            InstallDirTmplt: "${RootDir}/.install/${BuildTarget}/${Package}",
+            PackageDirTmplt: "${RootDir}/.package/${BuildTarget}/${Package}",
+        };
         Object.assign(config, optConfig);
         super(config);
     }

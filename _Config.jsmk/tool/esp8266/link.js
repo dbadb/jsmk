@@ -61,7 +61,7 @@ class Link extends ToolCli
             }
         );
 
-        this.AddFlags([
+        this.AddFlags(this.GetRole(), [
             "-g", "-Wall",
             "-Os", "-nostdlib",
             "-Wl,--no-check-sections",
@@ -76,7 +76,7 @@ class Link extends ToolCli
         ]);
 
         let sdk = jsmk.path.join(ts.BuildVars.ARD_TOOLS, "sdk");
-        this.AddSearchpaths("Link", [
+        this.AddSearchpaths(this.GetRole(), [
             jsmk.path.join(sdk, "lib"),
             jsmk.path.join(sdk, "ld"),
             jsmk.path.join(sdk, "libc/xtensa-lx106-elf/lib"),

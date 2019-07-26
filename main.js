@@ -1,4 +1,5 @@
-global.jsmk = require('./lib/jsmk.js').NewJsmk();
+/* global jsmk */
+global.jsmk = require("./lib/jsmk.js").NewJsmk();
 
 try
 {
@@ -14,16 +15,19 @@ catch(e)
 let err = null;
 jsmk.DoBuilds()
     .then(()=>{
-        jsmk.NOTICE("done with builds");
+        jsmk.NOTICE("-- Done ----");
     })
     .catch((e)=>{
-        if(!e)
-            e = new Error("DoBuilds reject");
-        if(typeof e === "string")
-            jsmk.ERROR("jsmk " + e);
+        if(e)
+        {
+            if(typeof e === "string")
+                jsmk.ERROR("jsmk " + e);
+            else
+                jsmk.ERROR("jsmk " + e.stack);
+            err = e;
+        }
         else
-            jsmk.ERROR("jsmk " + e.stack);
-        err = e;
+            err = 1;
     })
     .finally(() => {
         jsmk.EndSession(err);

@@ -27,7 +27,7 @@ class Link extends ToolCli
         super.ConfigureTaskSettings(task);
         let tsrc = task.BuildVars.TEENSYSRC;
         let tboard = task.BuildVars.TEENSYBOARD;
-        task.AddFlags([
+        task.AddFlags(this.GetRole(), [
             "-O",
             "-Wl,--gc-sections,--relax,--defsym=__rtc_localtime="+Date.now(),
             "-mthumb",
@@ -38,14 +38,14 @@ class Link extends ToolCli
         switch(tboard)
         {
         case "TEENSY31":
-            task.AddFlags([
+            task.AddFlags(this.GetRole(), [
                 `-T${tsrc}/mk20dx256.ld`,
                 "-mcpu=cortex-m4",
                 "-larm_cortexM4l_math",
             ]);
             break;
         case "TEENSYLC":
-            task.AddFlags([
+            task.AddFlags(this.GetRole(), [
                 `-T${tsrc}/mkl26z64.ld`,
                 "--specs=nano.specs",
                 "-mcpu=cortex-m0plus",
