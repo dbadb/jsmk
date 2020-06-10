@@ -7,7 +7,8 @@ class Teensy extends Foundation
      {
         super(__filename, "teensy", Foundation.Arch.unspecified);
 
-        let ardroot = "d:/dana/arduino-1.6.12";
+        let ardroot = "c:/Users/dana/Documents/arduino-1.8.12";
+        let ardlibs = jsmk.path.join(ardroot, "../Arduino/libraries");
         let t3src = jsmk.path.join(ardroot, "hardware/teensy/avr/cores/teensy3");
         let dbsrc = "/mnt/d/dana/src/teensy/nih/libcore/teensy-cores/teensy3";
         let teensycore = jsmk.path.join(ardroot, "hardware/teensy/avr/cores/teensy3");
@@ -18,11 +19,13 @@ class Teensy extends Foundation
         map.BuildVars =
         {
             ARDROOT: ardroot,
+            ARDLIBS: ardlibs,
             TEENSYSRC: t3src,
             TEENSYLIBS: jsmk.path.join(ardroot, "hardware/teensy/avr/libraries"),
             TEENSYTOOLS: teensytools,
             // TEENSYBOARD: "TEENSY31",
             TEENSYBOARD: "TEENSYLC",
+            TEENSYCORE: teensycore,
             TEENSYPATH:  [teensybin, teensytools],
         };
 

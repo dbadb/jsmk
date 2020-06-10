@@ -6,8 +6,16 @@ class AR extends ToolCli
     constructor(ts)
     {
         let exefile = "arm-none-eabi-ar";
+        let exefile2 = "arm-none-eabi-gcc-ar";
         let arg0 = jsmk.path.resolveExeFile(exefile, ts.BuildVars.TEENSYPATH);
-        if(!arg0) throw new Error("Can't resolve teensy AR executable");
+        if(!arg0) 
+        {
+            arg0 = jsmk.path.resolveExeFile(exefile2, ts.BuildVars.TEENSYPATH);
+            exefile = exefile2;
+        }
+        if(!arg0) 
+            throw new Error("Can't resolve teensy AR executable " + 
+                                  ts.BuildVars.TEENSYPATH + "/" + exefile);
         super(ts, "teensy/ar", {
             Role:  ToolCli.Role.Archive,
             ActionStage: "build",

@@ -7,6 +7,22 @@ let GCC = require("../gcc.js").GCC;
 // rather than a compiler.  On the other hand, the choice of compiler
 // is pretty-well tied down by teensy (and tightly coupled with
 // its collection of compiler flags).
+// "../arm-none-eabi-g++" -c -Os \
+//    --specs=nano.specs -g -Wall -ffunction-sections \
+//    -fdata-sections -nostdlib -MMD -fno-exceptions \
+//    -fpermissive -felide-constructors -std=gnu++14 \
+//    -Wno-error=narrowing -fno-rtti -mthumb \
+//    -mcpu=cortex-m0plus -fsingle-precision-constant \
+//    -D__MKL26Z64__ -DTEENSYDUINO=152 -DARDUINO=10812 \
+//    -DARDUINO_TEENSYLC -DF_CPU=48000000 -DUSB_SERIAL \
+//    -DLAYOUT_US_ENGLISH \
+//    "-IC:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_438011/pch" 
+//    "-IC:\\Users\\dana\\Documents\\arduino-1.8.12\\hardware\\teensy\\avr\\cores\\teensy3" \
+//    "-IC:\\Users\\dana\\Documents\\arduino-1.8.12\\hardware\\teensy\\avr\\libraries\\Bounce"\
+//    "-IC:\\Users\\dana\\Documents\\Arduino\\libraries\\SevSeg-3.3.0"\
+//    "-IC:\\Users\\dana\\Documents\\Arduino\\libraries\\SharpDistSensor"\
+//    "C:\\Users\\dana\\Documents\\Arduino\\libraries\\SharpDistSensor\\SharpDistSensor.cpp"\
+//    -o "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_438011\\libraries\\SharpDistSensor\\SharpDistSensor.cpp.o"
 class CC extends GCC
 {
     constructor(ts, invoc)
@@ -18,11 +34,14 @@ class CC extends GCC
             throw new Error("Can't resolve teensy CC executable "+exefile);
         super(ts, "teensy/cc", arg0);
         this.Define( {
-            ARDUINO: "10612",
-            TEENSYDUINO: "134",
+            ARDUINO: "10812",
+            TEENSYDUINO: "152",
             ARDUINO_ARCH_AVR: null,
-            USB_SERIAL_HID:  null, // serial + usb + mouse + joystick
-                                   // modify to change MANUFACTURE and PRODUCT
+            /*
+             * USB_SERIAL_HID:  null, (shouldn't be defined for MIDI)
+             * // serial + usb + mouse + joystick
+               // modify to change MANUFACTURE and PRODUCT
+            */
             //USB_SERIAL_HID_DB: null, // doesn't work, usb_undef.h
             // USB_KEYBOARDONLY: null,
             LAYOUT_US_ENGLISH: null,
@@ -45,13 +64,13 @@ class CC extends GCC
                 "-nostdlib",
                 "-fno-exceptions",
                 "-mthumb",
+                "-Wno-error=narrowing", 
             ]);
 
         if(gcc === "g++")
         {
             this.AddFlags(this.GetRole(), [
-                "-fno-rtti",
-                "-std=gnu++0x",
+                "-fno-rtti", "-fpermissive", "-std=gnu++14",
                 "-felide-constructors",
             ]);
         }
@@ -80,6 +99,7 @@ class CC extends GCC
             task.Define({
                     F_CPU: "48000000",
                     "__MKL26Z64__":  null,
+                    "ARDUINO_TEENSYLC": null,
                 }),
             task.AddFlags(this.GetRole(), [
                     "-mcpu=cortex-m0plus",

@@ -10,10 +10,10 @@ exports.Toolset = class vs17 extends Foundation
         let root = "C:/Program Files (x86)/";
         let vsDir = root + "Microsoft Visual Studio/2017/Community/";
         let sdkDir = root + "Windows Kits";
-        var msvcDir = "VC/Tools/MSVC/14.14.26428";
-        var sdkInc = "10/Include/10.0.17134.0";
-        var sdkLib = "10/Lib/10.0.17134.0";
-        var sdkBin = "10/bin";
+        var msvcDir = "VC/Tools/MSVC/14.16.27023";
+        var sdkInc = "10/Include/10.0.17763.0";
+        var sdkLib = "10/Lib/10.0.17763.0";
+        var sdkBin = "10/bin/10.0.17763.0";
         let toolsDir, ideDir, sdkToolsDir;
         let archVariant;
 
