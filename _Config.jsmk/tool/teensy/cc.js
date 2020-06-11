@@ -84,7 +84,7 @@ class CC extends GCC
 
     ConfigureTaskSettings(task)
     {
-        super.ConfigureTaskSettings(task);
+        super.ConfigureTaskSettings(task); // gcc gets to configure the task
         // USBTYPE must be one of arduino's types (selected from Tools menu)
         // (see usb_desc.h for exact values)
         let defaultDefs = {};

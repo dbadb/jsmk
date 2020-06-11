@@ -36,19 +36,40 @@ class GCC extends ToolCli
     ConfigureTaskSettings(task)
     {
         super.ConfigureTaskSettings(task);
+        let flags = [];
+
+        // Optimize for size. -Os enables all -O2 optimizations except 
+        // those that often increase code size.  A Project/Root can
+        // specify a default optimization regardless of Deployment.
+        switch(task.BuildVars.OPTIMIZATION)
+        {
+        case "Size":
+            flags.push("-Os");
+            break;
+        case "Speed":
+            flags.push("-O3");
+            break;
+        case "None":
+            flags.push("-O0"); // no-opt -> default
+            break;
+        default:
+        case "Contextual":
+            break;
+        }
         switch(task.BuildVars.Deployment)
         {
         case "debug":
-            task.AddFlags(this.GetRole(), [
-                "-g",
-            ]);
+            flags.push("-g");
+            if(flags.length == 0)
+                flags.push("-O0");
             break;
         case "release":
-            task.AddFlags(this.GetRole(), [
-                "-Os", // optimize for size
-            ]);
+            if(flags.length == 0)
+                flags.push("-Os");
             break;
         }
+        if(flags.length)
+            task.AddFlags(this.GetRole(), flags);
     }
 
     outputIsDirty(output, inputs, cwd)

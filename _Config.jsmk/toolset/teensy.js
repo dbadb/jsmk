@@ -1,5 +1,32 @@
 /* global jsmk */
 var Foundation = require("./foundation.js").Foundation;
+/*
+Linking everything together...
+arm-none-eabi-gcc -Os \
+    --specs=nano.specs \
+    -Wl,--gc-sections,--relax,--defsym=__rtc_localtime=1591875999 \
+    "-TC:\\Users\\dana\\Documents\\arduino-1.8.12\\hardware\\teensy\\avr\\cores\\teensy3/mkl26z64.ld" \
+    -lstdc++ -mthumb -mcpu=cortex-m0plus -fsingle-precision-constant \
+    -o "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_479489/controlsurface.ino.elf" \
+    ...OBJFILES...
+    SPI.cpp.o SoftwareSerial.cpp.o Adafruit_SSD1306.cpp.o Wire.cpp.o \
+    WireIMXRT.cpp.o WireKinetis.cpp.o twi.c.o glcdfont.c.o \
+    Adafruit_GFX.cpp.o Adafruit_SPITFT.cpp.o core.a\
+    -LC:../arduino_build_479489 \
+    -larm_cortexM0l_math -lm
+arm-none-eabi-objcopy -O ihex -j .eeprom \
+    --set-section-flags=.eeprom=alloc,load \
+    --no-change-warnings --change-section-lma \
+    .eeprom=0 .../controlsurface.ino.elf  .../controlsurface.ino.eep
+arm-none-eabi-objcopy -O ihex -R .eeprom \
+    .../controlsurface.ino.elf .../controlsurface.ino.hex
+arm-none-eabi-objdump -d -S -C .../controlsurface.ino.elf
+arm-none-eabi-objdump -t -C .../controlsurface.ino.elf
+arm-none-eabi-size -A .../BlinkTeensy.ino.elf
+teensy_post_compile -file=controlsurface.ino -path=(tobuiltarea) \
+    -tools=.../teensy/../tools/" \
+    -board=TEENSYLC
+*/
 
 class Teensy extends Foundation
 {
@@ -43,6 +70,7 @@ class Teensy extends Foundation
                 "o->a": new misc.AR(this),
                 "elf->eep": new misc.ObjCopy(this, "elf->eep"), // eeprom (data)
                 "elf->hex": new misc.ObjCopy(this, "elf->hex"), // non-data
+                "report": new misc.ReportSize(this),
                 "postcompile": new misc.PostCompile(this)
             }
         );

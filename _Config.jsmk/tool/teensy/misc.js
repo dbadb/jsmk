@@ -48,6 +48,61 @@ class ObjCopy extends ToolCli
     }
 }
 
+class ReportSize extends ToolCli
+{
+    constructor(ts)
+    {
+        let exefile = "arm-none-eabi-size";
+        let arg0 = jsmk.path.resolveExeFile(exefile, ts.BuildVars.TEENSYPATH);
+        if(!arg0) throw new Error("Can't resolve teensy size executable");
+        super(ts, "teensy/size", {
+            Role: ToolCli.Role.Report,
+            ActionStage: "build",
+            Semantics: ToolCli.Semantics.OneToNone,
+            Invocation: [arg0, "-A ${SRCFILE}"] ,
+        });
+    }
+
+    /* sample output
+    .../Playground.elf  :
+    section                 size        addr
+    .text                  41808           0
+    .fini                      4       41808
+    .usbdescriptortable      192   536868864
+    .dmabuffers              192   536869120
+    .usbbuffers             2160   536869312
+    .data                    488   536871472
+    .bss                    1304   536871960
+    .ARM.attributes           40           0
+    .comment                 110           0
+    .debug_info           465272           0
+    .debug_abbrev          56195           0
+    .debug_loc             74290           0
+    .debug_aranges          6352           0
+    .debug_ranges           9264           0
+    .debug_line            83615           0
+    .debug_str            111135           0
+    .debug_frame           18868           0
+    Total                 871289
+    */
+    filterOutput(chan, txt, task, outfile)
+    {
+        let lines = txt.split("\n");
+        let result = txt;
+        for(let l of lines)
+        {
+            let fields = l.split(/[\s]+/); // split on whitespace
+            // console.log(fields);
+            if(fields[0] == ".text")
+            {
+                // override the output
+                result = `Sketch uses ${fields[1]} bytes`;
+            }
+        }
+        return result;
+    }
+}
+
 class PostCompile extends ToolCli
 {
     // ...\arduino-1.8.12\hardware\teensy/../tools/teensy_post_compile \
@@ -90,3 +145,4 @@ class PostCompile extends ToolCli
 exports.AR = AR;
 exports.ObjCopy = ObjCopy;
 exports.PostCompile = PostCompile;
+exports.ReportSize = ReportSize;

@@ -28,11 +28,11 @@ class Link extends ToolCli
         let tsrc = task.BuildVars.TEENSYSRC;
         let tboard = task.BuildVars.TEENSYBOARD;
         task.AddFlags(this.GetRole(), [
-            "-O",
+            "-Os",
             "-Wl,--gc-sections,--relax,--defsym=__rtc_localtime="+Date.now(),
             "-mthumb",
             `-L${tsrc}`,
-            "-lm",
+            "-fsingle-precision-constant",
         ]);
 
         switch(tboard)
@@ -42,6 +42,7 @@ class Link extends ToolCli
                 `-T${tsrc}/mk20dx256.ld`,
                 "-mcpu=cortex-m4",
                 "-larm_cortexM4l_math",
+                "-lm",
             ]);
             break;
         case "TEENSYLC":
@@ -50,6 +51,7 @@ class Link extends ToolCli
                 "--specs=nano.specs",
                 "-mcpu=cortex-m0plus",
                 "-larm_cortexM0l_math",
+                "-lm",
             ]);
             break;
         }
