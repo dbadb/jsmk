@@ -50,6 +50,13 @@ class ObjCopy extends ToolCli
 
 class PostCompile extends ToolCli
 {
+    // ...\arduino-1.8.12\hardware\teensy/../tools/teensy_post_compile \
+    //  -file=BlinkTeensy.ino \
+    //  -path=C:\Users\dana\AppData\Local\Temp\arduino_build_530257 \
+    //  -tools=C:\Users\dana\Documents\arduino-1.8.12\hardware\teensy/../tools \
+    //  -board=TEENSYLC -reboot -port=COM5 -portlabel=COM5 \
+    //  -portprotocol=serial 
+
     constructor(ts)
     {
         let exefile = "teensy_post_compile";
@@ -60,7 +67,9 @@ class PostCompile extends ToolCli
             Semantics: ToolCli.Semantics.OneToNone,
             ActionStage: "test",
             Invocation: [arg0, "-file=${SRCFILEBASENOEXT} " +
-                       "-path=${BUILTDIR} ${FLAGS}"],
+                       "-path=${BUILTDIR} " +
+                       "${FLAGS} " + // -tools and -board filled in ConfigureTaskSettings
+                       "-reboot -portprotocol=serial"],
             Syntax:
             {
                 Flag: "${VAL}"
@@ -74,7 +83,6 @@ class PostCompile extends ToolCli
         task.AddFlags(this.GetRole(), [
             task.Interpolate("-tools=${TEENSYTOOLS}"),
             task.Interpolate("-board=${TEENSYBOARD}"),
-            // "-reboot"
         ]);
     }
 }

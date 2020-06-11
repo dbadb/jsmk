@@ -33,6 +33,7 @@ class CC extends GCC
         if(!arg0) 
             throw new Error("Can't resolve teensy CC executable "+exefile);
         super(ts, "teensy/cc", arg0);
+        this.SetBuildVar("SERIAL_MODE", "USB_SERIAL_HID");
         this.Define( {
             ARDUINO: "10812",
             TEENSYDUINO: "152",
@@ -84,6 +85,12 @@ class CC extends GCC
     ConfigureTaskSettings(task)
     {
         super.ConfigureTaskSettings(task);
+        // USBTYPE must be one of arduino's types (selected from Tools menu)
+        // (see usb_desc.h for exact values)
+        let defaultDefs = {};
+        console.assert(task.BuildVars.USBTYPE.length > 0);
+        defaultDefs[task.BuildVars.USBTYPE]  = null;
+        task.Define(defaultDefs);
         switch(task.BuildVars.TEENSYBOARD)
         {
         case "TEENSY31":
