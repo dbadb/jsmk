@@ -17,7 +17,177 @@ class AR extends ToolCli
     }
 }
 
-class EspTool extends ToolCli
+// elf2bin: Generate an Arduino compatible BIN file from bootloader and sketch 
+//          ELF. Replaces esptool-ck.exe and emulates its behavior.
+//
+// Arduino15\\packages\\esp8266\\tools\\python3\\3.7.2-post1/python3" 
+// "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/tools/elf2bin.py" 
+// --eboot "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/bootloaders/eboot/eboot.elf" 
+// --app "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.elf" 
+// --flash_mode dout --flash_freq 40 --flash_size 1M 
+// --path "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\2.5.0-4-b40a506/bin" 
+// --out "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.bin"
+class Elf2Bin extends ToolCli
+{
+    constructor(ts, python, scriptfile, rule)
+    {
+        let arg0 = jsmk.path.resolveExeFile(python);
+        if(!arg0) 
+            throw new Error("Can't resolve python3 executable " + python);
+        let bootfile = ts.BuildVars.ARD_BOOTFILE;
+        super(ts, "esp8266/elf2bin", 
+        {
+            Role: ToolCli.Role.Extract,
+            ActionStage: "build",
+            Semantics: ToolCli.Semantics.OneToOne,
+            DstExt: "bin",
+            Syntax:
+            {
+                Define: "-D${KEY}=${VAL}",
+                DefineNoVal: "-D${KEY}",
+                Searchpath: "-I${VAL}",
+                Flag: "${VAL}"
+            },
+            Invocation: [arg0, scriptfile, "--eboot", bootfile,
+                    "--app", "${SRCFILE}",
+                    "${FLAGS}",
+                    "--path", ts.BuildVars.ESP_BIN,
+                    "--out", "${DSTFILE}"]
+        });
+        this.AddFlags(this.GetRole(),
+        [
+            ["--flash_mode", "dout"],
+            ["--flash_freq", "40"],
+            ["--flash_size", "1M"]
+        ]);
+    }
+}
+
+
+// "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\python3\\3.7.2-post1/python3" 
+// "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/tools/sizes.py" 
+//  --elf "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.elf" 
+//  --path "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\2.5.0-4-b40a506/bin"
+//
+// NB: there's another size report that may be of interest
+//  "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\2.5.0-4-b40a506/bin/xtensa-lx106-elf-size" 
+//      -A "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.elf"
+// reports:
+//    Sketch uses 267196 bytes (27%) of program storage space. Maximum is 958448 bytes.
+//    Global variables use 27036 bytes (33%) of dynamic memory, leaving 54884 bytes for local variables. Maximum is 81920 bytes.
+//
+class ElfSizes extends ToolCli
+{
+    constructor(ts, python, scriptfile, rule)
+    {
+        let arg0 = jsmk.path.resolveExeFile(python);
+        if(!arg0) 
+            throw new Error("Can't resolve python3 executable " + python);
+        super(ts, "esp8266/sizes", 
+        {
+            Role: ToolCli.Role.Report,
+            ActionStage: "build",
+            Semantics: ToolCli.Semantics.OneToNone,
+            Syntax:
+            {
+                Define: "-D${KEY}=${VAL}",
+                DefineNoVal: "-D${KEY}",
+                Searchpath: "-I${VAL}",
+                Flag: "${VAL}"
+            },
+            Invocation: [
+                arg0, scriptfile, 
+                "--elf", "${SRCFILE}",
+                "--path", ts.BuildVars.ESP_BIN
+            ],
+        });
+    }
+}
+
+// "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\python3\\3.7.2-post1/python3" 
+// "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/tools/signing.py" 
+// --mode sign 
+// --privatekey "C:\\Users\\dana\\Documents\\Arduino\\sketches\\WIFIUnoTest/private.key" 
+// --bin "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.bin" 
+// --out "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.bin.signed" 
+// --legacy "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.bin.legacy_sig"
+class SignBin extends ToolCli
+{
+    constructor(ts, python, scriptfile, rule)
+    {
+        let arg0 = jsmk.path.resolveExeFile(python);
+        if(!arg0) 
+            throw new Error("Can't resolve python3 executable " + python);
+
+        // NB: signing isn't fully implemented!
+
+        super(ts, "esp8266/signbin", 
+        {
+            Role: ToolCli.Role.Sign,
+            ActionStage: "build",
+            Semantics: ToolCli.Semantics.OneToOne,
+            DstExt: "bin",
+            Syntax:
+            {
+                Define: "-D${KEY}=${VAL}",
+                DefineNoVal: "-D${KEY}",
+                Searchpath: "-I${VAL}",
+                Flag: "${VAL}"
+            },
+            Invocation: [arg0, scriptfile]
+        });
+    }
+}
+
+// Deploy:
+// Wrapper for Arduino core / others that can call esptool.py possibly multiple times
+// Adds pyserial to sys.path automatically based on the path of the current file
+// First parameter is pyserial path, second is esptool path, then a series of command arguments
+// i.e. python3 upload.py write_flash file 0x0
+// C:\Users\dana\AppData\Local\Arduino15\packages\esp8266\tools\python3\3.7.2-post1/python3 
+// C:\Users\dana\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\2.7.4/tools/upload.py 
+//  --chip esp8266
+//  --port COM3 
+//  --baud 115200 
+//  --before default_reset 
+//  --after hard_reset write_flash 0x0 
+//   C:\Users\dana\AppData\Local\Temp\arduino_build_278104/WIFIUnoTest.ino.bin 
+class Deploy extends ToolCli
+{
+    constructor(ts, python, scriptfile, rule)
+    {        
+        let arg0 = jsmk.path.resolveExeFile(python);
+        if(!arg0) 
+            throw new Error("Can't resolve python3 executable " + python);
+        super(ts, "esp8266/deploy", 
+        {
+            Role: ToolCli.Role.Deploy,
+            ActionStage: "test",
+            Semantics: ToolCli.Semantics.OneToNone,
+            DstExt: "",
+            Syntax:
+            {
+                Define: "-D${KEY}=${VAL}",
+                DefineNoVal: "-D${KEY}",
+                Searchpath: "-I${VAL}",
+                Flag: "${VAL}"
+            },
+            LiveOutput: true,
+            Invocation: [arg0, "-u", /* unbuffered */
+                    scriptfile,
+                    "--chip", "esp8266",
+                    "--port", ts.BuildVars.ARD_PORT,
+                    "--baud", "115200",
+                    "--before", "default_reset",
+                    "--after", "hard_reset",
+                    "write_flash", "0x0",
+                    "${SRCFILE}"
+                ],
+        });
+    }
+}
+
+class OldEspTool extends ToolCli
 {
     // NB: EspTool has unusual order-dependent argument parsing conventions
     //  this tool has two uses:
@@ -41,7 +211,7 @@ class EspTool extends ToolCli
     constructor(ts, exefile, rule)
     {
         let arg0 = jsmk.path.resolveExeFile(exefile);
-        if(!arg0) throw new Error("Can't resolve objcopp8266 executable");
+        if(!arg0) throw new Error("Can't resolve objcopp8266 executable " + exefile);
         let bootfile = ts.BuildVars.ARD_BOOTFILE;
         super(ts, "esp8266/objcopy", {
             Role: ToolCli.Role.Extract,
@@ -62,4 +232,7 @@ class EspTool extends ToolCli
 }
 
 exports.AR = AR;
-exports.EspTool = EspTool;
+exports.Elf2Bin = Elf2Bin;
+exports.ElfSizes = ElfSizes;
+exports.SignBin = SignBin;
+exports.Deploy = Deploy;

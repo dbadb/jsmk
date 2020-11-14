@@ -10,9 +10,9 @@
         "url": "https://bitbucket.com/dbadb/jsmk"
     },
     "dependencies": {
-        "bluebird": "^3.5.1",
-        "glob": "~7.1.1",
-        "minimist": "~1.2.0",
-        "winston": "~2.3.0"
+        "bluebird": "^3.7.2",
+        "glob": "^7.1.6",
+        "minimist": "^1.2.5",
+        "winston": "~2.4.5"
     }
 }

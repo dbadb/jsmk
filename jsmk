@@ -6,7 +6,7 @@ case `uname` in
     *CYGWIN*) basedir=`cygpath -w "$basedir"`;;
 esac
 
-node --use-strict "$basedir/main.js" "$@"
+node --trace-warnings --use-strict "$basedir/main.js" "$@"
 ret=$?
 
 exit $ret
