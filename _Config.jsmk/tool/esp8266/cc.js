@@ -43,7 +43,9 @@ let GCC = require("../gcc.js").GCC;
 // c:/Users/dana/AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/cores/esp8266/abi.cpp 
 // -o C:/Users/dana/Documents/src/bitbucket.dbadb/iot/esp8266/.built/esp8266-generic-win32-win32-debug/libcore/abi.cpp.o
 
-
+/* NB: board-specific settings belong in the toolset, not here
+ *  (unless changes are keyed off the ARD_BOARD)
+ */
 function CommonInit(tool, ts)
 {
     let defs = 
@@ -73,6 +75,11 @@ function CommonInit(tool, ts)
         "generic": {
             ARDUINO_ESP8266_GENERIC: null,
             LED_BUILTIN: 2,
+            ARDUINO_BOARD: "ESP8266_GENERIC",
+        },
+        "robodyn": {
+            ARDUINO_ESP8266_GENERIC: null,
+            LED_BUILTIN: 14,
             ARDUINO_BOARD: "ESP8266_GENERIC",
         }
         // more board types here.

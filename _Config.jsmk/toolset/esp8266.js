@@ -1,5 +1,11 @@
 //
-// esp8266 toolset supports  mini d1,
+// esp8266 toolset supports mini d1, generic
+//
+// board-specific parameters:
+//     - ESP_FLASH
+//
+// https://www.espressif.com/sites/default/files/documentation/2a-esp8266-sdk_getting_started_guide_en.pdf
+//
 //
 /* global jsmk */
 //
@@ -7,9 +13,8 @@ var Foundation = require("./foundation.js").Foundation;
 
 class esp8266 extends Foundation
 {
-    constructor()
+    constructor(board="generic")
     {
-        let board = "generic";
         super(__filename, "esp8266", board);
 
         let ardroot = "c:/Users/dana/arduino-1.8.12";
@@ -33,12 +38,17 @@ class esp8266 extends Foundation
         let sign = jsmk.path.join(htools, "signing.py"); 
         let python3 = jsmk.path.join(pkgtools, "python3/3.7.2-post1/python");
         let map = {};
+        let variant = {
+            "generic": "generic",
+            "robodyn": "generic",
+            "d1_mini": "generic",
+        }[board];
         map.BuildVars =
         {
             ARD_VERS: 10812,
             ARD_SDK: jsmk.path.join(hardware, "tools/sdk"),
             ARD_CORE: jsmk.path.join(hardware, "cores/esp8266"),
-            ARD_VARIANT: jsmk.path.join(hardware, "variants/" + board),
+            ARD_VARIANT: jsmk.path.join(hardware, "variants/" + variant),
             ARD_CORELIBS: jsmk.path.join(hardware, "libraries"),
             ARD_APPLIBS: jsmk.path.join(ardroot, "libraries"),
             ARD_USERLIBS: userlibs,
@@ -50,7 +60,16 @@ class esp8266 extends Foundation
 
             ESP_SDK: "NONOSDK22x_190703", 
             ESP_BIN: tsbin,
-
+            ESP_FLASH_SIZE: {
+                "generic": "1M",
+                "d1_mini": "1M",
+                "robodyn": "16M",
+            }[board],
+            ESP_FLASH_LD: {
+                "generic": "eagle.flash.1m64.ld", // default in arduino ide
+                "d1_mini": "eagle.flash.1m64.ld", 
+                "robodyn": "eagle.flash.16m15m.ld",
+            }[board],
             OPTIMIZATION: "Size",
         };
 

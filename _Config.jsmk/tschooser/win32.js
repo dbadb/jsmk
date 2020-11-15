@@ -10,7 +10,9 @@ exports.GetToolsets = function()
 
     var result = [
         new teensy(),
-        new esp8266(),
+        new esp8266("robodyn"),
+        new esp8266("d1_mini"),
+        new esp8266("generic"),
         new vs17(vs17.Arch.x86_64),
     ];
     return result;

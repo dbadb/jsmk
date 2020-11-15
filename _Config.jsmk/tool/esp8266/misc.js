@@ -35,6 +35,7 @@ class Elf2Bin extends ToolCli
         if(!arg0) 
             throw new Error("Can't resolve python3 executable " + python);
         let bootfile = ts.BuildVars.ARD_BOOTFILE;
+        let flashsize = ts.BuildVars.ESP_FLASH_SIZE;
         super(ts, "esp8266/elf2bin", 
         {
             Role: ToolCli.Role.Extract,
@@ -58,7 +59,7 @@ class Elf2Bin extends ToolCli
         [
             ["--flash_mode", "dout"],
             ["--flash_freq", "40"],
-            ["--flash_size", "1M"]
+            ["--flash_size", flashsize] // like "1MB"
         ]);
     }
 }

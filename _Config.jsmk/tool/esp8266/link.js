@@ -62,6 +62,7 @@ class Link extends ToolCli
             }
         );
 
+        let flashld = ts.BuildVars.ESP_FLASH_LD;
         this.AddFlags(this.GetRole(), [
             "-fno-exceptions",
             "-Wl,-static",
@@ -70,7 +71,7 @@ class Link extends ToolCli
             ["-u", "app_entry"],
             ["-u", "_printf_float"],
             ["-u", "_scanf_float"],
-            "-Teagle.flash.1m64.ld", // 4m1m.ld", 4m is 3m spiffs, 4m1m is 1m spiffs
+            `-T${flashld}`,
             "-Wl,--gc-sections",
             "-Wl,-wrap,system_restart_local",
             "-Wl,-wrap,spi_flash_read",
