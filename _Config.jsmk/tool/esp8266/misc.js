@@ -140,6 +140,42 @@ class SignBin extends ToolCli
     }
 }
 
+class MkLittleFS extends ToolCli
+{
+    constructor(ts, exefile)
+    {        
+        let arg0 = jsmk.path.resolveExeFile(exefile);
+        if(!arg0) 
+            throw new Error("Can't resolve MkLittleFS executable " + exefile);
+        super(ts, "esp8266/mklittlefs", 
+        {
+            Role: ToolCli.Role.Compile,
+            ActionStage: "build",
+            Semantics: ToolCli.Semantics.OneToOne,
+            DstExt: "mklittlefs.bin",
+            Syntax:
+            {
+                Define: "-D${KEY}=${VAL}",
+                DefineNoVal: "-D${KEY}",
+                Searchpath: "-I${VAL}",
+                Flag: "${VAL}"
+            },
+            /* expect that this is a task-specific buildvar 
+             * must be multiple of blocksize (which defaults to 4096) */
+            /* these values obtained from:
+                https://github.com/earlephilhower/arduino-esp8266littlefs-plugin/blob/master/src/ESP8266LittleFS.java
+             */
+            Invocation: [arg0, 
+                    "-c", "${SRCFILE}",
+                    "-p", "${PAGE_SIZE}",
+                    "-b", "${BLOCK_SIZE}",
+                    "-s", "${SPIFFSIZE}", 
+                    "${DSTFILE}"
+                ],
+        });
+    }
+}
+
 // Deploy:
 // Wrapper for Arduino core / others that can call esptool.py possibly multiple times
 // Adds pyserial to sys.path automatically based on the path of the current file
@@ -173,6 +209,10 @@ class Deploy extends ToolCli
                 Searchpath: "-I${VAL}",
                 Flag: "${VAL}"
             },
+            BuildVars:
+            {
+                DEPLOY_OFFSET: "${CODE_DEPLOY_OFFSET}"
+            },
             LiveOutput: true,
             Invocation: [arg0, "-u", /* unbuffered */
                     scriptfile,
@@ -181,7 +221,8 @@ class Deploy extends ToolCli
                     "--baud", "115200",
                     "--before", "default_reset",
                     "--after", "hard_reset",
-                    "write_flash", "0x0",
+                    "write_flash", 
+                    "${DEPLOY_OFFSET}", // code: 0x, for FS
                     "${SRCFILE}"
                 ],
         });
@@ -234,6 +275,7 @@ class OldEspTool extends ToolCli
 
 exports.AR = AR;
 exports.Elf2Bin = Elf2Bin;
+exports.MkLittleFS = MkLittleFS;
 exports.ElfSizes = ElfSizes;
 exports.SignBin = SignBin;
 exports.Deploy = Deploy;

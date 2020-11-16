@@ -21,6 +21,7 @@ class esp8266 extends Foundation
         let userlibs = "c:/Users/dana/Documents/Arduino/libraries";
         let pkgdir = "c:/Users/dana/AppData/Local/Arduino15/packages/esp8266";
         let pkgtools = jsmk.path.join(pkgdir, "tools");
+        let mklittlefs = jsmk.path.join(pkgtools, "mklittlefs/2.5.0-4-fe5bb56/mklittlefs");
         let ts = jsmk.path.join(pkgtools, "xtensa-lx106-elf-gcc/2.5.0-4-b40a506");
         let tsbin = jsmk.path.join(ts, "bin");
         let CC = jsmk.path.join(tsbin, "xtensa-lx106-elf-gcc");
@@ -38,6 +39,17 @@ class esp8266 extends Foundation
         let sign = jsmk.path.join(htools, "signing.py"); 
         let python3 = jsmk.path.join(pkgtools, "python3/3.7.2-post1/python");
         let map = {};
+        // see boards.txt in 
+        // AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/2.7.4
+        //  generic.menu.eesz.4M3M.build.flash_size=4M
+        //  generic.menu.eesz.4M3M.build.flash_size_bytes=0x400000
+        //  generic.menu.eesz.4M3M.build.flash_ld=eagle.flash.4m3m.ld
+        //  generic.menu.eesz.4M3M.build.spiffs_pagesize=256
+        //  generic.menu.eesz.4M3M.upload.maximum_size=1044464
+        //  generic.menu.eesz.4M3M.build.rfcal_addr=0x3FC000
+        //  generic.menu.eesz.4M3M.build.spiffs_start=0x100000
+        //  generic.menu.eesz.4M3M.build.spiffs_end=0x3FA000
+        //  generic.menu.eesz.4M3M.build.spiffs_blocksize=8192
         let variant = {
             "generic": "generic",
             "robodyn": "generic",
@@ -60,21 +72,62 @@ class esp8266 extends Foundation
 
             ESP_SDK: "NONOSDK22x_190703", 
             ESP_BIN: tsbin,
-            ESP_FLASH_SIZE: {
-                "generic": "1M",
-                "d1_mini": "1M",
-                "robodyn": "16M",
-            }[board],
-            ESP_FLASH_LD: {
-                "generic": "eagle.flash.1m64.ld", // default in arduino ide
-                "d1_mini": "eagle.flash.1m64.ld", 
-                "robodyn": "eagle.flash.16m15m.ld",
-            }[board],
             OPTIMIZATION: "Size",
+            CODE_DEPLOY_OFFSET: "0x0",
+            // see boards.txt in 
+            // AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/2.7.4
+            //  generic.menu.eesz.4M3M.build.flash_size=4M
+            //  generic.menu.eesz.4M3M.build.flash_size_bytes=0x400000
+            //  generic.menu.eesz.4M3M.build.flash_ld=eagle.flash.4m3m.ld
+            //  generic.menu.eesz.4M3M.build.spiffs_pagesize=256
+            //  generic.menu.eesz.4M3M.upload.maximum_size=1044464
+            //  generic.menu.eesz.4M3M.build.rfcal_addr=0x3FC000
+            //  generic.menu.eesz.4M3M.build.spiffs_start=0x100000
+            //  generic.menu.eesz.4M3M.build.spiffs_end=0x3FA000
+            //  generic.menu.eesz.4M3M.build.spiffs_blocksize=8192
         };
-
+        let boardvars;
+        switch(board)
+        {
+        case "generic": // untested (fill from boards.txt)
+            boardvars =
+            {
+                PAGE_SIZE: 256,
+                BLOCK_SIZE: 8192,
+                SPIFFSIZE: (0x3FA000 - 0x100000), // 3048 * 1024
+                ESP_FLASH_SIZE: "1M",
+                ESP_FLASH_LD: "eagle.flash.4m3m.ld", // 3M partition
+                FS_DEPLOY_OFFSET: "0x100000",
+            };
+            break;
+        case "d1_mini": // untested (fill from boards.txt)
+            boardvars =
+            {
+                PAGE_SIZE: 256,
+                BLOCK_SIZE: 8192,
+                SPIFFSIZE: (0x3FA000 - 0x100000), // 3048 * 1024
+                ESP_FLASH_SIZE: "4M",
+                ESP_FLASH_LD: "eagle.flash.4m3m.ld", // 3M partition
+                FS_DEPLOY_OFFSET: "0x100000",
+            };
+            break;
+        case "robodyn":
+            boardvars =
+            {
+                PAGE_SIZE: 256,
+                BLOCK_SIZE: 8192,
+                SPIFFSIZE: (0x3FA000 - 0x100000), // 3048 * 1024
+                ESP_FLASH_SIZE: "4M",
+                ESP_FLASH_LD: "eagle.flash.4m3m.ld", // 3M partition
+                FS_DEPLOY_OFFSET: "0x100000",
+            };
+            break;
+        default:
+            boardvars = {};
+            break;
+        }
+        Object.assign(map.BuildVars, boardvars);
         this.MergeSettings(map);
-
         let cc = jsmk.LoadConfig("tool/esp8266/cc.js");
         let link = jsmk.LoadConfig("tool/esp8266/link.js");
         let misc = jsmk.LoadConfig("tool/esp8266/misc.js");
@@ -89,6 +142,7 @@ class esp8266 extends Foundation
                 "->ld": new cc.PRELOAD(this, CC, ldfile),
                 "cpp.o->elf": new link.Link(this, LD),
                 "elf->bin": new misc.Elf2Bin(this, python3, elf2bin, "elf->bin"),
+                "dir->littlefs": new misc.MkLittleFS(this, mklittlefs),
                 "sizes": new misc.ElfSizes(this, python3, sizes, "sizes"),
                 "sign": new misc.SignBin(this, python3, sign, "sign"),
                 "deploy": new misc.Deploy(this, python3, flash, "upload"),
