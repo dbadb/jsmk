@@ -1,12 +1,4 @@
-//
-// esp8266 toolset supports mini d1, generic
-//
-// board-specific parameters:
-//     - ESP_FLASH
-//
-// https://www.espressif.com/sites/default/files/documentation/2a-esp8266-sdk_getting_started_guide_en.pdf
-//
-//
+// esp8266 toolset supports mini d1, generic, robodyn
 /* global jsmk */
 //
 var Foundation = require("./foundation.js").Foundation;
@@ -50,6 +42,7 @@ class esp8266 extends Foundation
         //  generic.menu.eesz.4M3M.build.spiffs_start=0x100000
         //  generic.menu.eesz.4M3M.build.spiffs_end=0x3FA000
         //  generic.menu.eesz.4M3M.build.spiffs_blocksize=8192
+        // https://www.espressif.com/sites/default/files/documentation/2a-esp8266-sdk_getting_started_guide_en.pdf
         let variant = {
             "generic": "generic",
             "robodyn": "generic",
