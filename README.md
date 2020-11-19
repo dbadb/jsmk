@@ -2,8 +2,9 @@
 
 jsmk is yet-another build system. This one is based on nodejs and can be used
 to build / compile complex projects in today's common languages and deployment
-modalities.  jsmk supports parallel builds with a simple scheme for
-characterizing parallelism.
+modalities.  jsmk supports multi-threaded parallel builds with a simple scheme 
+for characterizing parallelism - ie: you can express sequential and parallel
+tasks.
 
 ### This repo holds the jsmk build system ###
 
@@ -15,6 +16,7 @@ characterizing parallelism.
 * Clone this repo
 * Make sure nodejs is installed and in your path
 * We are currently using extra modules - installed under node_modules.
+  So issue: `npm install` to get
     * minimist (arg parsing)
     * winston (logging)
 * Make sure jsmk can find configuration settings
