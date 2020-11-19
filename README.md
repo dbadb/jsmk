@@ -14,10 +14,17 @@ tasks.
 ### How do I get set up? ###
 
 * Clone this repo
-* Make sure nodejs is installed and in your path
+* Make sure `node` and the launch-script `jsmk` are installed and in your path
 * We are currently using extra modules - installed under node_modules.
   So issue: `npm install` to get
     * minimist (arg parsing)
     * winston (logging)
 * Make sure jsmk can find configuration settings
     * you'll probably want to augment the ones present in _Config.jsmk
+    You can do this in your own work area by setting JSMK_CONFIG_DIR
+    in your environment.
+
+### What's next? ###
+
+* Read more _unwritten_ documentation
+
