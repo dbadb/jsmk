@@ -5,9 +5,9 @@ Linking everything together...
 arm-none-eabi-gcc -Os \
     --specs=nano.specs \
     -Wl,--gc-sections,--relax,--defsym=__rtc_localtime=1591875999 \
-    "-TC:\\Users\\dana\\Documents\\arduino-1.8.12\\hardware\\teensy\\avr\\cores\\teensy3/mkl26z64.ld" \
+    "-T...\arduino-1.8.12\hardware\\teensy\\avr\\cores\\teensy3/mkl26z64.ld" \
     -lstdc++ -mthumb -mcpu=cortex-m0plus -fsingle-precision-constant \
-    -o "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_479489/controlsurface.ino.elf" \
+    -o "...\AppData\\Local\\Temp\\arduino_build_479489/controlsurface.ino.elf" \
     ...OBJFILES...
     SPI.cpp.o SoftwareSerial.cpp.o Adafruit_SSD1306.cpp.o Wire.cpp.o \
     WireIMXRT.cpp.o WireKinetis.cpp.o twi.c.o glcdfont.c.o \
@@ -30,14 +30,12 @@ teensy_post_compile -file=controlsurface.ino -path=(tobuiltarea) \
 
 class Teensy extends Foundation
 {
-     constructor()
+     constructor(ardroot="${HOME}/Documents/arduino-1.8.12")
      {
         super(__filename, "teensy", Foundation.Arch.unspecified);
-
-        let ardroot = "c:/Users/dana/Documents/arduino-1.8.12";
+        ardroot = jsmk.Interpolate(ardroot);
         let ardlibs = jsmk.path.join(ardroot, "../Arduino/libraries");
         let t3src = jsmk.path.join(ardroot, "hardware/teensy/avr/cores/teensy3");
-        let dbsrc = "/mnt/d/dana/src/teensy/nih/libcore/teensy-cores/teensy3";
         let teensycore = jsmk.path.join(ardroot, "hardware/teensy/avr/cores/teensy3");
         let teensytools = jsmk.path.join(ardroot, "hardware/tools");
         let teensybin = jsmk.path.join(teensytools, "arm/bin");

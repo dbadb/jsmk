@@ -2,13 +2,12 @@
 var Foundation = require("./foundation.js").Foundation;
 class Arduino extends Foundation
 {
-     constructor(board="uno")
+     constructor(board="uno", ardroot="${HOME}/Documents/arduino-1.8.12")
      {
         super(__filename, "arduino", board)
 
-        let ardroot = "c:/Users/dana/Documents/arduino-1.8.12";
-        let userlibs = "c:/Users/dana/Documents/Arduino/libraries";
-        let pkgdir = "c:/Users/dana/AppData/Local/Arduino15/packages/arduino"; // esp, arduino, teensy
+        let userlibs = jsmk.Interpolate("${HOME}/Arduino/libraries");
+        let pkgdir = jsmk.Interpolate("${HOME}/AppData/Local/Arduino15/packages/arduino");
         let pkgtools = jsmk.path.join(pkgdir, "tools");
         let ts = jsmk.path.join(pkgtools, "avr-gcc/7.3.0-atmel3.6.1-arduino7");
         let tsbin = jsmk.path.join(ts, "bin");
@@ -29,7 +28,7 @@ class Arduino extends Foundation
         // multiple tools.
         map.BuildVars =
         {
-            ARDROOT: ardroot,
+            ARDROOT: jsmk.Interpolate(ardroot),
             ARD_VERS: 10812,
             ARD_CORE: jsmk.path.join(hardware, "cores/arduino"),
             ARD_VARIANT: jsmk.path.join(hardware, "variants", variant),

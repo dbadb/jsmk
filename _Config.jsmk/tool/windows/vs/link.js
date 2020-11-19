@@ -67,16 +67,16 @@ exports.Link = class Link extends ToolCli
 
         if(dll)
         {
-            // /OUT:"E:\dana\src\dbadbapp\nih\chuck\chugins\Debug\ABSaturator.chug" 
+            // /OUT:"${HOME}\src\dbadbapp\nih\chuck\chugins\Debug\ABSaturator.chug" 
             // /MANIFEST /NXCOMPAT 
-            // /PDB:"E:\dana\src\dbadbapp\nih\chuck\chugins\Debug\ABSaturator.pdb" 
+            // /PDB:"${HOME}\src\dbadbapp\nih\chuck\chugins\Debug\ABSaturator.pdb" 
             // /DYNAMICBASE 
             //  "kernel32.lib" "user32.lib" "gdi32.lib" "winspool.lib" 
             //  "comdlg32.lib" "advapi32.lib" "shell32.lib" "ole32.lib" 
             //  "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib" 
-            // /IMPLIB:"E:\dana\src\dbadbapp\nih\chuck\chugins\Debug\ABSaturator.lib" 
+            // /IMPLIB:"${HOME}\src\dbadbapp\nih\chuck\chugins\Debug\ABSaturator.lib" 
             // /DEBUG /DLL /MACHINE:X86 /INCREMENTAL 
-            // /PGD:"E:\dana\src\dbadbapp\nih\chuck\chugins\Debug\ABSaturator.pgd" 
+            // /PGD:"${HOME}\src\dbadbapp\nih\chuck\chugins\Debug\ABSaturator.pgd" 
             // /SUBSYSTEM:WINDOWS /MANIFESTUAC:"level='asInvoker' uiAccess='false'" 
             // /ManifestFile:"Debug\ABSaturator.chug.intermediate.manifest" 
             // /ERRORREPORT:PROMPT /NOLOGO /TLBID:1 
@@ -167,12 +167,12 @@ exports.Link = class Link extends ToolCli
         "comdlg32.lib" "advapi32.lib" "shell32.lib" 
         "ole32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" 
         "odbccp32.lib" 
-        "E:\dana\src\dbadbapp\nih\bgfx\bgfx\.build\win64_vs2017\bin\example-commonDebug.lib" 
-        "E:\dana\src\dbadbapp\nih\bgfx\bgfx\.build\win64_vs2017\bin\example-glueDebug.lib" 
-        "E:\dana\src\dbadbapp\nih\bgfx\bgfx\.build\win64_vs2017\bin\bgfxDebug.lib" 
-        "E:\dana\src\dbadbapp\nih\bgfx\bgfx\.build\win64_vs2017\bin\bimg_decodeDebug.lib" 
-        "E:\dana\src\dbadbapp\nih\bgfx\bgfx\.build\win64_vs2017\bin\bimgDebug.lib" 
-        "E:\dana\src\dbadbapp\nih\bgfx\bgfx\.build\win64_vs2017\bin\bxDebug.lib" 
+        "${HOME}\src\dbadbapp\nih\bgfx\bgfx\.build\win64_vs2017\bin\example-commonDebug.lib" 
+        "${HOME}\src\dbadbapp\nih\bgfx\bgfx\.build\win64_vs2017\bin\example-glueDebug.lib" 
+        "${HOME}\src\dbadbapp\nih\bgfx\bgfx\.build\win64_vs2017\bin\bgfxDebug.lib" 
+        "${HOME}\src\dbadbapp\nih\bgfx\bgfx\.build\win64_vs2017\bin\bimg_decodeDebug.lib" 
+        "${HOME}\src\dbadbapp\nih\bgfx\bgfx\.build\win64_vs2017\bin\bimgDebug.lib" 
+        "${HOME}\src\dbadbapp\nih\bgfx\bgfx\.build\win64_vs2017\bin\bxDebug.lib" 
         /DEBUG 
         /MACHINE:X64 
         /ENTRY:"mainCRTStartup" 
@@ -180,7 +180,7 @@ exports.Link = class Link extends ToolCli
         /PGD:"..\..\win64_vs2017\bin\examplesDebug.pgd" 
         /SUBSYSTEM:WINDOWS 
         /MANIFESTUAC:"level='asInvoker' uiAccess='false'" 
-        /ManifestFile:"e:\dana\src\bgfx\nih\bgfx\bgfx\.build\projects\vs2017\..\..\win64_vs2017\obj\x64\Debug\examples\examplesDebug.exe.intermediate.manifest" 
+        /ManifestFile:"${HOME}\src\bgfx\nih\bgfx\bgfx\.build\projects\vs2017\..\..\win64_vs2017\obj\x64\Debug\examples\examplesDebug.exe.intermediate.manifest" 
         /ERRORREPORT:PROMPT 
         /NOLOGO 
         /LIBPATH:"..\..\..\3rdparty\lib\win64_vs2017" 

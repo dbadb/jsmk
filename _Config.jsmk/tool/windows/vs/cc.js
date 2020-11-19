@@ -251,9 +251,9 @@ exports.CPP = cl;
     /Zc:inline /Zc:forScope /Zc:wchar_t 
     /Zi 
     /nologo 
-    /Fa"e:\dana\src\bgfx\nih\bgfx\bgfx\.build\projects\vs2017\..\..\win64_vs2017\obj\x64\Release\example-glue\" 
-    /Fo"e:\dana\src\bgfx\nih\bgfx\bgfx\.build\projects\vs2017\..\..\win64_vs2017\obj\x64\Release\example-glue\" 
-    /Fp"e:\dana\src\bgfx\nih\bgfx\bgfx\.build\projects\vs2017\..\..\win64_vs2017\obj\x64\Release\example-glue\example-glueRelease.pch" 
+    /Fa"${HOME}\src\bgfx\nih\bgfx\bgfx\.build\projects\vs2017\..\..\win64_vs2017\obj\x64\Release\example-glue\" 
+    /Fo"${HOME}\src\bgfx\nih\bgfx\bgfx\.build\projects\vs2017\..\..\win64_vs2017\obj\x64\Release\example-glue\" 
+    /Fp"${HOME}\src\bgfx\nih\bgfx\bgfx\.build\projects\vs2017\..\..\win64_vs2017\obj\x64\Release\example-glue\example-glueRelease.pch" 
     /diagnostics:classic
 /*
 
@@ -436,10 +436,10 @@ https://docs.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-alp
 
 
  C:/Progra~2/Microsoft\ Visual\ Studio 14.0/VC/bin/amd64/cl.exe civetweb/civetweb.c  \
-    /FoD:/dana/src/c++/github.com/tungsten/.built/vs14-x86_64-win32--debug/libthirdparty/civetweb.obj \
-    /ID:/dana/src/c++/github.com/tungsten/src/core /ID:/dana/src/c++/github.com/tungsten/src/thirdparty \
+    /Fo${HOME}/src/c++/github.com/tungsten/.built/vs14-x86_64-win32--debug/libthirdparty/civetweb.obj \
+    /I${HOME}/src/c++/github.com/tungsten/src/core /I${HOME}/src/c++/github.com/tungsten/src/thirdparty \
     /c /EHsc /fp:precise /Gd /Gm- /GR /W3 /WX- /TP /Zc:inline \
-    /FdD:/dana/src/c++/github.com/tungsten/.built/vs14-x86_64-win32--debug/libthirdparty/civetweb.obj.pdb \
+    /Fd${HOME}/src/c++/github.com/tungsten/.built/vs14-x86_64-win32--debug/libthirdparty/civetweb.obj.pdb \
     /GS /MDd /Ob0 /Od /RTC1 /Zi /DEMBREE_STATIC_LIB=1 /DLODEPNG_NO_COMPILE_DISK=1 \
     /DRAPIDJSON_HAS_STDSTRING=1 /DSTBI_NO_STDIO=1 /DUSE_IPV6=1 /D_MBCS \
     /DINSTALL_PREFIX="dbadb_" /D__SSE__ /DCONSTEXPR=const /DNOMINMAX /D_DEBUG /DWIN32 \

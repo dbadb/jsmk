@@ -4,13 +4,13 @@
 let GCC = require("../gcc.js").GCC;
 
 // arduino compilation of core:abo.cpp
-// "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\2.5.0-4-b40a506/bin/xtensa-lx106-elf-g++" 
-//  "-IC:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/tools/sdk/include" 
-//  "-IC:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/tools/sdk/lwip2/include" 
-//  "-IC:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/tools/sdk/libc/xtensa-lx106-elf/include" 
-//  "-IC:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_278104/core" 
-//  "-IC:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4\\cores\\esp8266" 
-//  "-IC:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4\\variants\\generic" 
+// "${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\2.5.0-4-b40a506/bin/xtensa-lx106-elf-g++" 
+//  "-I${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/tools/sdk/include" 
+//  "-I${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/tools/sdk/lwip2/include" 
+//  "-I${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/tools/sdk/libc/xtensa-lx106-elf/include" 
+//  "-I${HOME}\\AppData\\Local\\Temp\\arduino_build_278104/core" 
+//  "-I${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4\\cores\\esp8266" 
+//  "-I${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4\\variants\\generic" 
 //  -D__ets__ -DICACHE_FLASH -U__STRICT_ANSI__ 
 //  -c -w -Os -g -mlongcalls -mtext-section-literals 
 //  -fno-rtti -falign-functions=4 -std=gnu++11 
@@ -20,17 +20,17 @@ let GCC = require("../gcc.js").GCC;
 //  -DARDUINO_ESP8266_GENERIC -DARDUINO_ARCH_ESP8266 
 //  "-DARDUINO_BOARD=\"ESP8266_GENERIC\"" -DLED_BUILTIN=2 
 //  -DFLASHMODE_DOUT -DESP8266 
-// "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4\\cores\\esp8266\\abi.cpp" 
-// -o "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_278104\\core\\abi.cpp.o
+// "${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4\\cores\\esp8266\\abi.cpp" 
+// -o "${HOME}\\AppData\\Local\\Temp\\arduino_build_278104\\core\\abi.cpp.o
 //
 // vs
-// c:/Users/dana/AppData/Local/Arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/2.5.0-4-b40a506/bin/xtensa-lx106-elf-g++.exe 
-// -IC:/Users/dana/Documents/src/bitbucket.dbadb/iot/esp8266/libs 
-// -Ic:/Users/dana/AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/tools/sdk/include 
-// -Ic:/Users/dana/AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/tools/sdk/lwip2/include 
-// -Ic:/Users/dana/AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/tools/sdk/libc/xtensa-lx106-elf/include 
-// -Ic:/Users/dana/AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/cores/esp8266 
-// -Ic:/Users/dana/AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/variants/generic 
+// ${HOME}/AppData/Local/Arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/2.5.0-4-b40a506/bin/xtensa-lx106-elf-g++.exe 
+// -I${HOME}/Documents/src/bitbucket.dbadb/iot/esp8266/libs 
+// -I${HOME}/AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/tools/sdk/include 
+// -I${HOME}/AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/tools/sdk/lwip2/include 
+// -I${HOME}/AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/tools/sdk/libc/xtensa-lx106-elf/include 
+// -I${HOME}/AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/cores/esp8266 
+// -I${HOME}/AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/variants/generic 
 // -D__ets__ -DICACHE_FLASH -U__STRICT_ANSI__ 
 // -c -Os -Wall -mlongcalls -mtext-section-literals 
 // -MMD  -fno-rtti -falign-functions=4 -std=gnu++11 
@@ -40,8 +40,8 @@ let GCC = require("../gcc.js").GCC;
 // -DARDUINO=10812 -DARDUINO_ARCH_ESP8266 -DFLASHMODE_DOUT -DESP8266 
 // -DDEBUG_ESP_PORT=Serial -DNONOSDK22x_190703=1 -DARDUINO_ESP8266_GENERIC 
 // -DLED_BUILTIN=2 -DARDUINO_BOARD=ESP8266_GENERIC 
-// c:/Users/dana/AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/cores/esp8266/abi.cpp 
-// -o C:/Users/dana/Documents/src/bitbucket.dbadb/iot/esp8266/.built/esp8266-generic-win32-win32-debug/libcore/abi.cpp.o
+// ${HOME}/AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/cores/esp8266/abi.cpp 
+// -o ${HOME}/Documents/src/bitbucket.dbadb/iot/esp8266/.built/esp8266-generic-win32-win32-debug/libcore/abi.cpp.o
 
 /* NB: board-specific settings belong in the toolset, not here
  *  (unless changes are keyed off the ARD_BOARD)
@@ -98,7 +98,8 @@ function CommonInit(tool, ts)
         "-fno-exceptions", 
     ]);
 
-    tool.AddSearchpaths( tool.GetRole(), [
+    tool.AddSearchpaths( tool.GetRole(), 
+    [
         jsmk.path.join(ts.BuildVars.ARD_SDK, "include"),
         jsmk.path.join(ts.BuildVars.ARD_SDK, "lwip2/include"),
         jsmk.path.join(ts.BuildVars.ARD_SDK, "libc/xtensa-lx106-elf/include"),
@@ -114,8 +115,14 @@ class CC extends GCC
         // CC and CPP share a lot of flags and includes
         let arg0 = jsmk.path.resolveExeFile(invoc);
         if(!arg0) throw new Error("Can't resolve esp8266 executable " + invoc);
-        let plist = " ${FLAGS} ${DEFINES} ${SEARCHPATHS} ${SRCFILE} -o ${DSTFILE}";
-        super(ts, "esp8266/cc", arg0, plist);
+        super(ts, "esp8266/cc", arg0,
+        [
+            "${FLAGS}",
+            "${DEFINES}", 
+            "${SEARCHPATHS}", 
+            "${SRCFILE}",
+            "-o", "${DSTFILE}"
+        ]);
         CommonInit(this, ts);
         /* here are cc-specific */
         this.AddFlags(this.GetRole(), [
@@ -140,8 +147,13 @@ class CPP extends GCC
     {
         let arg0 = jsmk.path.resolveExeFile(invoc);
         if(!arg0) throw new Error("Can't resolve esp8266 executable " + invoc);
-        let plist = " ${FLAGS} ${DEFINES} ${SEARCHPATHS} ${SRCFILE} -o ${DSTFILE}";
-        super(ts, "esp8266/cpp", arg0, plist);
+        super(ts, "esp8266/cpp", arg0, [
+            "${FLAGS}",
+            "${DEFINES}",
+            "${SEARCHPATHS}",
+            "${SRCFILE}",
+            "-o", "${DSTFILE}"
+        ]);
         CommonInit(this, ts);
         this.AddFlags(this.GetRole(), [
             "-fno-rtti", 
@@ -156,8 +168,14 @@ class SC extends GCC /* uses cc for assembing but using -x below */
     {
         let arg0 = jsmk.path.resolveExeFile(invoc);
         if(!arg0) throw new Error("Can't resolve esp8266 executable " + invoc);
-        let plist = " ${FLAGS} ${DEFINES} ${SEARCHPATHS} -o ${DSTFILE} ${SRCFILE}";
-        super(ts, "esp8266/cpp", arg0, plist);
+        super(ts, "esp8266/cpp", arg0, 
+        [
+            "${FLAGS}",
+            "${DEFINES}",
+            "${SEARCHPATHS}",
+            "-o", "${DSTFILE}",
+            "${SRCFILE}"
+        ]);
         CommonInit(this, ts);
         this.AddFlags(this.GetRole(), [
             ["-x", "assembler-with-cpp"],
@@ -172,9 +190,15 @@ class PRELOAD extends GCC // ->ld (generates a .ld script)
         let arg0 = jsmk.path.resolveExeFile(invoc);
         if(!arg0) 
             throw new Error("Can't resolve esp8266 executable " + invoc);
-        let plist = " ${FLAGS} ${DEFINES} ${SEARCHPATHS} ${SRCFILE} "+
-                    "-o ${BUILTDIR}/local.eagle.app.v6.common.ld";
-        super(ts, "esp8266/mkld", arg0, plist);
+        let ldoutput = "local.eagle.app.v6.common.ld";
+        super(ts, "esp8266/mkld", arg0,
+                [
+                "${FLAGS}",
+                "${DEFINES}",
+                "${SEARCHPATHS}",
+                "${SRCFILE}",
+                "-o", "${BUILTDIR}/" + ldoutput
+                ]);
         this.AddFlags(this.GetRole(), 
         [
             "-CC",
@@ -183,12 +207,18 @@ class PRELOAD extends GCC // ->ld (generates a .ld script)
             "-DVTABLES_IN_FLASH",
         ]);
         this.ldinput = ldinput;
+        this.ldoutput = ldoutput;
     }
 
     ConfigureTaskSettings(task)
     {
         super.ConfigureTaskSettings(task);
         task.AddInputs([this.ldinput]);
+    }
+
+    buildDstFileName(srcfile, dstDir)
+    {
+        return jsmk.path.join(dstDir, this.ldoutput);
     }
 }
 

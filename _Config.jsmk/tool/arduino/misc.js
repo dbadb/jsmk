@@ -27,12 +27,12 @@ class AR extends ToolCli
 //          ELF. 
 //
 // Arduino15\\packages\\esp8266\\tools\\python3\\3.7.2-post1/python3" 
-// "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/tools/elf2bin.py" 
-// --eboot "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/bootloaders/eboot/eboot.elf" 
-// --app "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.elf" 
+// "${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/tools/elf2bin.py" 
+// --eboot "${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/bootloaders/eboot/eboot.elf" 
+// --app "${HOME}\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.elf" 
 // --flash_mode dout --flash_freq 40 --flash_size 1M 
-// --path "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\2.5.0-4-b40a506/bin" 
-// --out "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.bin"
+// --path "${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\2.5.0-4-b40a506/bin" 
+// --out "${HOME}\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.bin"
 class Elf2Bin extends ToolCli
 {
     constructor(ts, python, scriptfile, rule)
@@ -120,7 +120,6 @@ class ObjCopy extends ToolCli
     }
 }
 
-
 class ElfSizes extends ToolCli
 {
     constructor(ts, exefile, rule)
@@ -131,7 +130,7 @@ class ElfSizes extends ToolCli
         super(ts, "arduino/sizes", 
         {
             Role: ToolCli.Role.Report,
-            ActionStage: "build",
+            ActionStage: "test",
             Semantics: ToolCli.Semantics.OneToNone,
             Syntax:
             {
@@ -150,10 +149,10 @@ class ElfSizes extends ToolCli
 // Deploy:
 // Wrapper for Arduino core / others that can call avrdude
 //
-// C:\Users\dana\AppData\Local\Arduino15\packages\arduino\tools\avrdude\6.3.0-arduino17/bin/avrdude 
-//    -CC:\Users\dana\AppData\Local\Arduino15\packages\arduino\tools\avrdude\6.3.0-arduino17/etc/avrdude.conf 
+// ${HOME}\AppData\Local\Arduino15\packages\arduino\tools\avrdude\6.3.0-arduino17/bin/avrdude 
+//    -C${HOME}\AppData\Local\Arduino15\packages\arduino\tools\avrdude\6.3.0-arduino17/etc/avrdude.conf 
 //    -v -patmega328p -carduino -PCOM3 -b115200 
-//    -D -Uflash:w:C:\Users\dana\AppData\Local\Temp\arduino_build_32073/BlinkUno.ino.hex:i
+//    -D -Uflash:w:${HOME}\AppData\Local\Temp\arduino_build_32073/BlinkUno.ino.hex:i
 //
 class Deploy extends ToolCli
 {

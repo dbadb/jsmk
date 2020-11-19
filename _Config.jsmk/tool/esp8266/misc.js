@@ -21,12 +21,12 @@ class AR extends ToolCli
 //          ELF. Replaces esptool-ck.exe and emulates its behavior.
 //
 // Arduino15\\packages\\esp8266\\tools\\python3\\3.7.2-post1/python3" 
-// "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/tools/elf2bin.py" 
-// --eboot "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/bootloaders/eboot/eboot.elf" 
-// --app "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.elf" 
+// "${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/tools/elf2bin.py" 
+// --eboot "${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/bootloaders/eboot/eboot.elf" 
+// --app "${HOME}\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.elf" 
 // --flash_mode dout --flash_freq 40 --flash_size 1M 
-// --path "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\2.5.0-4-b40a506/bin" 
-// --out "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.bin"
+// --path "${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\2.5.0-4-b40a506/bin" 
+// --out "${HOME}\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.bin"
 class Elf2Bin extends ToolCli
 {
     constructor(ts, python, scriptfile, rule)
@@ -65,14 +65,14 @@ class Elf2Bin extends ToolCli
 }
 
 
-// "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\python3\\3.7.2-post1/python3" 
-// "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/tools/sizes.py" 
-//  --elf "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.elf" 
-//  --path "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\2.5.0-4-b40a506/bin"
+// "${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\python3\\3.7.2-post1/python3" 
+// "${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/tools/sizes.py" 
+//  --elf "${HOME}\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.elf" 
+//  --path "${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\2.5.0-4-b40a506/bin"
 //
 // NB: there's another size report that may be of interest
-//  "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\2.5.0-4-b40a506/bin/xtensa-lx106-elf-size" 
-//      -A "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.elf"
+//  "${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\2.5.0-4-b40a506/bin/xtensa-lx106-elf-size" 
+//      -A "${HOME}\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.elf"
 // reports:
 //    Sketch uses 267196 bytes (27%) of program storage space. Maximum is 958448 bytes.
 //    Global variables use 27036 bytes (33%) of dynamic memory, leaving 54884 bytes for local variables. Maximum is 81920 bytes.
@@ -87,7 +87,7 @@ class ElfSizes extends ToolCli
         super(ts, "esp8266/sizes", 
         {
             Role: ToolCli.Role.Report,
-            ActionStage: "build",
+            ActionStage: "test",
             Semantics: ToolCli.Semantics.OneToNone,
             Syntax:
             {
@@ -105,13 +105,13 @@ class ElfSizes extends ToolCli
     }
 }
 
-// "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\python3\\3.7.2-post1/python3" 
-// "C:\\Users\\dana\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/tools/signing.py" 
+// "${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\python3\\3.7.2-post1/python3" 
+// "${HOME}\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4/tools/signing.py" 
 // --mode sign 
-// --privatekey "C:\\Users\\dana\\Documents\\Arduino\\sketches\\WIFIUnoTest/private.key" 
-// --bin "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.bin" 
-// --out "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.bin.signed" 
-// --legacy "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.bin.legacy_sig"
+// --privatekey "${HOME}\\Documents\\Arduino\\sketches\\WIFIUnoTest/private.key" 
+// --bin "${HOME}\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.bin" 
+// --out "${HOME}\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.bin.signed" 
+// --legacy "${HOME}\\AppData\\Local\\Temp\\arduino_build_278104/WIFIUnoTest.ino.bin.legacy_sig"
 class SignBin extends ToolCli
 {
     constructor(ts, python, scriptfile, rule)
@@ -181,14 +181,14 @@ class MkLittleFS extends ToolCli
 // Adds pyserial to sys.path automatically based on the path of the current file
 // First parameter is pyserial path, second is esptool path, then a series of command arguments
 // i.e. python3 upload.py write_flash file 0x0
-// C:\Users\dana\AppData\Local\Arduino15\packages\esp8266\tools\python3\3.7.2-post1/python3 
-// C:\Users\dana\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\2.7.4/tools/upload.py 
+// ${HOME}\AppData\Local\Arduino15\packages\esp8266\tools\python3\3.7.2-post1/python3 
+// ${HOME}\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\2.7.4/tools/upload.py 
 //  --chip esp8266
 //  --port COM3 
 //  --baud 115200 
 //  --before default_reset 
 //  --after hard_reset write_flash 0x0 
-//   C:\Users\dana\AppData\Local\Temp\arduino_build_278104/WIFIUnoTest.ino.bin 
+//   ${HOME}\AppData\Local\Temp\arduino_build_278104/WIFIUnoTest.ino.bin 
 class Deploy extends ToolCli
 {
     constructor(ts, python, scriptfile, rule)
@@ -225,50 +225,6 @@ class Deploy extends ToolCli
                     "${DEPLOY_OFFSET}", // code: 0x, for FS
                     "${SRCFILE}"
                 ],
-        });
-    }
-}
-
-class OldEspTool extends ToolCli
-{
-    // NB: EspTool has unusual order-dependent argument parsing conventions
-    //  this tool has two uses:
-    //   1. convert an elf file to a downloadable binary.
-    //   2. flash the binary to the esp
-
-    // 1. recipe.objcopy.hex.pattern
-    //  "{runtime.tools.esptool.path}/{compiler.esptool.cmd}" /
-    //      -eo "{runtime.platform.path}/bootloaders/eboot/eboot.elf" \
-    //      -bo "{build.path}/{build.project_name}.bin" \
-    //      -bm {build.flash_mode} -bf {build.flash_freq} -bz {build.flash_size} \
-    //      -bs .text -bp 4096 -ec -eo "{build.path}/{build.project_name}.elf" \
-    //      -bs .irom0.text -bs .text -bs .data -bs .rodata -bc -ec
-    // 2. tools.esptool.upload.pattern
-    //  "{path}/{cmd}" {upload.verbose} \
-    //      -cd {upload.resetmethod} -cb {upload.speed} -cp "{serial.port}" \
-    //      -ca 0x00000 -cf "{build.path}/{build.project_name}.bin"
-    //  eg: esptool -vv -cd nodemcu -cb 921600 -cp COM9 -ca 0x00000 \
-    //          -cf file.elf.bin
-
-    constructor(ts, exefile, rule)
-    {
-        let arg0 = jsmk.path.resolveExeFile(exefile);
-        if(!arg0) throw new Error("Can't resolve objcopp8266 executable " + exefile);
-        let bootfile = ts.BuildVars.ARD_BOOTFILE;
-        super(ts, "esp8266/objcopy", {
-            Role: ToolCli.Role.Extract,
-            ActionStage: rule === "elf->bin" ? "build" : "test",
-            Semantics: ToolCli.Semantics.OneToOne,
-            DstExt: rule === "elf->bin" ? "bin" : "",
-            Invocation: rule === "elf->bin" ?
-                [arg0, `-eo ${bootfile} ` +
-                        "-bo ${DSTFILE} "+
-                        "-bm dio -bf 40 -bz 4M "+
-                        "-bs .text -bp 4096 -ec -eo ${SRCFILE} "+
-                        "-bs .irom0.text -bs .text -bs .data -bs .rodata -bc -ec"] :
-                [arg0, "-vv -cd nodemcu -cb 921600 " +
-                        `-cp ${ts.BuildVars.ARD_PORT} ` +
-                        "-ca 0x00000 -cf ${SRCFILE}"]
         });
     }
 }

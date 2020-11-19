@@ -3,22 +3,25 @@ let ToolCli = jsmk.Require("tool_cli.js").Tool;
 
 class GCC extends ToolCli
 {
-    constructor(ts, nm, arg0, plistOverride)
+    constructor(ts, nm, arg0, arglist)
     {
         if(!nm)
             nm = "compiler/gcc";
         if(!arg0)
             arg0 = "gcc";
-        let plistStr = " ${SRCFILE} -o ${DSTFILE} ${FLAGS} ${DEFINES} ${SEARCHPATHS}";
-        if(plistOverride)
-            plistStr = plistOverride;
+        if(!arglist)
+        {
+            arglist = ["${SRCFILE}", "-o", "${DSTFILE}", "${FLAGS}", 
+                          "${DEFINES}", "${SEARCHPATHS}"];
+        }
+        arglist = [arg0].concat(arglist);
         let config =
         {
             Role: ToolCli.Role.Compile,
             Semantics: ToolCli.Semantics.ManyToMany,
             DstExt: "o",
             ActionStage: "build",
-            Invocation: [arg0, plistStr],
+            Invocation: arglist,
             Syntax:
             {
                 Define: "-D${KEY}=${VAL}",
@@ -28,8 +31,9 @@ class GCC extends ToolCli
             },
         };
         super(ts, nm, config);
-        this.AddFlags(this.GetRole(), [
-            "-MMD", // for mkdep
+        this.AddFlags(this.GetRole(),
+        [
+           "-MMD", // for mkdep
         ]);
     }
 

@@ -16,13 +16,13 @@ let GCC = require("../gcc.js").GCC;
 //    -D__MKL26Z64__ -DTEENSYDUINO=152 -DARDUINO=10812 \
 //    -DARDUINO_TEENSYLC -DF_CPU=48000000 -DUSB_SERIAL \
 //    -DLAYOUT_US_ENGLISH \
-//    "-IC:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_438011/pch" 
-//    "-IC:\\Users\\dana\\Documents\\arduino-1.8.12\\hardware\\teensy\\avr\\cores\\teensy3" \
-//    "-IC:\\Users\\dana\\Documents\\arduino-1.8.12\\hardware\\teensy\\avr\\libraries\\Bounce"\
-//    "-IC:\\Users\\dana\\Documents\\Arduino\\libraries\\SevSeg-3.3.0"\
-//    "-IC:\\Users\\dana\\Documents\\Arduino\\libraries\\SharpDistSensor"\
-//    "C:\\Users\\dana\\Documents\\Arduino\\libraries\\SharpDistSensor\\SharpDistSensor.cpp"\
-//    -o "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_438011\\libraries\\SharpDistSensor\\SharpDistSensor.cpp.o"
+//    "-I${HOME}\\AppData\\Local\\Temp\\arduino_build_438011/pch" 
+//    "-I${HOME}\\Documents\\arduino-1.8.12\\hardware\\teensy\\avr\\cores\\teensy3" \
+//    "-I${HOME}\\Documents\\arduino-1.8.12\\hardware\\teensy\\avr\\libraries\\Bounce"\
+//    "-I${HOME}\\Documents\\Arduino\\libraries\\SevSeg-3.3.0"\
+//    "-I${HOME}\\Documents\\Arduino\\libraries\\SharpDistSensor"\
+//    "${HOME}\\Documents\\Arduino\\libraries\\SharpDistSensor\\SharpDistSensor.cpp"\
+//    -o "${HOME}\\AppData\\Local\\Temp\\arduino_build_438011\\libraries\\SharpDistSensor\\SharpDistSensor.cpp.o"
 class CC extends GCC
 {
     constructor(ts, invoc)

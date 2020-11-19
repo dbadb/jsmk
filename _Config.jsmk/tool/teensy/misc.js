@@ -57,7 +57,7 @@ class ReportSize extends ToolCli
         if(!arg0) throw new Error("Can't resolve teensy size executable");
         super(ts, "teensy/size", {
             Role: ToolCli.Role.Report,
-            ActionStage: "build",
+            ActionStage: "test",
             Semantics: ToolCli.Semantics.OneToNone,
             Invocation: [arg0, "-A ${SRCFILE}"] ,
         });
@@ -107,8 +107,8 @@ class PostCompile extends ToolCli
 {
     // ...\arduino-1.8.12\hardware\teensy/../tools/teensy_post_compile \
     //  -file=BlinkTeensy.ino \
-    //  -path=C:\Users\dana\AppData\Local\Temp\arduino_build_530257 \
-    //  -tools=C:\Users\dana\Documents\arduino-1.8.12\hardware\teensy/../tools \
+    //  -path=${HOME}\AppData\Local\Temp\arduino_build_530257 \
+    //  -tools=${HOME}\Documents\arduino-1.8.12\hardware\teensy/../tools \
     //  -board=TEENSYLC -reboot -port=COM5 -portlabel=COM5 \
     //  -portprotocol=serial 
 

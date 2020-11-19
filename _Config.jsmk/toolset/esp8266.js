@@ -5,13 +5,13 @@ var Foundation = require("./foundation.js").Foundation;
 
 class esp8266 extends Foundation
 {
-    constructor(board="generic")
+    constructor(board="generic", ardroot="${HOME}/Documents/arduino-1.8.12")
     {
         super(__filename, "esp8266", board);
 
-        let ardroot = "c:/Users/dana/arduino-1.8.12";
-        let userlibs = "c:/Users/dana/Documents/Arduino/libraries";
-        let pkgdir = "c:/Users/dana/AppData/Local/Arduino15/packages/esp8266";
+        ardroot = jsmk.Interpolate(ardroot);
+        let userlibs = jsmk.Interpolate("${HOME}/Documents/Arduino/libraries");
+        let pkgdir = jsmk.Interpolate("${HOME}/AppData/Local/Arduino15/packages/esp8266");
         let pkgtools = jsmk.path.join(pkgdir, "tools");
         let mklittlefs = jsmk.path.join(pkgtools, "mklittlefs/2.5.0-4-fe5bb56/mklittlefs");
         let ts = jsmk.path.join(pkgtools, "xtensa-lx106-elf-gcc/2.5.0-4-b40a506");
