@@ -11,8 +11,12 @@ class GCC extends ToolCli
             arg0 = "gcc";
         if(!arglist)
         {
-            arglist = ["${SRCFILE}", "-o", "${DSTFILE}", "${FLAGS}", 
-                          "${DEFINES}", "${SEARCHPATHS}"];
+            arglist = ["${FLAGS}", 
+                       "${DEFINES}", 
+                       "${SEARCHPATHS}",
+                       "${SRCFILE}", 
+                       "-o", "${DSTFILE}", 
+                      ];
         }
         arglist = [arg0].concat(arglist);
         let config =
@@ -52,6 +56,9 @@ class GCC extends ToolCli
             break;
         case "Speed":
             flags.push("-O3");
+            break;
+        case "Mixed":
+            flags.push("-O2");
             break;
         case "None":
             flags.push("-O0"); // no-opt -> default

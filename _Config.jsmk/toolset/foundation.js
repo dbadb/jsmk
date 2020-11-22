@@ -10,9 +10,9 @@ let Printenv = jsmk.LoadConfig("tool/printenv.js").Printenv;
 
 class Foundation extends Toolset
 {
-    constructor(filename, tsname, arch)
+    constructor(filename, tsname, arch, platform)
     {
-        super(filename, tsname, arch);
+        super(filename, tsname, arch, platform);
 
         // no settings in foundation?
 

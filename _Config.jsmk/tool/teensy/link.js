@@ -1,6 +1,8 @@
 /* global jsmk */
+
 let ToolCli = jsmk.Require("tool_cli.js").Tool;
 
+// see toolchain.txt for refs
 class Link extends ToolCli
 {
     constructor(ts)
@@ -18,16 +20,11 @@ class Link extends ToolCli
                 {
                     Flag: "${VAL}"
                 },
-            }
-        );
-    }
+        }); 
 
-    ConfigureTaskSettings(task)
-    {
-        super.ConfigureTaskSettings(task);
-        let tsrc = task.BuildVars.TEENSYSRC;
-        let tboard = task.BuildVars.TEENSYBOARD;
-        task.AddFlags(this.GetRole(), [
+        let tsrc = ts.BuildVars.TEENSYSRC;
+        let tboard = ts.BuildVars.TEENSYBOARD;
+        this.AddFlags(this.GetRole(), [
             "-Os",
             "-Wl,--gc-sections,--relax,--defsym=__rtc_localtime="+Date.now(),
             "-mthumb",
@@ -37,25 +34,42 @@ class Link extends ToolCli
 
         switch(tboard)
         {
+        case "TEENSY41":
+            this.AddFlags(this.GetRole(), [
+                `-T${tsrc}/imxrt1062_t41.ld`,
+                "-larm_cortexM7lfsp_math",
+            ]);
+            break;
+        case "TEENSY40":
+            this.AddFlags(this.GetRole(), [
+                `-T${tsrc}/imxrt1062.ld`,
+                "-larm_cortexM7lfsp_math",
+            ]);
+            break;
         case "TEENSY31":
-            task.AddFlags(this.GetRole(), [
+            this.AddFlags(this.GetRole(), [
                 `-T${tsrc}/mk20dx256.ld`,
                 "-mcpu=cortex-m4",
                 "-larm_cortexM4l_math",
-                "-lm",
             ]);
             break;
         case "TEENSYLC":
-            task.AddFlags(this.GetRole(), [
+            this.AddFlags(this.GetRole(), [
                 `-T${tsrc}/mkl26z64.ld`,
                 "--specs=nano.specs",
                 "-mcpu=cortex-m0plus",
                 "-larm_cortexM0l_math",
-                "-lm",
             ]);
             break;
         }
+
+        this.AddFlags(this.GetRole(), 
+        [
+            "-lm",
+            "-lstdc++"
+        ]);
     }
+
 }  // end of link
 
 exports.Link = Link;

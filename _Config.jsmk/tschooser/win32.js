@@ -9,7 +9,8 @@ exports.GetToolsets = function()
     let vs17 = jsmk.LoadConfig("toolset/vs17.js").Toolset;
 
     var result = [
-        new teensy(),
+        new teensy("teensyLC"),
+        new teensy("teensy40"),
         new esp8266("robodyn"),
         new esp8266("d1_mini"),
         new esp8266("generic"),

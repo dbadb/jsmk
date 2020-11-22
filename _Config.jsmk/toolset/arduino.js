@@ -71,9 +71,9 @@ class Arduino extends Foundation
 
         this.MergeToolMap(
             {
-                "cpp->o": new cc.CPP(this, CPP),
-                "c->o": new cc.CC(this, CC),
                 "S->o": new cc.CC(this, SC),
+                "c->o": new cc.CC(this, CC),
+                "cpp->o": new cc.CPP(this, CPP),
                 "o->a": new misc.AR(this, AR, LTOPLUGIN),
                 "cpp.o->elf": new link.Link(this, LD),
                 "elf->eep": new misc.ObjCopy(this, OBJCOPY, "elf->eep"), // eeprom (data)

@@ -6,26 +6,15 @@ let GCC = require("../gcc.js").GCC;
 // It's possible that teensy is better represented as a framework
 // rather than a compiler.  On the other hand, the choice of compiler
 // is pretty-well tied down by teensy (and tightly coupled with
-// its collection of compiler flags).
-// "../arm-none-eabi-g++" -c -Os \
-//    --specs=nano.specs -g -Wall -ffunction-sections \
-//    -fdata-sections -nostdlib -MMD -fno-exceptions \
-//    -fpermissive -felide-constructors -std=gnu++14 \
-//    -Wno-error=narrowing -fno-rtti -mthumb \
-//    -mcpu=cortex-m0plus -fsingle-precision-constant \
-//    -D__MKL26Z64__ -DTEENSYDUINO=152 -DARDUINO=10812 \
-//    -DARDUINO_TEENSYLC -DF_CPU=48000000 -DUSB_SERIAL \
-//    -DLAYOUT_US_ENGLISH \
-//    "-I${HOME}\\AppData\\Local\\Temp\\arduino_build_438011/pch" 
-//    "-I${HOME}\\Documents\\arduino-1.8.12\\hardware\\teensy\\avr\\cores\\teensy3" \
-//    "-I${HOME}\\Documents\\arduino-1.8.12\\hardware\\teensy\\avr\\libraries\\Bounce"\
-//    "-I${HOME}\\Documents\\Arduino\\libraries\\SevSeg-3.3.0"\
-//    "-I${HOME}\\Documents\\Arduino\\libraries\\SharpDistSensor"\
-//    "${HOME}\\Documents\\Arduino\\libraries\\SharpDistSensor\\SharpDistSensor.cpp"\
-//    -o "${HOME}\\AppData\\Local\\Temp\\arduino_build_438011\\libraries\\SharpDistSensor\\SharpDistSensor.cpp.o"
-class CC extends GCC
+// its collection of compiler flags). So for now we embody different
+// Teensy chips as differnt instantiations of the teensy toolset.
+//
+// see toolchain.txt for refs
+//
+
+class CC extends GCC // shared with g++, only different invoc
 {
-    constructor(ts, invoc)
+    constructor(ts, invoc, rule)
     {
         let gcc = invoc ? invoc : "gcc";
         let exefile = `arm-none-eabi-${gcc}`;
@@ -34,10 +23,37 @@ class CC extends GCC
             throw new Error("Can't resolve teensy CC executable "+exefile);
         super(ts, "teensy/cc", arg0);
         this.SetBuildVar("SERIAL_MODE", "USB_SERIAL_HID");
+
+        if(rule === "S->o")
+            this.AddFlags(this.GetRole(), [
+                ["-x", "assembler-with-cpp"]
+            ]);
+
+        // shared flags across c & cpp ------------------------------
+        this.AddFlags(this.GetRole(), [
+                "-c",
+                "-Wall", "-ffunction-sections", "-fdata-sections", "-nostdlib",
+                "-mthumb", 
+            ]);
+
+        // c vs c++ flags
+        if(gcc === "g++")
+        {
+            this.AddFlags(this.GetRole(), [
+                "-fno-exceptions", 
+                "-fpermissive",  
+                "-fno-rtti", 
+                "-felide-constructors",
+                "-fno-threadsafe-statics", 
+                "-std=gnu++14", 
+                "-Wno-error=narrowing", 
+            ]);
+        }
+
+        // shared Defines --------------------------------------------------
         this.Define( {
-            ARDUINO: "10812",
-            TEENSYDUINO: "152",
-            ARDUINO_ARCH_AVR: null,
+            ARDUINO: "${ARDUINO}",
+            TEENSYDUINO: "${TEENSYDUINO}",
             /*
              * USB_SERIAL_HID:  null, (shouldn't be defined for MIDI)
              * // serial + usb + mouse + joystick
@@ -46,7 +62,7 @@ class CC extends GCC
             //USB_SERIAL_HID_DB: null, // doesn't work, usb_undef.h
             // USB_KEYBOARDONLY: null,
             LAYOUT_US_ENGLISH: null,
-            __TEENSYBOARD:  null
+            // __TEENSYBOARD:  null
 
             // NB  MANUFACTURER_NAME, MANUFACTURE_NAME_LEN
             //     PRODUCT_NAME, PRODUCT_NAME_LEN are found in
@@ -55,66 +71,82 @@ class CC extends GCC
             //      teensy3/usb_inst.cpp
         });
 
-        this.AddFlags(this.GetRole(), [
-                "-c",
-                "--specs=nano.specs",
-                "-Wall",
-                "-ffunction-sections",
-                "-fdata-sections",
-                "-fsingle-precision-constant",
-                "-nostdlib",
-                "-fno-exceptions",
-                "-mthumb",
-                "-Wno-error=narrowing", 
-            ]);
+        this.AddSearchpaths( "Compile", 
+        [
+            "${TEENSYCORE}",
+            "${TEENSYLIBS}" 
+        ]);
 
-        if(gcc === "g++")
+        // arch specifc --------------------------------------------------
+
+        let arch = ts.TargetArch;
+        switch(arch)
         {
-            this.AddFlags(this.GetRole(), [
-                "-fno-rtti", "-fpermissive", "-std=gnu++14",
-                "-felide-constructors",
+        case "teensy41": 
+            this.Define(
+            {
+                "ARDUINO_TEENSY41": null,
+                "__IMXRT1062__": null,
+                "F_CPU": "600000000", /* up to 816000000 */
+                "__IMXRT1062__": null,
+            });
+            this.AddFlags(this.GetRole(), 
+            [
+                "-mcpu=cortex-m7",
+                "-mfpu=fpv5-d16",
+                "-mfloat-abi=hard",
             ]);
+            break;
+        case "teensy40":
+            this.Define(
+            {
+                "ARDUINO_TEENSY40": null,
+                "__IMXRT1062__": null,
+                "F_CPU": "600000000",
+                "__IMXRT1062__": null,
+            });
+            this.AddFlags(this.GetRole(), 
+            [
+                "-mcpu=cortex-m7",
+                "-mfpu=fpv5-d16",
+                "-mfloat-abi=hard",
+            ]);
+            break;
+        case "teensyLC": // mcu=mkl26z64
+            this.Define(
+            {
+                "ARDUINO_TEENSYLC": null,
+                "__MKL26Z64__": null,
+                "F_CPU": "48000000", // or 24
+            });
+            this.AddFlags(this.GetRole(), 
+            [
+                "--specs=nano.specs",
+                "-mcpu=cortex-m0plus",
+            ]);
+            break;
+        case "teensy31":
+            this.Define(
+            {
+                "ARDUINO_TEENSY31": null,
+                "F_CPU": "96000000",
+                "__MK20DX256__": null,
+            });
+            break;
         }
 
-        this.AddSearchpaths( "Compile", [
-            "${TEENSYSRC}",
-            "${TEENSYLIBS}"
-        ]);
     } // end constructor
 
+    // need to configure all toolset tasks to agree with the 
+    // current USBTYPE must be one of arduino's types (selected from Tools menu)
     ConfigureTaskSettings(task)
     {
-        super.ConfigureTaskSettings(task); // gcc gets to configure the task
-        // USBTYPE must be one of arduino's types (selected from Tools menu)
-        // (see usb_desc.h for exact values)
+        // gcc gets to configure the task     
+        super.ConfigureTaskSettings(task); 
         let defaultDefs = {};
         console.assert(task.BuildVars.USBTYPE.length > 0);
         defaultDefs[task.BuildVars.USBTYPE]  = null;
         task.Define(defaultDefs);
-        switch(task.BuildVars.TEENSYBOARD)
-        {
-        case "TEENSY31":
-            task.Define({
-                    F_CPU: "96000000",
-                    "__MK20DX256__": null,
-                });
-            task.AddFlags(this.GetRole(), [
-                    "-mcpu=cortex-m4",
-                ]);
-            break;
-        case "TEENSYLC":
-            task.Define({
-                    F_CPU: "48000000",
-                    "__MKL26Z64__":  null,
-                    "ARDUINO_TEENSYLC": null,
-                }),
-            task.AddFlags(this.GetRole(), [
-                    "-mcpu=cortex-m0plus",
-                ]);
-            break;
-        default:
-            jsmk.WARNING("Teensy compiler requires TEENSYBOARD selection");
-        }
     }
 }
 
@@ -126,5 +158,17 @@ class CPP extends CC
     }
 }
 
+class SC extends CC /* uses cc for assembing but using -x below */
+{
+    constructor(ts)
+    {
+        super(ts);
+        this.AddFlags(this.GetRole(), [
+            ["-x", "assembler-with-cpp"],
+        ]);
+    }
+}
+
 exports.CC = CC;
 exports.CPP = CPP;
+exports.SC = SC;

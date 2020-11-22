@@ -1,6 +1,7 @@
 /* global jsmk */
 let ToolCli = jsmk.Require("tool_cli.js").Tool;
 
+// see toolchain.txt for refs
 class AR extends ToolCli
 {
     constructor(ts)
