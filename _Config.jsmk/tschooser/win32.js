@@ -11,6 +11,7 @@ exports.GetToolsets = function()
     var result = [
         new teensy("teensyLC"),
         new teensy("teensy40"),
+        new teensy("teensy40_oc"),
         new esp8266("robodyn"),
         new esp8266("d1_mini"),
         new esp8266("generic"),

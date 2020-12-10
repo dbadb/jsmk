@@ -96,6 +96,15 @@ teensy41.menu.keys.en-us.build.keylayout=US_ENGLISH
 //  "C:\\Users\\dana\\Documents\\arduino-1.8.12\\hardware\\teensy\\avr\\cores\\teensy4\\analog.c" 
 //  -o "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_834029\\core\\analog.c.o"
 // 
+// gcc -O2 -Wl,--gc-sections,--relax 
+// "-TC:\\Users\\dana\\Documents\\arduino-1.8.12\\hardware\\teensy\\avr\\cores\\teensy4/imxrt1062.ld" 
+// -mthumb -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-d16 
+// -o "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_834029/sketch_nov22a.ino.elf" 
+// "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_834029\\sketch\\sketch_nov22a.ino.cpp.o" 
+// "C:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_834029/core\\core.a" 
+// "-LC:\\Users\\dana\\AppData\\Local\\Temp\\arduino_build_834029" 
+// -larm_cortexM7lfsp_math -lm -lstdc++
+
 teensy40.build.board=TEENSY40
 teensy40.build.flags.ld=-Wl,--gc-sections,--relax "-T{build.core.path}/imxrt1062.ld"
 teensy40.build.core=teensy4

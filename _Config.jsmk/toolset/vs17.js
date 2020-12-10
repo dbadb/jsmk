@@ -11,8 +11,6 @@ exports.Toolset = class vs17 extends Foundation
         let vsDir = root + "Microsoft Visual Studio/2017/Community/";
         let sdkDir = root + "Windows Kits";
         var msvcDir = "VC/Tools/MSVC/14.16.27023";
-        var sdkInc = "10/Include/10.0.17763.0";
-        var sdkLib = "10/Lib/10.0.17763.0";
         var sdkBin = "10/bin/10.0.17763.0";
         let toolsDir, ideDir, sdkToolsDir;
         let archVariant;
@@ -51,16 +49,16 @@ exports.Toolset = class vs17 extends Foundation
         map.EnvMap =
         {
             // these paths obtained via vcvars64.bat
-			INCLUDE: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Tools\\MSVC\\14.14.26428\\ATLMFC\\include;C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Tools\\MSVC\\14.14.26428\\include;C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.6.1\\include\\um;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17134.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17134.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17134.0\\um;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17134.0\\winrt;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17134.0\\cppwinrt",
-			
-			LIB: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Tools\\MSVC\\14.14.26428\\ATLMFC\\lib\\x64;C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Tools\\MSVC\\14.14.26428\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.6.1\\lib\\um\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.17134.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.17134.0\\um\\x64;", 
-
-			LIBPATH: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Tools\\MSVC\\14.14.26428\\ATLMFC\\lib\\x64;C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Tools\\MSVC\\14.14.26428\\lib\\x64;C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Tools\\MSVC\\14.14.26428\\lib\\x86\\store\\references;C:\\Program Files (x86)\\Windows Kits\\10\\UnionMetadata\\10.0.17134.0;C:\\Program Files (x86)\\Windows Kits\\10\\References\\10.0.17134.0;C:\\WINDOWS\\Microsoft.NET\\Framework64\\v4.0.30319;",
-
-// https://blogs.msdn.microsoft.com/commandline/2017/12/22/share-environment-vars-between-wsl-and-windows/
-            WSLENV: "INCLUDE/w:LIB/w:LIBPATH/w",
-
-        };
+            // via the menu: x64 Native Tools Prompt for VS2017
+            x64: {
+                INCLUDE: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Tools\\MSVC\\14.16.27023\\include;C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.6.1\\include\\um;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17763.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17763.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17763.0\\um;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17763.0\\winrt;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17763.0\\cppwinrt",
+                LIB: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Tools\\MSVC\\14.16.27023\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.6.1\\lib\\um\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.17763.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.17763.0\\um\\x64;",
+                LIBPATH: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Tools\\MSVC\\14.16.27023\\lib\\x64;C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Tools\\MSVC\\14.16.27023\\lib\\x86\\store\\references;C:\\Program Files (x86)\\Windows Kits\\10\\UnionMetadata\\10.0.17763.0;C:\\Program Files (x86)\\Windows Kits\\10\\References\\10.0.17763.0;C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319;",
+                WSLENV: "INCLUDE/w:LIB/w:LIBPATH/w",
+                // https://blogs.msdn.microsoft.com/commandline/2017/12/22/share-environment-vars-between-wsl-and-windows/
+            },
+            // XXX: add 32bit
+        }[archVariant];
 
         this.MergeSettings(map);
 

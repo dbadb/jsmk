@@ -80,9 +80,9 @@ class CC extends GCC // shared with g++, only different invoc
         // arch specifc --------------------------------------------------
 
         let arch = ts.TargetArch;
-        switch(arch)
+        switch(ts.BuildVars.TEENSYBOARD)
         {
-        case "teensy41": 
+        case "TEENSY41": 
             this.Define(
             {
                 "ARDUINO_TEENSY41": null,
@@ -97,22 +97,29 @@ class CC extends GCC // shared with g++, only different invoc
                 "-mfloat-abi=hard",
             ]);
             break;
-        case "teensy40":
-            this.Define(
+        case "TEENSY40":
+            // -DF_CPU=816000000 
+            // -DF_CPU=600000000
             {
-                "ARDUINO_TEENSY40": null,
-                "__IMXRT1062__": null,
-                "F_CPU": "600000000",
-                "__IMXRT1062__": null,
-            });
-            this.AddFlags(this.GetRole(), 
-            [
-                "-mcpu=cortex-m7",
-                "-mfpu=fpv5-d16",
-                "-mfloat-abi=hard",
-            ]);
+                let freq = "600000000";
+                if(ts.BuildVars.TEENSYVARIANTS.indexOf("oc") != -1)
+                    freq = "816000000";
+                this.Define(
+                {
+                    "ARDUINO_TEENSY40": null,
+                    "__IMXRT1062__": null,
+                    "F_CPU": freq,
+                    "__IMXRT1062__": null,
+                });
+                this.AddFlags(this.GetRole(), 
+                [
+                    "-mcpu=cortex-m7",
+                    "-mfpu=fpv5-d16",
+                    "-mfloat-abi=hard",
+                ]);
+            }
             break;
-        case "teensyLC": // mcu=mkl26z64
+        case "TEENSYLC": // mcu=mkl26z64
             this.Define(
             {
                 "ARDUINO_TEENSYLC": null,
@@ -125,7 +132,7 @@ class CC extends GCC // shared with g++, only different invoc
                 "-mcpu=cortex-m0plus",
             ]);
             break;
-        case "teensy31":
+        case "TEENSY31":
             this.Define(
             {
                 "ARDUINO_TEENSY31": null,

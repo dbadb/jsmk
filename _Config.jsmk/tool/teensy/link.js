@@ -7,7 +7,7 @@ class Link extends ToolCli
 {
     constructor(ts)
     {
-        let exefile = "arm-none-eabi-gcc";
+        let exefile = "arm-none-eabi-g++";
         let arg0 = jsmk.path.resolveExeFile(exefile, ts.BuildVars.TEENSYPATH);
         super(ts, "teensy/link",
             {
@@ -36,12 +36,19 @@ class Link extends ToolCli
         {
         case "TEENSY41":
             this.AddFlags(this.GetRole(), [
+                "-mcpu=cortex-m7",
+                "-mfpu=fpv5-d16",
+                "-mfloat-abi=hard",
                 `-T${tsrc}/imxrt1062_t41.ld`,
                 "-larm_cortexM7lfsp_math",
             ]);
             break;
         case "TEENSY40":
-            this.AddFlags(this.GetRole(), [
+            this.AddFlags(this.GetRole(), 
+            [
+                "-mcpu=cortex-m7",
+                "-mfpu=fpv5-d16",
+                "-mfloat-abi=hard",
                 `-T${tsrc}/imxrt1062.ld`,
                 "-larm_cortexM7lfsp_math",
             ]);

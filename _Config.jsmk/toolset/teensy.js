@@ -3,8 +3,10 @@ var Foundation = require("./foundation.js").Foundation;
 
 class Teensy extends Foundation
 {
-     constructor(arch="teensyLC", ardroot="${HOME}/Documents/arduino-1.8.12")
-     {
+    // arch may include 'fields' to produce build variants
+    // used eg to select CPUFREQ since the entire core needs to agree on clockspeed
+    constructor(arch="teensyLC", ardroot="${HOME}/Documents/arduino-1.8.12")
+    {
         super(__filename, "teensy", arch, "arduino");
         ardroot = jsmk.Interpolate(ardroot);
         let ardlibs = jsmk.path.join(ardroot, "../Arduino/libraries");
@@ -14,15 +16,15 @@ class Teensy extends Foundation
         let teensybin = jsmk.path.join(teensytools, "arm/bin");
         let map = {};
 
+        let archfields = arch.split("_");
+        let archbase = archfields[0]; // teens40_oc
         let teensycore = 
         {
         "teensy41": t4src,
         "teensy40": t4src,
         "teensy31": t3src,
         "teensyLC": t3src,
-        }[arch];
-
-        console.log("teensycore:" + teensycore);
+        }[archbase];
 
         map.BuildVars =
         {
@@ -39,17 +41,18 @@ class Teensy extends Foundation
                 "teensy40": "TEENSY40",
                 "teensy31": "TEENSY31",
                 "teensyLC": "TEENSYLC",
-            }[arch],
+            }[archbase],
             TEENSYSRC: teensycore,
             TEENSYCORE: teensycore,
-            TEENSYPATH:  [teensybin, teensytools],
+            TEENSYPATH: [teensybin, teensytools],
+            TEENSYVARIANTS: archfields.slice(1), // often []
             OPTIMIZATION:  // a build-var to be consumed by tools
             {
                 "teensy41": "Mixed", // "-O2"
                 "teensy40": "Mixed", // "-O2"
                 "teensy31": "Size", // "-Os" ??
                 "teensyLC": "Size", // "-Os"
-            }[arch],
+            }[archbase],
         };
 
         this.MergeSettings(map);
