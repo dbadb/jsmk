@@ -41,13 +41,16 @@ class CopyFiles extends Tool
             // let inputs and outputs remain on config
             delete config.installdir;
             delete config.installext;
+
+            // jsmk.DEBUG(this.m_actionStage + " to " + idir);
+            // (installdir is usually to _Root/toolset/Product/...)
         }
     }
 
     // GenerateWork is a generator (ie: issues yield) of Promises
-    *GenerateWork(stage, task, inputs, triggers, outputs)
+    *GenerateWork(doit, task, inputs, triggers, outputs)
     {
-        if(stage !== this.m_actionStage) return;
+        if(!doit) return;
 
         if(inputs.length !== outputs.length)
             throw new Error("CopyFiles requires equal inputs and outputs");
@@ -66,17 +69,16 @@ class CopyFiles extends Tool
             let infile = inputs[i];
             let outfile = outputs[i];
             if(this.outputIsDirty(outfile, triggers.concat(infile), cwd))
-                yield this.makeWork(stage, cwd, infile, outfile, filter);
+                yield this.makeWork(cwd, infile, outfile, filter);
         }
     }
 
-    makeWork(stage, cwd, infile, outfile, filter)
+    makeWork(cwd, infile, outfile, filter)
     {
         let w  = new Promise( (resolve,reject) => {
             if(!jsmk.path.isAbsolute(infile))
                 infile = jsmk.path.join(cwd, infile);
-            if(stage != "install") stage = "copy"; // usually build
-            jsmk.INFO(`${stage} from: ${infile}`);
+            jsmk.INFO(`copy from: ${infile}`);
             jsmk.INFO(`       to: ${outfile}`);
             jsmk.path.makedirs(jsmk.path.dirname(outfile));
             let istream = fs.createReadStream(infile, {encoding: "binary"});
