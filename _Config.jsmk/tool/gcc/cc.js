@@ -21,6 +21,13 @@ class CC extends GCC
                 "-c",
                 "-Wall",
             ]);
+        if(ts.TargetArch.indexOf("_64") != -1)
+        {
+            this.AddFlags(this.GetRole(), 
+            [
+                "-fPIC",
+            ]);
+        }
 
         this.AddSearchpaths( "Compile", []);
     } // end constructor

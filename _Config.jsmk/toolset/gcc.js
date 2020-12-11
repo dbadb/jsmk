@@ -30,7 +30,7 @@ class GCC extends Foundation
                 "lex->c": new misc.LEX(this),
                 "cpp->o": new cc.CPP(this),
                 "c->o": new cc.CC(this),
-                "cpp.o->so": new link.Link(this),
+                "cpp.o->so": new link.Link(this, true/*buildso*/),
                 "cpp.o->exe": new link.Link(this),
                 "o->a": new misc.AR(this),
             }

@@ -14,8 +14,9 @@ class YACC extends ToolCli
             Role:  ToolCli.Role.Compile,
             ActionStage: "build",
             Semantics: ToolCli.Semantics.ManyToMany,
-            DstExt: "c",
-            Invocation: [arg0, "-dv -b ${DSTFILE} ${SRCFILE}"]
+            DstExt: "tab.c", // produce c and h file
+            Invocation: [arg0, "-dv -b ${DSTFILENOEXT} ${SRCFILE}"],
+            OutputNaming: "concise"
         });
     }
 }
@@ -33,8 +34,9 @@ class LEX extends ToolCli
             Role:  ToolCli.Role.Compile,
             ActionStage: "build",
             Semantics: ToolCli.Semantics.ManyToMany,
-            DstExt: "c",
-            Invocation: [arg0, "-o${DSTFILE} ${SRCFILE}"]
+            DstExt: "yy.c",
+            Invocation: [arg0, "-o${DSTFILE} ${SRCFILE}"],
+            OutputNaming: "concise"
         });
     }
 }
