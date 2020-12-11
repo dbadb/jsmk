@@ -71,12 +71,10 @@ class GCC extends ToolCli
         {
         case "debug":
             flags.push("-g");
-            if(flags.length == 0)
-                flags.push("-O0");
             break;
         case "release":
             if(flags.length == 0)
-                flags.push("-Os");
+                flags.push("-O3");
             break;
         }
         if(flags.length)

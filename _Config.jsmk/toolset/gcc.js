@@ -26,8 +26,11 @@ class GCC extends Foundation
 
         this.MergeToolMap(
             {
+                "y->c": new misc.YACC(this),
+                "lex->c": new misc.LEX(this),
                 "cpp->o": new cc.CPP(this),
                 "c->o": new cc.CC(this),
+                "cpp.o->so": new link.Link(this),
                 "cpp.o->exe": new link.Link(this),
                 "o->a": new misc.AR(this),
             }

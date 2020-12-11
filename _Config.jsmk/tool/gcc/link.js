@@ -3,7 +3,7 @@ let ToolCli = jsmk.Require("tool_cli.js").Tool;
 
 class Link extends ToolCli
 {
-    constructor(ts)
+    constructor(ts, buildso=false)
     {
         let exefile = "g++";
         let arg0 = jsmk.path.resolveExeFile(exefile, 
@@ -12,7 +12,7 @@ class Link extends ToolCli
             {
                 Role: ToolCli.Role.Link,
                 Semantics: ToolCli.Semantics.ManyToOne,
-                DstExt: "",
+                DstExt: buildso ? "so" : "",
                 ActionStage: "build",
                 Invocation: [arg0, 
                     "-o ${DSTFILE} ${SRCFILES} ${FLAGS} ${LIBS}"],
@@ -23,6 +23,8 @@ class Link extends ToolCli
                 },
             }
         );
+        if(buildso)
+            this.AddFlags(this.GetRole(), ["-shared"]);
     }
 
     ConfigureTaskSettings(task)

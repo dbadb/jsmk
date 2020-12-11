@@ -1,6 +1,44 @@
 /* global jsmk */
 let ToolCli = jsmk.Require("tool_cli.js").Tool;
 
+// YACC converts .y to .c,.h files
+class YACC extends ToolCli
+{
+    constructor(ts)
+    {
+        let exefile = "bison";
+        let arg0 = jsmk.path.resolveExeFile(exefile, 
+                                            ts.BuildVars.LINUX_TOOLCHAIN);
+        if(!arg0) throw new Error("Can't resolve linux bison executable");
+        super(ts, "linux/yacc", {
+            Role:  ToolCli.Role.Compile,
+            ActionStage: "build",
+            Semantics: ToolCli.Semantics.ManyToMany,
+            DstExt: "c",
+            Invocation: [arg0, "-dv -b ${DSTFILE} ${SRCFILE}"]
+        });
+    }
+}
+
+// LEX converts .lex to .yy.c files
+class LEX extends ToolCli
+{
+    constructor(ts)
+    {
+        let exefile = "flex";
+        let arg0 = jsmk.path.resolveExeFile(exefile, 
+                                            ts.BuildVars.LINUX_TOOLCHAIN);
+        if(!arg0) throw new Error("Can't resolve linux bison executable");
+        super(ts, "linux/lex", {
+            Role:  ToolCli.Role.Compile,
+            ActionStage: "build",
+            Semantics: ToolCli.Semantics.ManyToMany,
+            DstExt: "c",
+            Invocation: [arg0, "-o${DSTFILE} ${SRCFILE}"]
+        });
+    }
+}
+
 class AR extends ToolCli
 {
     constructor(ts)
@@ -21,3 +59,5 @@ class AR extends ToolCli
 
 
 exports.AR = AR;
+exports.YACC = YACC;
+exports.LEX = LEX;

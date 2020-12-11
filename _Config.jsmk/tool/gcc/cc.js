@@ -17,7 +17,7 @@ class CC extends GCC
 
         this.Define({});
 
-        this.AddFlags([
+        this.AddFlags(this.GetRole(), [
                 "-c",
                 "-Wall",
             ]);
@@ -37,10 +37,11 @@ class CPP extends CC
     constructor(toolset)
     {
         super(toolset, "g++");
-        this.AddFlags([
-            "-fno-rtti",
-            "-std=gnu++0x",
-            "-felide-constructors",
+        this.AddFlags(this.GetRole(), [
+            // these are more about code-base
+            // "-fno-rtti", 
+            // "-std=gnu++0x",
+            // "-felide-constructors",
         ]);
     }
 }
