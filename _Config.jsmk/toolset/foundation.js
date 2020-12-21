@@ -7,6 +7,8 @@
 let Toolset = jsmk.Require("toolset.js").Toolset;
 let CopyFiles = jsmk.LoadConfig("tool/copyfiles.js").CopyFiles;
 let Printenv = jsmk.LoadConfig("tool/printenv.js").Printenv;
+let ToolCli = jsmk.Require("tool_cli.js").Tool;
+let Tool = jsmk.Require("tool.js").Tool;
 
 class Foundation extends Toolset
 {
@@ -24,6 +26,36 @@ class Foundation extends Toolset
                             ActionStage: "install"
                         }),
             printenv: new Printenv(this),
+
+            // general development -------------------
+            buildscript: new ToolCli(this, "buildscript", 
+                        {
+                            Role: "Compile",
+                            ActionStage: "build",
+                            Invocation: ["node", "${ARGUMENTS}"],
+                            Semantics: Tool.Semantics.CustomTrigger
+                        }),
+            preinstallscript: new ToolCli(this, "preinstallscript", 
+                        {
+                            Role: "Archive",
+                            ActionStage: "preinstall",
+                            Invocation: ["node", "${ARGUMENTS}"],
+                            Semantics: Tool.Semantics.CustomTrigger
+                        }),
+            installscript: new ToolCli(this, "installscript", 
+                        {
+                            Role: "Archive",
+                            ActionStage: "install",
+                            Invocation: ["node", "${ARGUMENTS}"],
+                            Semantics: Tool.Semantics.CustomTrigger
+                        }),
+            packagescript: new ToolCli(this, "packagescript", 
+                        {
+                            Role: "Package",
+                            ActionStage: "package",
+                            Invocation: ["node", "${ARGUMENTS}"],
+                            Semantics: Tool.Semantics.CustomTrigger
+                        }),
 
             // for javascript development -------------------
             ".js->.js.min": null, // aka uglify

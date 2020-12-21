@@ -1,13 +1,13 @@
 /* global jsmk */
 let Tool = jsmk.Require("tool.js").Tool;
 let fs = require("fs");
+let fse = require("fs-extra");
 
 class CopyFiles extends Tool
 {
     constructor(toolset, vers, cfg)
     {
-        let config =
-        {
+        let config = {
             Role: Tool.Role.Copy,
             Semantics: Tool.Semantics.ManyToMany,
             ActionStage: cfg ? cfg.ActionStage : "build",
@@ -21,8 +21,13 @@ class CopyFiles extends Tool
         super.ConfigureTaskSettings(task);
         if(config.inputs && config.installdir)
         {
-            let idir = jsmk.path.join(task.EvaluateBuildVar("InstallDir"), 
-                                        config.installdir);
+            let rootdir;
+            if(config.installroot)
+                rootdir = task.Interpolate(config.installroot);
+            else
+                rootdir = task.EvaluateBuildVar("InstallDir");
+            // console.log("rootdir " + rootdir);
+            let idir = jsmk.path.join(rootdir, config.installdir);
             let outputs = [];
             for(let input of config.inputs)
             {
@@ -48,7 +53,7 @@ class CopyFiles extends Tool
     }
 
     // GenerateWork is a generator (ie: issues yield) of Promises
-    *GenerateWork(doit, task, inputs, triggers, outputs)
+    * GenerateWork(doit, task, inputs, triggers, outputs)
     {
         if(!doit) return;
 
@@ -59,12 +64,15 @@ class CopyFiles extends Tool
             triggers = [];
 
         let cwd = task.GetWorkingDir();
-        let outputdir = task.GetOutputDir(); 
-        jsmk.path.makedirs(outputdir); // probably unneeded
+        let outputdir = task.GetOutputDir();
+
+        console.log("copyfiles to: " + outputdir);
+
+        jsmk.path.makedirs(outputdir); // often redundant
 
         let config = task.GetToolConfig();
         let filter = (config && config.filter) ? config.filter : null;
-        for(let i=0;i<inputs.length;i++)
+        for(let i = 0; i < inputs.length; i++)
         {
             let infile = inputs[i];
             let outfile = outputs[i];
@@ -73,35 +81,48 @@ class CopyFiles extends Tool
         }
     }
 
-    makeWork(cwd, infile, outfile, filter)
+    makeWork(cwd, infile, outfile, filter) // XXX: filtercontents, filterfiles
     {
-        let w  = new Promise( (resolve,reject) => {
-            if(!jsmk.path.isAbsolute(infile))
-                infile = jsmk.path.join(cwd, infile);
-            jsmk.INFO(`copy from: ${infile}`);
-            jsmk.INFO(`       to: ${outfile}`);
-            jsmk.path.makedirs(jsmk.path.dirname(outfile));
-            let istream = fs.createReadStream(infile, {encoding: "binary"});
-            istream.on("error", reject);
-            let ostream = fs.createWriteStream(outfile, {encoding: "binary"});
-            ostream.on("error", reject);
-            if(!filter)
+        if(!jsmk.path.isAbsolute(infile))
+            infile = jsmk.path.join(cwd, infile);
+
+        jsmk.INFO(`copy from: ${infile} ${filter?'(filtered)':''}`);
+        jsmk.INFO(`       to: ${outfile}`);
+        let w;
+        if(!filter)
+        {
+            // handles permissions and subtrees
+            w = fse.copy(infile, outfile); // returns a promise
+        }
+        else
+        {
+            w = new Promise((resolve, reject) =>
             {
-                ostream.on("close", resolve);
-                istream.pipe(ostream);
-            }
-            else
-            {
-                istream.on("end", () => {
-                    ostream.end();
-                    jsmk.file.touch(outfile);  // updates timestamp cache
-                    resolve();
-                });
-                istream.on("data", (chunk) => {
-                    ostream.write(filter(infile, chunk));
-                });
-            }
-        });
+                jsmk.path.makedirs(jsmk.path.dirname(outfile));
+                let istream = fs.createReadStream(infile, { encoding: "binary" });
+                istream.on("error", reject);
+                let ostream = fs.createWriteStream(outfile, { encoding: "binary" });
+                ostream.on("error", reject);
+                if(!filter)
+                {
+                    ostream.on("close", resolve);
+                    istream.pipe(ostream);
+                }
+                else
+                {
+                    istream.on("end", () =>
+                    {
+                        ostream.end();
+                        jsmk.file.touch(outfile); // updates timestamp cache
+                        resolve();
+                    });
+                    istream.on("data", (chunk) =>
+                    {
+                        ostream.write(filter(infile, chunk));
+                    });
+                }
+            });
+        }
         w._name = "copyfile";
         return w;
     }
