@@ -2,6 +2,8 @@
 let Tool = jsmk.Require("tool.js").Tool;
 let fs = require("fs");
 let fse = require("fs-extra");
+let klaw = require("klaw");
+let path = require("path");
 
 class CopyFiles extends Tool
 {
@@ -64,35 +66,45 @@ class CopyFiles extends Tool
             triggers = [];
 
         let cwd = task.GetWorkingDir();
-        let outputdir = task.GetOutputDir();
-
-        console.log("copyfiles to: " + outputdir);
-
-        jsmk.path.makedirs(outputdir); // often redundant
+        // commented out due when OutputDir != installroot
+        // let outputdir = task.GetOutputDir();
+        //  console.log("copyfiles to: " + outputdir);
+        // jsmk.path.makedirs(outputdir); // often redundant
 
         let config = task.GetToolConfig();
-        let filter = (config && config.filter) ? config.filter : null;
+        let contentfilter = (config && config.filter) ? config.filter : null;
         for(let i = 0; i < inputs.length; i++)
         {
             let infile = inputs[i];
+            if(!jsmk.path.isAbsolute(infile))
+                infile = jsmk.path.join(cwd, infile);
             let outfile = outputs[i];
-            if(this.outputIsDirty(outfile, triggers.concat(infile), cwd))
-                yield this.makeWork(cwd, infile, outfile, filter);
+            let dirty = this.outputIsDirty(outfile, triggers.concat(infile), cwd);
+            let isdir = this.isDir(infile);
+            if(dirty || isdir)
+                yield this.makeWork(cwd, infile, outfile, contentfilter, isdir);
         }
     }
 
-    makeWork(cwd, infile, outfile, filter) // XXX: filtercontents, filterfiles
+    makeWork(cwd, infile, outfile, contentfilter, isdir) // XXX: filtercontents, filterfiles
     {
-        if(!jsmk.path.isAbsolute(infile))
-            infile = jsmk.path.join(cwd, infile);
+        if(!isdir)
+        {
+            jsmk.INFO(`copy from: ${infile} ${contentfilter?'(filtered)':''}`);
+            jsmk.INFO(`       to: ${outfile}`);
+        }
 
-        jsmk.INFO(`copy from: ${infile} ${filter?'(filtered)':''}`);
-        jsmk.INFO(`       to: ${outfile}`);
         let w;
-        if(!filter)
+        if(!contentfilter)
         {
             // handles permissions and subtrees
-            w = fse.copy(infile, outfile); // returns a promise
+            let istat = fs.lstatSync(infile);
+            if(istat.isDirectory())
+            {
+                return this.deepCopy(infile, outfile); // single task
+            }
+            else
+                w = fse.copy(infile, outfile); // returns a promise
         }
         else
         {
@@ -103,7 +115,7 @@ class CopyFiles extends Tool
                 istream.on("error", reject);
                 let ostream = fs.createWriteStream(outfile, { encoding: "binary" });
                 ostream.on("error", reject);
-                if(!filter)
+                if(!contentfilter)
                 {
                     ostream.on("close", resolve);
                     istream.pipe(ostream);
@@ -118,13 +130,96 @@ class CopyFiles extends Tool
                     });
                     istream.on("data", (chunk) =>
                     {
-                        ostream.write(filter(infile, chunk));
+                        ostream.write(contentfilter(infile, chunk));
                     });
                 }
             });
         }
         w._name = "copyfile";
         return w;
+    }
+
+    deepCopy(indir, outdir)
+    {
+        return new Promise((resolve, reject) =>
+        {
+            let inroot = indir;
+            let outroot = outdir;
+            let nerr = 0,
+                nfiles = 0,
+                ndirs = 0;
+            let deferredmsg = `deepCopy \n\tfrom: ${indir}\n\tto: ${outdir}`;
+
+            // traverse the input tree, items have already been stated
+            klaw(indir).on("data", (item) =>
+                {
+                    // console.log("klaw: " + item.path);
+                    let dirty = false;
+                    let subpath = item.path.substr(inroot.length + 1);
+                    let outpath = path.join(outroot, subpath);
+                    if(!fs.existsSync(outpath))
+                        dirty = true;
+                    else
+                    if(!item.stats.isDirectory())
+                    {
+                        let ostat = fs.lstatSync(outpath);
+                        if(item.stats.mtime > ostat.mtime)
+                            dirty = true;
+                        nfiles++;
+                    }
+                    else
+                    {
+                        // this is a directory and the output dir exists
+                        // let's make sure that the outdir's timestamp is
+                        // >= indirs. Here is a directory "touch".
+                        // nb: this doesn't make it dirty
+                        ndirs++;
+                        let now = new Date();
+                        try
+                        {
+                            fs.utimesSync(outpath, now, now);
+                        }
+                        catch (err)
+                        {
+                            jsmk.WARNING(err);
+                        }
+                    }
+                    if(dirty)
+                    {
+                        if(deferredmsg)
+                        {
+                            jsmk.INFO(deferredmsg);
+                            deferredmsg = null;
+                        }
+                        if(item.stats.isDirectory())
+                        {
+                            jsmk.INFO("mkdir " + subpath);
+                            fs.mkdirSync(outpath);
+                        }
+                        else
+                        {
+                            jsmk.INFO(`copy to ${subpath}`);
+                            try
+                            {
+                                fs.copyFileSync(item.path, outpath);
+                            }
+                            catch (err)
+                            {
+                                nerr++;
+                                jsmk.WARNING(`failed to copy ${input} to ${outpath} (${err})`);
+                            }
+                        }
+                    }
+                })
+                .on("end", () =>
+                {
+                    // jsmk.INFO(`copyfiles checked: ${nfiles}/${ndirs} below ${indir}`);
+                    if(nerr)
+                        reject(nerr);
+                    else
+                        resolve();
+                });
+        });
     }
 }
 
