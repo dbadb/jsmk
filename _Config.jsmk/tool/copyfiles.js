@@ -194,7 +194,7 @@ class CopyFiles extends Tool
                         if(item.stats.isDirectory())
                         {
                             jsmk.INFO("mkdir " + subpath);
-                            fs.mkdirSync(outpath);
+                            fs.mkdirSync(outpath, {recursive: true});
                         }
                         else
                         {
