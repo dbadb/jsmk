@@ -21,14 +21,15 @@ class Link extends ToolCli
                 Syntax:
                 {
                     Flag: "${VAL}",
-                    Lib: "-l${VAL}"
+                    Lib: "-l${VAL}",
+                    Framework: "-framework ${VAL}"
                 },
             }
         );
         this.AddFlags(this.GetRole(),
         [
             ["-isysroot", "${MACOSX_SDK}"],     
-            ["-mmacosx-version-min=10.15"], // 14:mohave 15:catalina, 16:bigsur
+            "-mmacosx-version-min=10.15", // 14:mohave 15:catalina, 16:bigsur
         ]);
         if(buildso)
             this.AddFlags(this.GetRole(), ["-dylib"]);
