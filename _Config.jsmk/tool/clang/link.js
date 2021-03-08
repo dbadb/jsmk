@@ -1,6 +1,10 @@
 /* global jsmk */
 let ToolCli = jsmk.Require("tool_cli.js").Tool;
 
+// xxx: eg: need to include fluidsynth.dylibs in package and ensure that we load
+//  the correct version relative to the executable (ie: chuck or a chugin).
+// https://medium.com/@donblas/fun-with-rpath-otool-and-install-name-tool-e3e41ae86172
+// http://clarkkromenaker.com/post/library-dynamic-loading-mac/ 
 class Link extends ToolCli
 {
     constructor(ts, buildso=false)
@@ -21,7 +25,7 @@ class Link extends ToolCli
                 Syntax:
                 {
                     Flag: "${VAL}",
-                    Lib: "-l${VAL}",
+                    Lib: "${VAL}", // -l libs can be handled as flags (?)
                     Framework: "-framework ${VAL}"
                 },
             }
@@ -32,7 +36,7 @@ class Link extends ToolCli
             "-mmacosx-version-min=10.15", // 14:mohave 15:catalina, 16:bigsur
         ]);
         if(buildso)
-            this.AddFlags(this.GetRole(), ["-dylib"]);
+            this.AddFlags(this.GetRole(), ["-fPIC", "-shared"]);
         // else "-execute" (the default)
     }
 

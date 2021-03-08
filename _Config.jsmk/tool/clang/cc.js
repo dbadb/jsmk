@@ -35,9 +35,9 @@ const ToolCli = jsmk.Require("tool_cli.js").Tool;
 //  -nostdinc, nostdlibinc, -nobuiltininc
 class Clang extends ToolCli
 {
-    constructor(ts, nm, asCPP=false)
+    constructor(ts, nm, asCpp=false)
     {
-        let exe = asCPP ? "clang++" : "clang";
+        let exe = asCpp ? "clang++" : "clang";
         let exepath = jsmk.path.join(ts.BuildVars.MACOSX_BIN, exe);
         let arg0 = jsmk.path.resolveExeFile(exepath);
         if(!arg0) throw new Error(`Can't resolve ${exe} ${ts.BuildVar.MACOSX_BIN}`);
@@ -63,11 +63,13 @@ class Clang extends ToolCli
             },
         });
 
+        let std = asCpp ? "-std=gnu++14" : "-std=gnu11";
         this.AddFlags(this.GetRole(), 
         [
             "-c",
+            std,
             ["-isysroot", "${MACOSX_SDK}"],     
-            ["-mmacosx-version-min=10.15"], // 14:mohave 15:catalina, 16:bigsur
+            "-mmacosx-version-min=10.15", // 14:mohave 15:catalina, 16:bigsur
             "-Wall",
             "-ffast-math", // when not arm?
             "-MMD", // dependency file
