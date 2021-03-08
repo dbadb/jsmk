@@ -5,6 +5,7 @@ let ToolCli = jsmk.Require("tool_cli.js").Tool;
 //  the correct version relative to the executable (ie: chuck or a chugin).
 // https://medium.com/@donblas/fun-with-rpath-otool-and-install-name-tool-e3e41ae86172
 // http://clarkkromenaker.com/post/library-dynamic-loading-mac/ 
+// https://stackoverflow.com/questions/2092378/macosx-how-to-collect-dependencies-into-a-local-bundle
 class Link extends ToolCli
 {
     constructor(ts, buildso=false)
