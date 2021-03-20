@@ -193,8 +193,9 @@ class CopyFiles extends Tool
                         }
                         if(item.stats.isDirectory())
                         {
+                            // dst parent directory may not exist
                             jsmk.INFO("mkdir " + subpath);
-                            fs.mkdirSync(outpath);
+                            fs.mkdirSync(outpath, { recursive: true });
                         }
                         else
                         {
