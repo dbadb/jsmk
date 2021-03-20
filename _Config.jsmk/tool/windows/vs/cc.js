@@ -29,7 +29,7 @@ class cl extends ToolCli
         this.AddFlags(this.GetRole(), [
             "-c",
             "-EHsc", // C++ exceptions
-            "-fp:precise",
+            // "-fp:precise",
             "-Gd",   // specifies __cdecl calling convention for ...
             "-Gm-", // minimal rebuild disabled (for now)
             // "-GR-", // disabled RTTI  (leave this to projects)
