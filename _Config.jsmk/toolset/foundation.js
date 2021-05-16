@@ -28,6 +28,17 @@ class Foundation extends Toolset
             printenv: new Printenv(this),
 
             // general development -------------------
+            npmcmd: new ToolCli(this, "npmcmd", 
+                        {
+                            Role: "Compile",
+                            ActionStage: "build",
+                            Invocation: 
+                            [
+                                (process.platform == "win32") ? "npm.cmd" : "npm",
+                                "${ARGUMENTS}"
+                            ],
+                            Semantics: Tool.Semantics.CustomTrigger
+                        }),
             buildscript: new ToolCli(this, "buildscript", 
                         {
                             Role: "Compile",
