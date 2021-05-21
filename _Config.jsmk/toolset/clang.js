@@ -11,7 +11,7 @@ class Clang extends Foundation
         }, opts);
         let toolChain = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain";
         let devPlatform = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer";
-        let sdk = `${devPlatform}/SDKs/MacOSX11.1.sdk`;
+        let sdk = `${devPlatform}/SDKs/MacOSX11.3.sdk`;
 
         let map = {};
         map.BuildVars =
