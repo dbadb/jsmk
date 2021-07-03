@@ -84,6 +84,8 @@ class ElfSizes extends ToolCli
         let arg0 = jsmk.path.resolveExeFile(python);
         if(!arg0) 
             throw new Error("Can't resolve python3 executable " + python);
+        else
+            jsmk.DEBUG("ElfSizes using python here:" + arg0);
         super(ts, "esp8266/sizes", 
         {
             Role: ToolCli.Role.Report,
