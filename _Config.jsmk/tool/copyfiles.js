@@ -31,9 +31,17 @@ class CopyFiles extends Tool
             // console.log("rootdir " + rootdir);
             let idir = jsmk.path.join(rootdir, config.installdir);
             let outputs = [];
+            let inputsFiltered = [];
             for(let input of config.inputs)
             {
                 let infile = jsmk.path.basename(input);
+                if(config.ignore && config.ignore.test(input))
+                {
+                    jsmk.INFO("copyfiles ignoring " + input);
+                    continue;
+                }
+                else
+                    inputsFiltered.push(input)
                 let outfile = jsmk.path.join(idir, infile);
                 if(config.installext)
                 {
@@ -44,6 +52,7 @@ class CopyFiles extends Tool
                 }
                 outputs.push(outfile);
             }
+            config.inputs = inputsFiltered;
             config.outputs = outputs;
             // let inputs and outputs remain on config
             delete config.installdir;
