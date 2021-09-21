@@ -16,6 +16,8 @@
         "klaw": "^3.0.0",
         "klaw-sync": "^6.0.0",
         "minimist": "^1.2.5",
+        "rimraf": "^3.0.2",
+        "through2": "^4.0.2",
         "winston": "~2.4.5"
     }
 }
