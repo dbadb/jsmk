@@ -94,9 +94,11 @@ class CopyFiles extends Tool
     {
         let w;
         let ignore = params ? params.ignore : null;
+        let quiet = params ? params.quiet : false;
         if(ignore && ignore.test(infile))
         {
-            jsmk.INFO(`ignoring: ${infile}`);
+            if(!quiet)
+                jsmk.INFO(`ignoring: ${infile}`);
             w = new Promise((resolve, reject) => { resolve(0); });
             w._name = "copyfile (ignore)";
             return w;
@@ -113,7 +115,7 @@ class CopyFiles extends Tool
             let istat = fs.lstatSync(infile);
             if(istat.isDirectory())
             {
-                return this.deepCopy(infile, outfile, ignore); // single task
+                return this.deepCopy(infile, outfile, params); // single task
             }
             else
                 w = fse.copy(infile, outfile); // returns a promise
@@ -151,8 +153,10 @@ class CopyFiles extends Tool
         return w;
     }
 
-    deepCopy(indir, outdir, ignore)
+    deepCopy(indir, outdir, params)
     {
+        let ignore = params ? params.ignore : null;
+        let quiet = params ? params.quiet : false;
         return new Promise((resolve, reject) =>
         {
             let inroot = indir;
@@ -192,7 +196,8 @@ class CopyFiles extends Tool
                 let subpath = item.path.substr(inroot.length + 1);
                 if(ignore && ignore.test(subpath))
                 {
-                    jsmk.INFO("deepCopy ignoring " + subpath);
+                    if(!quiet)
+                        jsmk.INFO("deepCopy ignoring " + subpath);
                     return;
                 }
                 let dirty = false;
@@ -241,7 +246,8 @@ class CopyFiles extends Tool
                     }
                     else
                     {
-                        jsmk.INFO(`copy to ${subpath}`);
+                        if(!quiet)
+                            jsmk.INFO(`copy to ${subpath}`);
                         try
                         {
                             fs.copyFileSync(item.path, outpath);
