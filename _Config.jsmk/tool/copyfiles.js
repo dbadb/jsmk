@@ -3,7 +3,6 @@ let Tool = jsmk.Require("tool.js").Tool;
 let fs = require("fs");
 let fse = require("fs-extra");
 let klaw = require("klaw");
-let through2 = require("through2");
 let path = require("path");
 
 class CopyFiles extends Tool
