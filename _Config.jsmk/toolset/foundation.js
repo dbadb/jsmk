@@ -25,6 +25,9 @@ class Foundation extends Toolset
             install:    new CopyFiles(this, "<novers>", {
                             ActionStage: "install"
                         }),
+            copypackage: new CopyFiles(this, "<novers>", {
+                            ActionStage: "package"
+                        }),
             printenv: new Printenv(this),
 
             // general development -------------------
@@ -44,28 +47,40 @@ class Foundation extends Toolset
                             Role: "Compile",
                             ActionStage: "build",
                             Invocation: ["node", "${ARGUMENTS}"],
-                            Semantics: Tool.Semantics.CustomTrigger
+                            Semantics: Tool.Semantics.CustomTrigger,
+                            LiveOutput: true
                         }),
             preinstallscript: new ToolCli(this, "preinstallscript", 
                         {
                             Role: "Archive",
                             ActionStage: "preinstall",
                             Invocation: ["node", "${ARGUMENTS}"],
-                            Semantics: Tool.Semantics.CustomTrigger
+                            Semantics: Tool.Semantics.CustomTrigger,
+                            LiveOutput: true
                         }),
             installscript: new ToolCli(this, "installscript", 
                         {
                             Role: "Archive",
                             ActionStage: "install",
                             Invocation: ["node", "${ARGUMENTS}"],
-                            Semantics: Tool.Semantics.CustomTrigger
+                            Semantics: Tool.Semantics.CustomTrigger,
+                            LiveOutput: true
                         }),
             packagescript: new ToolCli(this, "packagescript", 
                         {
                             Role: "Package",
                             ActionStage: "package",
                             Invocation: ["node", "${ARGUMENTS}"],
-                            Semantics: Tool.Semantics.CustomTrigger
+                            Semantics: Tool.Semantics.CustomTrigger,
+                            LiveOutput: true
+                        }),
+            repositscript: new ToolCli(this, "respositscript", 
+                        {
+                            Role: "Reposit",
+                            ActionStage: "reposit",
+                            Invocation: ["node", "${ARGUMENTS}"],
+                            Semantics: Tool.Semantics.CustomTrigger,
+                            LiveOutput: true
                         }),
 
             // for javascript development -------------------

@@ -21,16 +21,34 @@ class CopyFiles extends Tool
     ConfigureTaskSettings(task, config)
     {
         super.ConfigureTaskSettings(task);
+        let actionStage = task.GetActionStage();
         if(config.inputs && config.installdir)
         {
             let rootdir;
             if(config.installroot)
                 rootdir = task.Interpolate(config.installroot);
             else
-                rootdir = task.EvaluateBuildVar("InstallDir");
-            // console.log("rootdir " + rootdir);
+            {
+                switch(actionStage)
+                {
+                case "package":
+                    rootdir = task.EvaluateBuildVar("PackageDir");
+                    break;
+                case "install":
+                    rootdir = task.EvaluateBuildVar("InstallDir");
+                    break;
+                default:
+                    rootdir = task.EvaluateBuildVar("BuiltDir");
+                    break;
+                }
+            }
+
             let idir = jsmk.path.join(rootdir, config.installdir);
             let outputs = [];
+            if(!Array.isArray(config.inputs))
+            {
+                throw new Error(task.GetName() + ".inputs must be an array");
+            }
             for(let input of config.inputs)
             {
                 let infile = jsmk.path.basename(input);
@@ -44,12 +62,18 @@ class CopyFiles extends Tool
                 }
                 outputs.push(outfile);
             }
+            if(actionStage == "package")
+            {
+                jsmk.NOTICE("copyfiles " + 
+                    config.inputs + " to " + config.outputs);
+            }
             config.outputs = outputs;
+            config.rootdir = rootdir;
             // let inputs and outputs remain on config
             delete config.installdir;
             delete config.installext;
 
-            // jsmk.DEBUG(this.m_actionStage + " to " + idir);
+            // jsmk.NOTICE(this.m_actionStage + " to " + idir);
             // (installdir is usually to _Root/toolset/Product/...)
         }
     }
