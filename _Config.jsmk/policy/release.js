@@ -1,4 +1,4 @@
-var Policy = require("./default.js");
+var {Policy} = require("./default.js");
 
 class ReleasePolicy extends Policy
 {

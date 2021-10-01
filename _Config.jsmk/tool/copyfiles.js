@@ -228,6 +228,7 @@ class CopyFiles extends Tool
                 let outpath = path.join(outroot, subpath);
                 if(!fs.existsSync(outpath))
                 {
+                    // jsmk.INFO("  creating " + outpath);
                     dirty = true;
                 }
                 else
@@ -235,7 +236,10 @@ class CopyFiles extends Tool
                 {
                     let ostat = fs.lstatSync(outpath);
                     if(item.stats.mtime > ostat.mtime)
+                    {
+                        // jsmk.INFO("  newer " + outpath);
                         dirty = true;
+                    }
                     nfiles++;
                 }
                 else
@@ -265,7 +269,7 @@ class CopyFiles extends Tool
                     if(item.stats.isDirectory())
                     {
                         // dst parent directory may not exist
-                        jsmk.INFO("mkdir " + subpath);
+                        jsmk.INFO("mkdir " + subpath.length ? subpath : outpath);
                         fs.mkdirSync(outpath, { recursive: true });
                     }
                     else
