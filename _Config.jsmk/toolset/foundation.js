@@ -61,14 +61,6 @@ class Foundation extends Toolset
                             Semantics: Tool.Semantics.CustomTrigger,
                             LiveOutput: true
                         }),
-            preinstallscript: new ToolCli(this, "preinstallscript", 
-                        {
-                            Role: "Archive",
-                            ActionStage: "preinstall",
-                            Invocation: ["node", "${ARGUMENTS}"],
-                            Semantics: Tool.Semantics.CustomTrigger,
-                            LiveOutput: true
-                        }),
             installscript: new ToolCli(this, "installscript", 
                         {
                             Role: "Archive",
