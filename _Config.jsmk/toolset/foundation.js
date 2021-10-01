@@ -31,6 +31,17 @@ class Foundation extends Toolset
             printenv: new Printenv(this),
 
             // general development -------------------
+            cmd: new ToolCli(this, "cmd", 
+                        {
+                            Role: "Compile",
+                            ActionStage: "build", // task override via actionstage
+                            Invocation: 
+                            [
+                                "${ARGUMENTS}"
+                            ],
+                            Semantics: Tool.Semantics.CustomTrigger,
+                            LiveOutput: true
+                        }),
             npmcmd: new ToolCli(this, "npmcmd", 
                         {
                             Role: "Compile",
