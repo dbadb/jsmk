@@ -33,6 +33,7 @@ class Clang extends Foundation
         this.MergeToolMap(
             {
                 "cpp->o": new cc.CPP(this),
+                "mm->o": new cc.MM(this),
                 "c->o": new cc.CC(this),
                 "cpp.o->exe": new link.Link(this),
                 "y->c": new misc.YACC(this),

@@ -1,7 +1,7 @@
 const ToolCli = jsmk.Require("tool_cli.js").Tool;
 
-// Clang is a tool that provides cc or c++, toolset expected
-// to instantiate me twice setting asCC appropriately.
+// Clang is a tool that provides cc, mm or c++, toolset expected
+// to instantiate me thrice setting target appropriately.
 // cc --version:
 //  Apple clang version 12.0.0 (clang-1200.0.32.29)
 //  Target: x86_64-apple-darwin20.3.0
@@ -35,9 +35,14 @@ const ToolCli = jsmk.Require("tool_cli.js").Tool;
 //  -nostdinc, nostdlibinc, -nobuiltininc
 class Clang extends ToolCli
 {
-    constructor(ts, nm, asCpp=false)
+    constructor(ts, nm, target="c")
     {
-        let exe = asCpp ? "clang++" : "clang";
+        let exe = {
+            c: "clang",
+            cpp: "clang++",
+            mm: "clang++"
+        }[target];
+
         let exepath = jsmk.path.join(ts.BuildVars.MACOSX_BIN, exe);
         let arg0 = jsmk.path.resolveExeFile(exepath);
         if(!arg0) throw new Error(`Can't resolve ${exe} ${ts.BuildVar.MACOSX_BIN}`);
@@ -63,11 +68,15 @@ class Clang extends ToolCli
             },
         });
 
-        let std = asCpp ? "-std=gnu++14" : "-std=gnu11";
+        let std = {
+            "cpp": ["-std=gnu++14"], 
+            "c": ["-std=gnu11"],
+            "mm": ["-ObjC++", "-std=gnu++14"],
+        }[target];
         this.AddFlags(this.GetRole(), 
         [
             "-c",
-            std,
+            ...std,
             ["-isysroot", "${MACOSX_SDK}"],     
             "-mmacosx-version-min=10.15", // 14:mohave 15:catalina, 16:bigsur
             "-Wall",
@@ -151,12 +160,21 @@ class ClangPP extends Clang
 {
     constructor(toolset, nm)
     {
-        super(toolset, nm, true);
+        super(toolset, nm, "cpp");
+    }
+}
+
+class ClangMM extends Clang
+{
+    constructor(toolset, nm)
+    {
+        super(toolset, nm, "mm");
     }
 }
 
 exports.CC = Clang;
 exports.CPP = ClangPP;
+exports.MM = ClangMM;
 
 /* available cpus ---------------------------------------------------------
 
