@@ -11,7 +11,11 @@ class Clang extends Foundation
         }, opts);
         let toolChain = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain";
         let devPlatform = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer";
-        let sdk = `${devPlatform}/SDKs/MacOSX11.3.sdk`;
+
+        // NB: this always gets the latest install:
+        // If we want multiple SDKs installed, it's a manual operation and
+        // assist is symlinks.
+        let sdk = `${devPlatform}/SDKs/MacOSX.sdk`; 
 
         let map = {};
         map.BuildVars =
@@ -33,6 +37,7 @@ class Clang extends Foundation
         this.MergeToolMap(
             {
                 "cpp->o": new cc.CPP(this),
+                "mm->o": new cc.MM(this),
                 "c->o": new cc.CC(this),
                 "cpp.o->exe": new link.Link(this),
                 "y->c": new misc.YACC(this),

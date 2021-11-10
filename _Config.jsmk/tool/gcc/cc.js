@@ -20,14 +20,8 @@ class CC extends GCC
         this.AddFlags(this.GetRole(), [
                 "-c",
                 "-Wall",
-            ]);
-        if(ts.TargetArch.indexOf("_64") != -1)
-        {
-            this.AddFlags(this.GetRole(), 
-            [
                 "-fPIC",
             ]);
-        }
 
         this.AddSearchpaths( "Compile", []);
     } // end constructor
@@ -46,8 +40,8 @@ class CPP extends CC
         super(toolset, "g++");
         this.AddFlags(this.GetRole(), [
             // these are more about code-base
+            "-std=c++14",
             // "-fno-rtti", 
-            // "-std=gnu++0x",
             // "-felide-constructors",
         ]);
     }
