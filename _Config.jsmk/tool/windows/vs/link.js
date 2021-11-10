@@ -87,9 +87,6 @@ exports.Link = class Link extends ToolCli
         }
         else
         {
-            this.AddFlags(this.m_role, [
-                "/ENTRY:mainCRTStartup",
-            ]);
             // minimum set of libs required to successfully link...add'l
             // syslibs are provided by module/task (framework).
             // 
@@ -143,6 +140,21 @@ exports.Link = class Link extends ToolCli
     {
         // jsmk.DEBUG(`vslink ${this.m_name} configure task: ${task.GetName()}`);
         super.ConfigureTaskSettings(task)        ;
+
+        if(this.m_role == ToolCli.Role.Link)
+        {
+            if(task.BuildVars.WindowsApp)
+            {
+                // console.log("a windows app may have another /ENTRY");
+            }
+            else
+            {
+                task.AddFlags(this.m_role, [
+                    "/ENTRY:mainCRTStartup",
+                ]);
+            }
+        }
+
         switch(task.BuildVars.Deployment)
         {
         case "debug":

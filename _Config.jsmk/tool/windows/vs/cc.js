@@ -37,6 +37,7 @@ class cl extends ToolCli
             "-Gy", // separate functions for linker
             "-W3", // warning level
             "-WX-", // warnings aren't errors
+            "-std:c++14", // it *is* 2021, and this is required for vst plugins
             asCC ?  "-TC" : "-TP",
             "-Zc:inline", //
             "-Zc:wchar_t",
