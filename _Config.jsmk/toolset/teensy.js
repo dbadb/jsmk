@@ -3,7 +3,8 @@ var Foundation = require("./foundation.js").Foundation;
 
 class Teensy extends Foundation
 {
-    // arch may include 'fields' to produce build variants
+    // arch is set by tschooser.
+    // arch may include '_'-separated 'fields' to produce build variants.
     // used eg to select CPUFREQ since the entire core needs to agree on clockspeed
     constructor(arch="teensyLC", ardroot="${HOME}/Documents/arduino-1.8.12")
     {
@@ -20,10 +21,10 @@ class Teensy extends Foundation
         let archbase = archfields[0]; // teens40_oc
         let teensycore = 
         {
-        "teensy41": t4src,
-        "teensy40": t4src,
-        "teensy31": t3src,
-        "teensyLC": t3src,
+            "teensy41": t4src,
+            "teensy40": t4src,
+            "teensy31": t3src,
+            "teensyLC": t3src,
         }[archbase];
 
         map.BuildVars =
