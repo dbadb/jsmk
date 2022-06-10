@@ -154,14 +154,14 @@ class cl extends ToolCli
             let depfileMap = {};
             let lines = txt.split(/\r?\n/);
             let result = [];
-            let rootDir = task.GetRootDir();
+            let rootDir = task.GetRootDir().toLowerCase();
             let quiet = true;
             for(let i in lines)
             {
                 let line = lines[i];
                 if(line.indexOf("Note: including file:") == 0)
                 {
-                    let filename = jsmk.path.normalize(line.split(/ +/).slice(3).join(" "));
+                    let filename = jsmk.path.normalize(line.split(/ +/).slice(3).join(" ")).toLowerCase();
                     if(jsmk.path.issubdir(filename, rootDir))
                     {
                         if(depfileMap[filename] === undefined)
@@ -169,8 +169,10 @@ class cl extends ToolCli
                             depfileMap[filename] = true;
                         }
                     }
-                    //else
-                    //    jsmk.NOTICE("skipping dependency: " + filename + ` (${rootDir})`);
+                    else
+                    {
+                       // jsmk.NOTICE("skipping dependency: " + filename + ` (${rootDir})`);
+                    }
                 }
                 else
                 {
