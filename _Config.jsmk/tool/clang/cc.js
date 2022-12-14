@@ -81,6 +81,7 @@ class Clang extends ToolCli
                 "-mmacosx-version-min=10.15", // 14:mohave 15:catalina, 16:bigsur
             ],
             win32: [
+                "-DWIN32"
             ]
         }[platform];
         this.AddFlags(this.GetRole(), 

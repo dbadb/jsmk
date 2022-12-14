@@ -4,73 +4,69 @@
 //   Studio IDE crashes on urchin. (!!)
 var Foundation = require("./foundation.js").Foundation;
 
+const sdkVers = "10.0.22000.0";
+const vcVers = "14.34.31933";
+const vsDir = "C:/Program Files/Microsoft Visual Studio/2022/Community/";
+const sdkRoot = "C:/Program Files (x86)/Windows Kits";
+const msvcDir = `${vsDir}/VC/Tools/MSVC/${vcVers}`;
+
+const Config = {};
+Config[Foundation.Arch.x86_64] = getConfig("x64");
+Config[Foundation.Arch.x86_32] = getConfig("x32");
+Config.x64 = getConfig("x64"); // toolset.Arch more precise than Host.Arch
+Config.x32 = getConfig("x32");
+
+function getConfig(arch)
+{
+    let c = {
+        msvcLibDir : `${msvcDir}/Lib/${arch}`, // delayimp.lib
+        msvcIncDir : `${msvcDir}/include`, // std library headers
+        sdkBinDir : `${sdkRoot}/10/bin/${sdkVers}/${arch}`,
+        sdkIncUmDir : `${sdkRoot}/10/Include/${sdkVers}/um`, // windows.h
+        sdkIncSharedDir : `${sdkRoot}/10/Include/${sdkVers}/shared`, // winapifamily.h
+        sdkIncCrtDir : `${sdkRoot}/10/Include/${sdkVers}/ucrt`,
+        sdkLibUmDir : `${sdkRoot}/10/Lib/${sdkVers}/um/${arch}`, // dsound.lib
+        sdkLibCrtDir : `${sdkRoot}/10/Lib/${sdkVers}/ucrt/${arch}`,
+    }
+    // toolsDir is where cl, link, lib, etc are (including llvm fwiw)
+    // here x64 refers to build-host
+    c.toolsDir = jsmk.path.join(msvcDir, "bin/Hostx64", arch);
+    // ideDir is places where IDE runtimes (dll are found 
+    // (offref, VsRegistryDetour) (usefulness ?)
+    c.ideDir = jsmk.path.join(vsDir, "Common7/IDE", arch);
+    c.INCLUDE = `${c.msvcIncDir};${c.sdkIncUmDir};${c.sdkIncSharedDir};${c.sdkIncCrtDir};`;
+    c.LIB = `${c.msvcLibDir};${c.sdkLibUmDir};${c.sdkLibCrtDir}`;
+    return c;
+}
+
+exports.Config = Config;
+
 exports.Toolset = class vs22 extends Foundation
 {
     constructor(arch)
     {
         super(__filename, "vs22", arch);
 
-        let sdkVers = "10.0.22000.0";
-        let vcVers = "14.34.31933";
-        let vsDir = "C:/Program Files/Microsoft Visual Studio/2022/Community/";
-        let sdkRoot = "C:/Program Files (x86)/Windows Kits";
-
-        let archVariant = (arch === Foundation.Arch.x86_64) ? "x64" : "x32"; // XXX arm64, ...
-        var msvcDir = `${vsDir}/VC/Tools/MSVC/${vcVers}`;
-        var msvcLibDir = `${msvcDir}/Lib/${archVariant}`; // delayimp.lib
-        var msvcIncDir = `${msvcDir}/include`; // std library headers
-        var sdkBinDir = `${sdkRoot}/10/bin/${sdkVers}/${archVariant}`;
-        var sdkIncUmDir = `${sdkRoot}/10/Include/${sdkVers}/um`; // windows.h
-        var sdkIncSharedDir = `${sdkRoot}/10/Include/${sdkVers}/shared`; // winapifamily.h
-        var sdkIncCrtDir = `${sdkRoot}/10/Include/${sdkVers}/ucrt`;
-        var sdkLibUmDir = `${sdkRoot}/10/Lib/${sdkVers}/um/${archVariant}`; // dsound.lib
-        var sdkLibCrtDir = `${sdkRoot}/10/Lib/${sdkVers}/ucrt/${archVariant}`;
-
-        // add'l archVariant: arm64, arm
-        // nb: we wish to support:
-        //  gitbash: 
-        //      * node is native windows, and accepts c:/ and /mnt/c/
-        //  wsl..
-        //      * node is linux build, doesn't understand c:/
-        //  
-        //  In both cases, external programs (like cl.exe) aren't aware
-        //  of /mnt.  Basic idea is that we need to differentiate between
-        //  paths that node can understand and paths that external programs
-        //  understand.
-
-        // toolsDir is where cl, link, lib, etc are (including llvm fwiw)
-        let toolsDir = jsmk.path.join(msvcDir, "bin/Hostx64", archVariant);
-        // ideDir is places where IDE runtimes (dll are found 
-        // (offref, VsRegistryDetour) (usefulness ?)
-        let ideDir = jsmk.path.join(vsDir, "Common7/IDE", archVariant);
         // sdkToolsDir is location for, eg rc.exe and other tools
         var map = {};
         map.BuildVars =
         {
             VSRootDir: vsDir,
             VSSDKDir: sdkRoot, // unused ?
-            VSToolsDir: toolsDir,
-            VSIDEDir: ideDir,
-            VSSDKToolsDir: sdkBinDir, // eg: rc.exe
+            VSToolsDir: Config[arch].toolsDir,
+            VSIDEDir: Config[arch].ideDir,
+            VSSDKToolsDir: Config[arch].sdkBinDir, // eg: rc.exe
         };
         map.EnvMap =
         {
-            // these paths obtained via vcvars64.bat
-            // via the menu: x64 Native Tools Prompt for VS2017
-            x64: {
-                INCLUDE: `${msvcIncDir};${sdkIncUmDir};${sdkIncSharedDir};${sdkIncCrtDir};`,
-                LIB: `${msvcLibDir};${sdkLibUmDir};${sdkLibCrtDir}`,
-                //LIB: "\14.16.27023\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.6.1\\lib\\um\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.17763.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.17763.0\\um\\x64;",
-                //LIBPATH: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Tools\\MSVC\\14.16.27023\\lib\\x64;C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Tools\\MSVC\\14.16.27023\\lib\\x86\\store\\references;C:\\Program Files (x86)\\Windows Kits\\10\\UnionMetadata\\10.0.17763.0;C:\\Program Files (x86)\\Windows Kits\\10\\References\\10.0.17763.0;C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319;",
-                //WSLENV: "INCLUDE/w:LIB/w:LIBPATH/w",
-                // https://blogs.msdn.microsoft.com/commandline/2017/12/22/share-environment-vars-between-wsl-and-windows/
-            },
+            INCLUDE: Config[arch].INCLUDE,
+            LIB: Config[arch].LIB,
             // XXX: add 32bit
-        }[archVariant];
+        };
 
         this.MergeSettings(map);
 
-        let vers = "17";
+        let vers = "22";
         let dir = "tool/windows/vs/";
         let ccmod = jsmk.LoadConfig(dir+"cc.js");
         let CC = new ccmod.CC(this, vers);

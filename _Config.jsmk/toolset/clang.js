@@ -1,4 +1,6 @@
 const Foundation = require("./foundation.js").Foundation;
+const WinConfig = require("./vs22.js").Config;
+
 
 class Clang extends Foundation
 {
@@ -9,6 +11,9 @@ class Clang extends Foundation
             arch: jsmk.GetHost().Arch,
             vers: "", // toolset version (ie: clang 12.0.0)
         }, opts);
+        let arch = cfg.arch;
+        console.log("clang arch: " + arch);
+        console.log("clang WinConfig " + JSON.stringify(WinConfig));
         let map = {};
         let platform = jsmk.GetHost().Platform;
         if(platform == "darwin")
@@ -33,12 +38,17 @@ class Clang extends Foundation
         else
         if(platform == "win32")
         {
+            // clang on windows requires stadnard windows setup
             map.BuildVars =  {
                 CLANG_BIN: "C:/Program Files/LLVM/bin"
             };
+            map.EnvMap = {
+                INCLUDE: WinConfig[arch].INCLUDE,
+                LIB: WinConfig[arch].LIB,
+            };
         }
         else
-            throw new Exception("unknown platfomr " + platform);
+            throw new Exception("unknown platform " + platform);
         super(__filename, "clang"+cfg.vers, cfg.arch);
         
         this.MergeSettings(map);
