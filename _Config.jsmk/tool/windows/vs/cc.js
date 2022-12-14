@@ -32,7 +32,7 @@ class cl extends ToolCli
             // "-fp:precise",
             "-Gd",   // specifies __cdecl calling convention for ...
             "-Gm-", // minimal rebuild disabled (for now)
-            // "-GR-", // disabled RTTI  (leave this to projects)
+            "-GR-", // disabled RTTI  (leave this to projects)
             "-GS-", // no security checks
             "-Gy", // separate functions for linker
             "-W3", // warning level

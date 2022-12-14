@@ -9,23 +9,36 @@ class Clang extends Foundation
             arch: jsmk.GetHost().Arch,
             vers: "", // toolset version (ie: clang 12.0.0)
         }, opts);
-        let toolChain = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain";
-        let devPlatform = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer";
-
-        // NB: this always gets the latest install:
-        // If we want multiple SDKs installed, it's a manual operation and
-        // assist is symlinks.
-        let sdk = `${devPlatform}/SDKs/MacOSX.sdk`; 
-
         let map = {};
-        map.BuildVars =
+        let platform = jsmk.GetHost().Platform;
+        if(platform == "darwin")
         {
-            MACOSX_TOOLCHAIN: toolChain,
-            MACOSX_SDK: sdk,
-            MACOSX_BIN: `${toolChain}/usr/bin`,
-            MACOSX_INC: `${sdk}/usr/include`,
-            MACOSX_LIB: `${sdk}/usr/lib`,
-        };
+            let toolChain = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain";
+            let devPlatform = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer";
+
+            // NB: this always gets the latest install:
+            // If we want multiple SDKs installed, it's a manual operation and
+            // assist is symlinks.
+            let sdk = `${devPlatform}/SDKs/MacOSX.sdk`; 
+            map.BuildVars = 
+            {
+                MACOSX_TOOLCHAIN: toolChain,
+                MACOSX_SDK: sdk,
+                MACOSX_BIN: `${toolChain}/usr/bin`,
+                CLANG_BIN: `${toolChain}/usr/bin`,
+                MACOSX_INC: `${sdk}/usr/include`,
+                MACOSX_LIB: `${sdk}/usr/lib`,
+            };
+        }
+        else
+        if(platform == "win32")
+        {
+            map.BuildVars =  {
+                CLANG_BIN: "C:/Program Files/LLVM/bin"
+            };
+        }
+        else
+            throw new Exception("unknown platfomr " + platform);
         super(__filename, "clang"+cfg.vers, cfg.arch);
         
         this.MergeSettings(map);
@@ -37,16 +50,22 @@ class Clang extends Foundation
         this.MergeToolMap(
             {
                 "cpp->o": new cc.CPP(this),
-                "mm->o": new cc.MM(this),
                 "c->o": new cc.CC(this),
                 "cpp.o->exe": new link.Link(this),
-                "y->c": new misc.YACC(this),
-                "lex->c": new misc.LEX(this),
                 "cpp.o->so": new link.Link(this, true),
                 "o->a": new misc.AR(this),
             }
         );
-        jsmk.DEBUG("osx/clang toolset loaded");
+        if(platform == "darwin")
+        {
+            this.MergeToolMap(
+            {
+                "mm->o": new cc.MM(this),
+                "y->c": new misc.YACC(this),
+                "lex->c": new misc.LEX(this),
+            });
+        }
+        jsmk.DEBUG("clang toolset loaded");
     }
 }
 

@@ -10,12 +10,13 @@ class Link extends ToolCli
 {
     constructor(ts, buildso=false)
     {
+        let platform = jsmk.GetHost().Platform;
         let exe = "clang++";
-        let exepath = jsmk.path.join(ts.BuildVars.MACOSX_BIN, exe);
+        let exepath = jsmk.path.join(ts.BuildVars.CLANG_BIN, exe);
         let arg0 = jsmk.path.resolveExeFile(exepath);
-        if(!arg0) throw new Error(`Can't resolve ${exe} ${ts.BuildVar.MACOSX_BIN}`);
+        if(!arg0) throw new Error(`Can't resolve ${exe} ${ts.BuildVar.CLANG_BIN}`);
 
-        super(ts, "osx/link",
+        super(ts, "clang/link",
             {
                 Role: ToolCli.Role.Link,
                 Semantics: ToolCli.Semantics.ManyToOne,
@@ -31,11 +32,15 @@ class Link extends ToolCli
                 },
             }
         );
-        this.AddFlags(this.GetRole(),
-        [
-            ["-isysroot", "${MACOSX_SDK}"],     
-            "-mmacosx-version-min=10.15", // 14:mohave 15:catalina, 16:bigsur
-        ]);
+        let flags = {
+            darwin: [
+                ["-isysroot", "${MACOSX_SDK}"],     
+                "-mmacosx-version-min=10.15", // 14:mohave 15:catalina, 16:bigsur
+            ],
+            win32: [
+            ]
+        }[platform];
+        this.AddFlags(this.GetRole(), flags);
         if(buildso)
             this.AddFlags(this.GetRole(), ["-fPIC", "-shared"]);
         // else "-execute" (the default)

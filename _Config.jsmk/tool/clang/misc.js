@@ -46,10 +46,11 @@ class AR extends ToolCli
 {
     constructor(ts)
     {
-        let exe = "ar";
-        let exepath = jsmk.path.join(ts.BuildVars.MACOSX_BIN, exe);
+        let platform = jsmk.GetHost().Platform;
+        let exe = (platform == "darwin") ? "ar" : "llvm-ar";
+        let exepath = jsmk.path.join(ts.BuildVars.CLANG_BIN, exe);
         let arg0 = jsmk.path.resolveExeFile(exepath);
-        if(!arg0) throw new Error(`Can't resolve ${exe} ${ts.BuildVar.MACOSX_BIN}`);
+        if(!arg0) throw new Error(`Can't resolve ${exe} ${ts.BuildVar.CLANG_BIN}`);
         super(ts, "darwin/ar", {
             Role:  ToolCli.Role.Archive,
             ActionStage: "build",

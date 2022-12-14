@@ -43,9 +43,10 @@ class Clang extends ToolCli
             mm: "clang++"
         }[target];
 
-        let exepath = jsmk.path.join(ts.BuildVars.MACOSX_BIN, exe);
+        let platform = jsmk.GetHost().Platform;
+        let exepath = jsmk.path.join(ts.BuildVars.CLANG_BIN, exe);
         let arg0 = jsmk.path.resolveExeFile(exepath);
-        if(!arg0) throw new Error(`Can't resolve ${exe} ${ts.BuildVar.MACOSX_BIN}`);
+        if(!arg0) throw new Error(`Can't resolve ${exe} ${ts.BuildVar.CLANG_BIN}`);
         super(ts, nm, 
         {
             Role: ToolCli.Role.Compile,
@@ -73,12 +74,20 @@ class Clang extends ToolCli
             "c": ["-std=gnu11"],
             "mm": ["-ObjC++", "-std=gnu++14"],
         }[target];
+
+        let pflags = {
+            darwin: [
+                ["-isysroot", "${MACOSX_SDK}"],     
+                "-mmacosx-version-min=10.15", // 14:mohave 15:catalina, 16:bigsur
+            ],
+            win32: [
+            ]
+        }[platform];
         this.AddFlags(this.GetRole(), 
         [
             "-c",
             ...std,
-            ["-isysroot", "${MACOSX_SDK}"],     
-            "-mmacosx-version-min=10.15", // 14:mohave 15:catalina, 16:bigsur
+            ...pflags,
             "-Wall",
             "-ffast-math", // when not arm?
             "-MMD", // dependency file
