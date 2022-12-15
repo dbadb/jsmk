@@ -35,6 +35,11 @@ class GCC extends ToolCli
             },
         };
         super(ts, nm, config);
+        this.target = (nm.indexOf("+") == -1) ? "c" : "cpp";
+        this.defaultStd = {
+            "cpp": "c++14", 
+            "c": null,
+        }[this.target];
         this.AddFlags(this.GetRole(),
         [
            "-MMD", // for mkdep
@@ -45,6 +50,24 @@ class GCC extends ToolCli
     {
         super.ConfigureTaskSettings(task);
         let flags = [];
+
+        switch(this.target)
+        {
+        case "c":
+            {
+                let std = task.BuildVars.CStd || this.defaultStd;
+                if(std)
+                    flags.push(`-std=${std}`);
+            }
+            break;
+        case "cpp":
+            {
+                let std = task.BuildVars.CppStd || this.defaultStd;
+                if(std)
+                    flags.push(`-std=${std}`);
+            }
+            break;
+        }
 
         // Optimize for size. -Os enables all -O2 optimizations except 
         // those that often increase code size.  A Project/Root can

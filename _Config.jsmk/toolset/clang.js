@@ -12,8 +12,8 @@ class Clang extends Foundation
             vers: "", // toolset version (ie: clang 12.0.0)
         }, opts);
         let arch = cfg.arch;
-        console.log("clang arch: " + arch);
-        console.log("clang WinConfig " + JSON.stringify(WinConfig));
+        // console.log("clang arch: " + arch);
+        // console.log("clang WinConfig " + JSON.stringify(WinConfig));
         let map = {};
         let platform = jsmk.GetHost().Platform;
         if(platform == "darwin")

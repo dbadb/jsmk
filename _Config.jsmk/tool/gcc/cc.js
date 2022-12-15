@@ -37,10 +37,9 @@ class CPP extends CC
 {
     constructor(toolset)
     {
-        super(toolset, "g++");
+        super(toolset, "g++"); // super is gcc
         this.AddFlags(this.GetRole(), [
             // these are more about code-base
-            "-std=c++14",
             // "-fno-rtti", 
             // "-felide-constructors",
         ]);

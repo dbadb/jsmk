@@ -35,8 +35,8 @@ const ToolCli = jsmk.Require("tool_cli.js").Tool;
 //  -nostdinc, nostdlibinc, -nobuiltininc
 class Clang extends ToolCli
 {
-    constructor(ts, nm, target="c")
-    {
+    constructor(ts, nm, target="c") // constructor called below
+    { 
         let exe = {
             c: "clang",
             cpp: "clang++",
@@ -69,26 +69,28 @@ class Clang extends ToolCli
             },
         });
 
-        let std = {
-            "cpp": ["-std=gnu++14"], 
-            "c": ["-std=gnu11"],
-            "mm": ["-ObjC++", "-std=gnu++14"],
-        }[target];
-
-        let pflags = {
+        this.target = target;
+        let xflags = {
             darwin: [
                 ["-isysroot", "${MACOSX_SDK}"],     
                 "-mmacosx-version-min=10.15", // 14:mohave 15:catalina, 16:bigsur
             ],
             win32: [
-                "-DWIN32"
+                "-DWIN32",
+                "-D_WIN32"
             ]
         }[platform];
+        if(this.target == "mm")
+            xflags.push("-ObjC++");
+        this.defaultStd = {
+            "cpp": "gnu++14", 
+            "c": "gnu11",
+            "mm": "gnu++14",
+        }[this.target];
         this.AddFlags(this.GetRole(), 
         [
             "-c",
-            ...std,
-            ...pflags,
+            ...xflags,
             "-Wall",
             "-ffast-math", // when not arm?
             "-MMD", // dependency file
@@ -100,9 +102,26 @@ class Clang extends ToolCli
         super.ConfigureTaskSettings(task);
         let flags = [];
 
+        switch(this.target)
+        {
+        case "c":
+            {
+                let std = task.BuildVars.CStd || this.defaultStd;
+                flags.push(`-std=${std}`);
+            }
+            break;
+        case "cpp":
+            {
+                let std = task.BuildVars.CppStd || this.defaultStd;
+                flags.push(`-std=${std}`);
+            }
+            break;
+        }
+
         // Optimize for size. -Os enables all -O2 optimizations except 
         // those that often increase code size.  A Project/Root can
         // specify a default optimization regardless of Deployment.
+
         switch(task.BuildVars.OPTIMIZATION)
         {
         case "Size":

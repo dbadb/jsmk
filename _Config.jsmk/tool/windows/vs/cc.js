@@ -26,18 +26,24 @@ class cl extends ToolCli
                     },
             });
 
+        this.target = asCC ? "c" : "cpp";
+        this.defaultStd = {
+            "cpp": "c++14", 
+            "c": null,
+        }[this.target];
+
         this.AddFlags(this.GetRole(), [
             "-c",
             "-EHsc", // C++ exceptions
             // "-fp:precise",
             "-Gd",   // specifies __cdecl calling convention for ...
             "-Gm-", // minimal rebuild disabled (for now)
-            "-GR-", // disabled RTTI  (leave this to projects)
+            // "-GR-", // disabled RTTI  (leave this to projects)
             "-GS-", // no security checks
             "-Gy", // separate functions for linker
             "-W3", // warning level
             "-WX-", // warnings aren't errors
-            "-std:c++14", // it *is* 2021, and this is required for vst plugins
+            "-Zc:__cplusplus", // https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
             asCC ?  "-TC" : "-TP",
             "-Zc:inline", //
             "-Zc:wchar_t",
@@ -54,13 +60,32 @@ class cl extends ToolCli
     ConfigureTaskSettings(task)
     {
         super.ConfigureTaskSettings(task);
+
+        let flags = [];
+        let defs = {};
+        switch(this.target)
+        {
+        case "c":
+            {
+                let std = task.BuildVars.CStd || this.defaultStd;
+                if(std)
+                    flags.push(`-std:${std}`);
+            }
+            break;
+        case "cpp":
+            {
+                let std = task.BuildVars.CppStd || this.defaultStd;
+                if(std)
+                    flags.push(`-std:${std}`);
+            }
+            break;
+        }
+
         switch(task.BuildVars.Deployment)
         {
         case "debug":
-            task.Define({
-                "_DEBUG": null,
-            });
-            task.AddFlags(this.GetRole(), [
+            defs._DEBUG = null;
+            flags.push(...[
                 "-Fd${DSTFILE}.pdb",
                 "-MDd", // debugging dynamic c runtime (crt)
                 "-Ob0", // inline expansion
@@ -70,20 +95,16 @@ class cl extends ToolCli
             ]);
             break;
         case "release":
-            task.Define({
-                "NDEBUG": null,
-            });
-            task.AddFlags(this.GetRole(), [
+            defs.NDEBUG = null;
+            flags.push(...[
                 "-MD", // non-debugging dynamic crt
                 "-O2",
                 "-Ob2", // inline expansion
             ]);
             break;
         case "releasesym":
-            task.Define({
-                "NDEBUG": null,
-            });
-            task.AddFlags(this.GetRole(), [
+            defs.NDEBUG = null;
+            flags.push(...[
                 "-MD", // non-debugging crt
                 "-O2",
                 "-Ob1", // inline expansion
@@ -95,32 +116,31 @@ class cl extends ToolCli
         let config = task.GetToolConfig();
         if(config)
         {
-            let flags, defs;
             switch(config.isa)
             {
             case "SSE2":
-                flags = ["-QxSSE2"];
+                flags.push("-QxSSE2");
                 break;
             case "SSE3":
-                flags = ["-QxSSE3"];
+                flags = flags.push("QxSSE3");
                 break;
             case "SSE42":
-                flags = ["-QxSSE4.2"];
+                flags = flags.push("-QxSSE4.2");
                 break;
             case "AVX":
-                flags = ["-arch:AVX"];
+                flags = flags.push("-arch:AVX");
                 break;
             case "AVX2":
-                flags = ["-arch:AVX2", "-QxCORE-AVX2"];
+                flags = flags.push("-arch:AVX2", "-QxCORE-AVX2");
                 break;
             case "AVX512":
                 break;
             }
-            if(defs)
-                task.Define(defs);
-            if(flags)
-                task.AddFlags(this.GetRole(), flags);
         }
+        if(defs)
+            task.Define(defs);
+        if(flags)
+            task.AddFlags(this.GetRole(), flags);
     }
 
     outputIsDirty(output, inputs, cwd)
