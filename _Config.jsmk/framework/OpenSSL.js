@@ -20,31 +20,42 @@ class OpenSSL extends Framework
     {
         super(name, version);
         if(!version.match(/^(3.0|default)/))
-            throw new Exception(`OpenSSL unsupported version: ${version} (3.0 required)`);
+            throw new Error(`OpenSSL unsupported version: ${version} (3.0 required)`);
 
         this.m_toolset = jsmk.GetActiveToolset();
         this.m_arch = this.m_toolset.TargetArch;
-        let eArch;
-        switch(this.m_arch)
-        {
-        case Toolset.Arch.x86_64:
-            eArch = "x64";
-            break;
-        case Toolset.Arch.x86_32:
-            eArch = "x86";
-            break;
-        default:
-            throw new Exeception("OpenSSL unsuppported arch " + this.m_arch);
-        }
         switch(Platform)
         {
         case "win32":
-            this.m_incDir = jsmk.path.join(FrameworkDir, `openssl/openssl-3/${eArch}/include`);
-            this.m_libDir = jsmk.path.join(FrameworkDir,`openssl/openssl-3/${eArch}/lib`);
-            this.m_libs = ["libssl.lib", "libcrypto.lib"];
+            {
+                let eArch;
+                switch(this.m_arch)
+                {
+                case Toolset.Arch.x86_64:
+                    eArch = "x64";
+                    break;
+                case Toolset.Arch.x86_32:
+                    eArch = "x86";
+                    break;
+                default:
+                    throw new Error("OpenSSL unsuppported arch " + this.m_arch);
+                }
+                this.m_incDir = jsmk.path.join(FrameworkDir, `openssl/openssl-3/${eArch}/include`);
+                this.m_libDir = jsmk.path.join(FrameworkDir,`openssl/openssl-3/${eArch}/lib`);
+                this.m_libs = ["libssl.lib", "libcrypto.lib"];
+            }
+            break;
+        case "darwin":
+            {
+                // /opt/homebrew/openssl@3/3.0.5/lib (files are single-arch)
+                let subdir = "openssl@3/3.0.5";
+                this.m_incDir = jsmk.path.join(FrameworkDir, `${subdir}/include`);
+                this.m_libDir = jsmk.path.join(FrameworkDir,`${subdir}/lib`);
+                this.m_libs = ["libssl.a", "libcrypto.a"];
+            }
             break;
         default:
-            throw new Exeception("OpenSSL implemented platform " + Platform);
+            throw new Error("OpenSSL implemented platform " + Platform);
         }
     }
 

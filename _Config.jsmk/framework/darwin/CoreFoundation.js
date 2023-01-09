@@ -3,13 +3,12 @@
 // support.
 //
 let Framework = jsmk.Require("framework").Framework;
-let Tool = jsmk.Require("tool").Tool;
-let Arch = jsmk.Require("toolset").Arch;
 
-class Cocoa extends Framework
+class CoreFoundation extends Framework
 {
     constructor(name, version)
     {
+        super(name, version);
     }
 
     IsNative() { return true; }
@@ -20,4 +19,4 @@ class Cocoa extends Framework
     }
 }
 
-exports.Framework = Cocoa;;
+exports.Framework = CoreFoundation;
