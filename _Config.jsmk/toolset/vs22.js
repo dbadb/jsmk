@@ -1,7 +1,15 @@
 /*global jsmk */
-// NB: this is a work-in-progress. Tabled in favor of clang
-//   backed by a vs22 install.  Currently (12/22) the Visual 
-//   Studio IDE crashes on urchin. (!!)
+//  See also clang backed by a vs22 install.  
+//  Currently (12/22) the Visual Studio IDE crashes on urchin, 
+//  but the vc17 debugger works with vc22 builds.
+//  Considerations on the choice of a compiler for win32 apps:
+//   - all compilers need access to windows APIs which are installed
+//     during VisualStudio install.
+//   - clang may produce better code but this isn't verified.
+//     It also still has outstanding known issues.  That said
+//     chuck compiles and runs fine.
+//   - after evaluating clang we came back to vs22 since it's the
+//     "closest to the source".
 var Foundation = require("./foundation.js").Foundation;
 
 const sdkVers = "10.0.22000.0";
