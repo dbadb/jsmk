@@ -55,6 +55,9 @@ class OpenSSL extends Framework
                 this.m_libs = ["-lssl", "-lcrypto"];
             }
             break;
+        case "linux":
+            this.m_libs = ["ssl", "crypto"];
+            break;
         default:
             throw new Error("OpenSSL implemented platform " + Platform);
         }
@@ -67,11 +70,13 @@ class OpenSSL extends Framework
         switch(r)
         {
         case Tool.Role.Compile:
-            task.AddSearchpaths(r, [this.m_incDir]);
+            if(this.m_incDir)
+                task.AddSearchpaths(r, [this.m_incDir]);
             break;
         case Tool.Role.Link:
         case Tool.Role.ArchiveDynamic:
-            task.AddSearchpaths(r, [this.m_libDir]);
+            if(this.m_libDir)
+                task.AddSearchpaths(r, [this.m_libDir]);
             task.AddLibs(this.m_libs);
             break;
         }
