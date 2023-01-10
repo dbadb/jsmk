@@ -51,7 +51,8 @@ class OpenSSL extends Framework
                 let subdir = "openssl@3/3.0.5";
                 this.m_incDir = jsmk.path.join(FrameworkDir, `${subdir}/include`);
                 this.m_libDir = jsmk.path.join(FrameworkDir,`${subdir}/lib`);
-                this.m_libs = ["libssl.a", "libcrypto.a"];
+                // this.m_libs = ["libssl.a", "libcrypto.a"];
+                this.m_libs = ["-lssl", "-lcrypto"];
             }
             break;
         default:

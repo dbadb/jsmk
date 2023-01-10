@@ -23,12 +23,13 @@ class Link extends ToolCli
                 DstExt: buildso ? "dylib" : "",
                 ActionStage: "build",
                 Invocation: [arg0, 
-                    "-o ${DSTFILE} ${SRCFILES} ${FLAGS} ${LIBS}"],
+                    "-o ${DSTFILE} ${SRCFILES} ${FLAGS} ${SEARCHPATHS} ${LIBS}"],
                 Syntax:
                 {
                     Flag: "${VAL}",
                     Lib: "${VAL}", // -l libs can be handled as flags (?)
-                    Framework: "-framework ${VAL}"
+                    Framework: "-framework ${VAL}",
+                    Searchpath: "-L${VAL}"
                 },
             }
         );
