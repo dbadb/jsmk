@@ -111,6 +111,7 @@ class Clang extends ToolCli
             }
             break;
         case "cpp":
+        case "mm":
             {
                 let std = task.BuildVars.CppStd || this.defaultStd;
                 flags.push(`-std=${std}`);
