@@ -101,6 +101,7 @@ class Clang extends ToolCli
     {
         super.ConfigureTaskSettings(task);
         let flags = [];
+        let defs = {};
 
         switch(this.target)
         {
@@ -149,10 +150,12 @@ class Clang extends ToolCli
         case "release":
             if(flags.length == 0)
                 flags.push("-O3");
+            defs.NDEBUG=null; // disables assertions
             break;
         }
         if(flags.length)
             task.AddFlags(this.GetRole(), flags);
+        task.Define(defs);
     }
 
     outputIsDirty(output, inputs, cwd)
