@@ -4,7 +4,7 @@ let Arch = jsmk.Require("toolset.js").Arch;
 
 class cl extends ToolCli
 {
-    constructor(ts, vsvers, asCC)
+    constructor(ts, vsvers, asC)
     {
         let arg0 = jsmk.path.resolveExeFile("cl", ts.BuildVars.VSToolsDir);
         if(!arg0) throw new Error("Can't resolve cl.exe " +
@@ -26,7 +26,7 @@ class cl extends ToolCli
                     },
             });
 
-        this.target = asCC ? "c" : "cpp";
+        this.target = asC ? "c" : "cpp";
         this.defaultStd = {
             "cpp": "c++14", 
             "c": null,
@@ -44,7 +44,7 @@ class cl extends ToolCli
             "-W3", // warning level
             "-WX-", // warnings aren't errors
             "-Zc:__cplusplus", // https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
-            asCC ?  "-TC" : "-TP",
+            asC ?  "-TC" : "-TP",
             "-Zc:inline", //
             "-Zc:wchar_t",
             "-Zc:forScope",
@@ -52,8 +52,8 @@ class cl extends ToolCli
         ]);
 
         this.Define({
-            "WIN32": null,
-            "_WIN32": null,
+            "_WIN32": null, // this should already be present but doesn't hurt
+            "WIN32": null, // nb: this isn't conventional
         });
     }
 
