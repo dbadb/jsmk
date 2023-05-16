@@ -77,7 +77,7 @@ class Foundation extends Toolset
                             Semantics: Tool.Semantics.CustomTrigger,
                             LiveOutput: true
                         }),
-            repositscript: new ToolCli(this, "respositscript", 
+            repositscript: new ToolCli(this, "repositscript", 
                         {
                             Role: "Reposit",
                             ActionStage: "reposit",

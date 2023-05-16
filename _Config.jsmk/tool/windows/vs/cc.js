@@ -98,7 +98,7 @@ class cl extends ToolCli
             defs.NDEBUG = null;
             flags.push(...[
                 "-MD", // non-debugging dynamic crt
-                "-O2",
+                "-O3",
                 "-Ob2", // inline expansion
             ]);
             break;
@@ -106,7 +106,7 @@ class cl extends ToolCli
             defs.NDEBUG = null;
             flags.push(...[
                 "-MD", // non-debugging crt
-                "-O2",
+                "-O3",
                 "-Ob1", // inline expansion
                 "-Zi",  // debugging symbols
             ]);
