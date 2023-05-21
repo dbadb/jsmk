@@ -9,6 +9,7 @@ let CopyFiles = jsmk.LoadConfig("tool/copyfiles.js").CopyFiles;
 let Printenv = jsmk.LoadConfig("tool/printenv.js").Printenv;
 let ToolCli = jsmk.Require("tool_cli.js").Tool;
 let Tool = jsmk.Require("tool.js").Tool;
+let ToolNop = jsmk.Require("tool.js").ToolNop;
 
 class Foundation extends Toolset
 {
@@ -101,6 +102,12 @@ class Foundation extends Toolset
             "cpp->a":   undefined,
             "cpp.o->exe": undefined,
             "link":     undefined,
+            "rc->o":    new ToolNop(this, "rescompile", 
+                        {
+                            Role: "Compile",
+                            ActionStage: "build",
+                            Semantics: ToolCli.Semantics.OneToOne,
+                        }),
 
             // shader development ---------------------------
             "osl->oso": undefined, // "oslcompiler"
