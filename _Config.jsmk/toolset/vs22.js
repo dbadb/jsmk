@@ -81,17 +81,19 @@ exports.Toolset = class vs22 extends Foundation
         let CPP = new ccmod.CPP(this, vers);
         let Link = jsmk.LoadConfig(dir+"link.js").Link;
         let dlltool = new Link(this, vers, true);
+        let rescmp = new (jsmk.LoadConfig(dir+"rc.js").RC)(this, vers);
+        let AR = new (jsmk.LoadConfig(dir+"ar.js").AR)(this, vers);
         this.MergeToolMap({
             "c->o":    CC,
             "cpp->o":  CPP,
-            "o->a":    new (jsmk.LoadConfig(dir+"ar.js").AR)(this, vers),
+            "o->a":    AR,
             "o->so": dlltool,
             "o->dll": dlltool,
             "c.o->exe": new Link(this, vers),
             "cpp.o->exe": new Link(this, vers),
             "cpp.o->so": dlltool,
             "cpp.o->dll": dlltool,
-            "rc->o": new (jsmk.LoadConfig(dir+"rc.js").RC)(this, vers),
+            "rc->o": rescmp,
         });
 
         jsmk.DEBUG(this.ToolsetHandle + " toolset loaded");
