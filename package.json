@@ -11,12 +11,13 @@
     },
     "dependencies": {
         "bluebird": "^3.7.2",
-        "fs-extra": "^9.0.1",
-        "glob": "^7.1.6",
-        "klaw": "^3.0.0",
+        "fs-extra": "^11.1.1",
+        "glob": "^10.2.6",
+        "klaw": "^4.1.0",
         "klaw-sync": "^6.0.0",
-        "minimist": "^1.2.5",
-        "rimraf": "^3.0.2",
-        "winston": "~2.4.5"
+        "minimist": "^1.2.8",
+        "rimraf": "^5.0.1",
+        "winston": "^3.9.0",
+        "winston-daily-rotate-file": "^4.7.1"
     }
 }
