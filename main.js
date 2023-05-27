@@ -1,6 +1,7 @@
 /* global jsmk */
 global.jsmk = require("./lib/jsmk.js").NewJsmk();
 
+/*
 global.oldwarn = console.warn;
 console.warn = function()
 {
@@ -11,6 +12,7 @@ console.log = function()
 {
     jsmk.WARNING("someone writing to console: " + JSON.stringify(arguments));
 }
+*/
 
 try
 {
