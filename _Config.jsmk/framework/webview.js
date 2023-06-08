@@ -21,6 +21,7 @@ class Webview extends Framework
         switch(Platform)
         {
         case "win32":
+            break;
         case "darwin":
             throw new Error("Webview framework not implemented on " + Platform);
             break;
