@@ -51,6 +51,17 @@ class Webview extends Framework
         }
     }
 
+    GetName()
+    {
+        switch(Platform)
+        {
+        case "darwin":
+            return "WebKit";
+        default:
+            return "WebView"; 
+        }
+    }
+
     ConfigureTaskSettings(task) /* the preferred mode of operation */
     {
         let tool = task.GetTool();

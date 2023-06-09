@@ -92,7 +92,6 @@ class Clang extends ToolCli
             "-c",
             ...xflags,
             "-Wall",
-            "-ffast-math", // when not arm?
             "-MMD", // dependency file
         ]);
     }
@@ -119,6 +118,9 @@ class Clang extends ToolCli
             }
             break;
         }
+
+        if(!task.BuildVars.NoFastMath)
+            flags.push("-ffast-math"); // when not arm?
 
         // Optimize for size. -Os enables all -O2 optimizations except 
         // those that often increase code size.  A Project/Root can

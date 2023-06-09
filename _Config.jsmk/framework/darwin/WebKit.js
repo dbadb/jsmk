@@ -4,7 +4,7 @@
 //
 let Framework = jsmk.Require("framework").Framework;
 
-class WebView extends Framework
+class WebKit extends Framework
 {
     constructor(name, version)
     {
@@ -19,4 +19,4 @@ class WebView extends Framework
     }
 }
 
-exports.Framework = WebView;
+exports.Framework = WebKit;
