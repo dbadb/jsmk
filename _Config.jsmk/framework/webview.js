@@ -23,7 +23,6 @@ class Webview extends Framework
         case "win32":
             break;
         case "darwin":
-            throw new Error("Webview framework not implemented on " + Platform);
             break;
         case "linux":
             // pkg-config --cflags webkit2gtk-4.0
@@ -41,6 +40,17 @@ class Webview extends Framework
         }
     }
 
+    IsNative() 
+    { 
+        switch(Platform)
+        {
+        case "darwin":
+            return true; 
+        default:
+            return false; 
+        }
+    }
+
     ConfigureTaskSettings(task) /* the preferred mode of operation */
     {
         let tool = task.GetTool();
@@ -48,11 +58,13 @@ class Webview extends Framework
         switch(r)
         {
         case Tool.Role.Compile:
-            task.AddSearchpaths(r, this.m_incdirs);
+            if(this.m_incdirs)
+                task.AddSearchpaths(r, this.m_incdirs);
             break;
         case Tool.Role.Link:
         case Tool.Role.ArchiveDynamic:
-            task.AddLibs(this.m_libs);
+            if(this.m_libs)
+                task.AddLibs(this.m_libs);
             break;
         }
     }
