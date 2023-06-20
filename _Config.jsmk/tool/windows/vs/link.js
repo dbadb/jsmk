@@ -105,6 +105,9 @@ exports.Link = class Link extends ToolCli
                 "uuid.lib",
                 "odbc32.lib",
                 "odbccp32.lib", 
+                "Dbghelp.lib",
+                "Iphlpapi.lib", // GetAdapterAddress
+                "Userenv.lib",
                 // "/nodefaultlib",
                 //"oldnames.lib",
                 //"imm32.lib",
