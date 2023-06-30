@@ -48,9 +48,10 @@ class OpenSSL extends Framework
         case "darwin":
             {
                 // /opt/homebrew/openssl@3/3.0.5/lib (files are single-arch)
-                let subdir = "openssl@3/3.0.5";
-                this.m_incDir = jsmk.path.join(FrameworkDir, `${subdir}/include`);
-                this.m_libDir = jsmk.path.join(FrameworkDir,`${subdir}/lib`);
+                // /opt/homebrew/include
+                // let subdir = "openssl@3/3.0.5";
+                this.m_incDir = "/opt/homebrew/include";
+                this.m_libDir = "/opt/homebrew/lib";
                 // this.m_libs = ["libssl.a", "libcrypto.a"];
                 this.m_libs = ["-lssl", "-lcrypto"];
             }
