@@ -57,12 +57,13 @@ class OpenSSL extends Framework
             }
             break;
         case "linux":
-            this.m_libs = ["ssl", "crypto"];
+            this.m_libs = ["-lssl", "-lcrypto"];
             break;
         default:
             throw new Error("OpenSSL implemented platform " + Platform);
         }
     }
+    
 
     ConfigureTaskSettings(task) /* the preferred mode of operation */
     {

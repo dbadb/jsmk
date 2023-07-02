@@ -31,8 +31,8 @@ class Webview extends Framework
             ];
             // pkg-config --libs webkit2gtk-4.0
             this.m_libs = [
-                "webkit2gtk-4.0", "soup-2.4", 
-                "javascriptcoregtk-4.0",
+                "-lwebkit2gtk-4.0", "-lsoup-2.4", 
+                "-ljavascriptcoregtk-4.0",
             ]
             break;
         default:

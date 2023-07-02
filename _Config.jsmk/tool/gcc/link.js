@@ -19,7 +19,7 @@ class Link extends ToolCli
                 Syntax:
                 {
                     Flag: "${VAL}",
-                    Lib: "-l${VAL}"
+                    Lib: "${VAL}"
                 },
             }
         );
