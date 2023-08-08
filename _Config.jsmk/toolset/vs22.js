@@ -44,6 +44,13 @@ function getConfig(arch)
     c.ideDir = jsmk.path.join(vsDir, "Common7/IDE", arch);
     c.INCLUDE = `${c.msvcIncDir};${c.sdkIncUmDir};${c.sdkIncSharedDir};${c.sdkIncCrtDir};`;
     c.LIB = `${c.msvcLibDir};${c.sdkLibUmDir};${c.sdkLibCrtDir}`;
+    c.BuildVars = {
+        VSRootDir: vsDir,
+        VSSDKDir: sdkRoot, // unused ?
+        VSToolsDir: c.toolsDir,
+        VSIDEDir: c.ideDir,
+        VSSDKToolsDir: c.sdkBinDir, // eg: rc.exe
+    }
     return c;
 }
 
@@ -57,7 +64,8 @@ exports.Toolset = class vs22 extends Foundation
 
         // sdkToolsDir is location for, eg rc.exe and other tools
         var map = {};
-        map.BuildVars =
+        map.BuildVars = Config[arch].BuildVars;
+        /*
         {
             VSRootDir: vsDir,
             VSSDKDir: sdkRoot, // unused ?
@@ -65,6 +73,7 @@ exports.Toolset = class vs22 extends Foundation
             VSIDEDir: Config[arch].ideDir,
             VSSDKToolsDir: Config[arch].sdkBinDir, // eg: rc.exe
         };
+        */
         map.EnvMap =
         {
             INCLUDE: Config[arch].INCLUDE,

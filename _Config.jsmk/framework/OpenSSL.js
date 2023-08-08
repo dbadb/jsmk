@@ -45,7 +45,17 @@ class OpenSSL extends Framework
                 }
                 this.m_incDir = jsmk.path.join(FrameworkDir, `openssl/openssl-3/${eArch}/include`);
                 this.m_libDir = jsmk.path.join(FrameworkDir,`openssl/openssl-3/${eArch}/lib`);
-                this.m_libs = ["libssl.lib", "libcrypto.lib"];
+                if(this.m_toolset.Name.startsWith("clang"))
+                {
+                    // hrm, -L doesn't work on window + clang?
+                    // this.m_libs = ["-lssl", "-lcrypto"];
+                    this.m_libs = [
+                            `${this.m_libDir}/libssl.lib`,
+                            `${this.m_libDir}/libcrypto.lib`
+                        ];
+                }
+                else
+                    this.m_libs = ["libssl.lib", "libcrypto.lib"];
             }
             break;
         case "darwin":

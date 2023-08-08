@@ -1,7 +1,6 @@
 const Foundation = require("./foundation.js").Foundation;
 const WinConfig = require("./vs22.js").Config;
 
-
 class Clang extends Foundation
 {
     constructor(opts)
@@ -73,6 +72,15 @@ class Clang extends Foundation
                 "mm->o": new cc.MM(this),
                 "y->c": new misc.YACC(this),
                 "lex->c": new misc.LEX(this),
+            });
+        }
+        else
+        if(platform == "win32")
+        {
+            let rc = new (jsmk.LoadConfig("tool/windows/vs/rc.js").RC)(WinConfig[arch], "22");
+            this.MergeToolMap(
+            {
+                "rc->o": rc,
             });
         }
         jsmk.DEBUG("clang toolset loaded");
