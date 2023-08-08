@@ -149,6 +149,9 @@ exports.Link = class Link extends ToolCli
             if(task.BuildVars.WindowsApp)
             {
                 // console.log("a windows app may have another /ENTRY");
+                task.AddFlags(this.m_role, [
+                    "/SUBSYSTEM:WINDOWS"
+                ]);
             }
             else
             {

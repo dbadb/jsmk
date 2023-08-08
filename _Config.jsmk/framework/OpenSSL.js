@@ -31,14 +31,17 @@ class OpenSSL extends Framework
                 let eArch;
                 switch(this.m_arch)
                 {
+                case "x64":
                 case Toolset.Arch.x86_64:
                     eArch = "x64";
                     break;
+                case "x86":
                 case Toolset.Arch.x86_32:
                     eArch = "x86";
                     break;
                 default:
-                    throw new Error("OpenSSL unsuppported arch " + this.m_arch);
+                    throw new Error("OpenSSL unsuppported arch " + 
+                                    this.m_arch + "(" + Toolset.Arch.x86_64 + ")");
                 }
                 this.m_incDir = jsmk.path.join(FrameworkDir, `openssl/openssl-3/${eArch}/include`);
                 this.m_libDir = jsmk.path.join(FrameworkDir,`openssl/openssl-3/${eArch}/lib`);
