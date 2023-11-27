@@ -127,11 +127,6 @@ class CopyFiles extends Tool
             w._name = "copyfile (ignore)";
             return w;
         }
-        if(!isdir)
-        {
-            jsmk.INFO(`copy from: ${infile} ${contentfilter?'(filtered)':''}`);
-            jsmk.INFO(`       to: ${outfile}`);
-        }
 
         if(!contentfilter)
         {
@@ -142,7 +137,32 @@ class CopyFiles extends Tool
                 return this.deepCopy(infile, outfile, params); // single task
             }
             else
-                w = fse.copy(infile, outfile); // returns a promise
+            {
+                let ostat;
+                try
+                {
+                    ostat = fs.lstatSync(outfile);
+                }
+                catch(err)
+                {
+                    // enoent
+                }
+                if(!ostat || ostat.mtime < istat.mtime)
+                {
+                    jsmk.INFO(`copy from: ${infile} ${contentfilter?'(filtered)':''}`);
+                    jsmk.INFO(`       to: ${outfile}`);
+                    return fse.copy(infile, outfile); // returns a promise
+                }
+                else
+                {
+                    let w = new Promise((resolve, reject) => 
+                    { 
+                        resolve(0); 
+                    });
+                    w._name = "copyfile-noop";
+                    return w;
+                }
+            }
         }
         else
         {
