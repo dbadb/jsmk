@@ -19,7 +19,7 @@ class Link extends ToolCli
                 Syntax:
                 {
                     Flag: "${VAL}",
-                    Lib: "${VAL}"
+                    Lib: "${VAL}", // syslibs are treated like flags, so no -l here.
                 },
             }
         );
