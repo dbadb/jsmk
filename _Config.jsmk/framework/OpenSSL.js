@@ -65,8 +65,12 @@ class OpenSSL extends Framework
                 // let subdir = "openssl@3/3.0.5";
                 this.m_incDir = "/opt/homebrew/include";
                 this.m_libDir = "/opt/homebrew/lib";
-                // this.m_libs = ["libssl.a", "libcrypto.a"];
-                this.m_libs = ["-lssl", "-lcrypto"];
+                // prefer static linking for simpler code-signing, etc.
+                this.m_libs = [
+                    `${this.m_libDir}/libssl.a`,
+                    `${this.m_libDir}/libcrypto.a`
+                ];
+                // this.m_libs = ["-lssl", "-lcrypto"];
             }
             break;
         case "linux":
