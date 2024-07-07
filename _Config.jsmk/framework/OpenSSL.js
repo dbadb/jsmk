@@ -26,7 +26,8 @@ class OpenSSL extends Framework
         this.m_arch = this.m_toolset.TargetArch;
         switch(Platform)
         {
-        case "win32":
+        // NB: windows now ships with openssl libs in /Windows//System32
+        case "win32": 
             {
                 let eArch;
                 switch(this.m_arch)
@@ -81,7 +82,6 @@ class OpenSSL extends Framework
         }
     }
     
-
     ConfigureTaskSettings(task) /* the preferred mode of operation */
     {
         let tool = task.GetTool();

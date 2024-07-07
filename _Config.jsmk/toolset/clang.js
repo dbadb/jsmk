@@ -39,7 +39,8 @@ class Clang extends Foundation
         {
             // clang on windows requires stadnard windows setup
             map.BuildVars =  {
-                CLANG_BIN: "C:/Program Files/LLVM/bin"
+                // CLANG_BIN: "C:/Program Files/LLVM/bin"
+                CLANG_BIN: "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/Llvm/x64/bin"
             };
             map.EnvMap = {
                 INCLUDE: WinConfig[arch].INCLUDE,
