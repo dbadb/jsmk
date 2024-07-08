@@ -121,9 +121,6 @@ class Clang extends ToolCli
             break;
         }
 
-        if(!task.BuildVars.NoFastMath)
-            flags.push("-ffast-math"); // when not arm?
-
         // Optimize for size. -Os enables all -O2 optimizations except 
         // those that often increase code size.  A Project/Root can
         // specify a default optimization regardless of Deployment.
@@ -152,11 +149,14 @@ class Clang extends ToolCli
             flags.push("-g");
             break;
         case "release":
-            if(flags.length == 0)
+            if(!task.BuildVars.OPTIMIZATION)
                 flags.push("-O3");
+            // jsmk.NOTICE("clang release build flags " + flags)
             defs.NDEBUG=null; // disables assertions
             break;
         }
+        if(!task.BuildVars.NoFastMath)
+            flags.push("-ffast-math"); // when not arm?
         if(flags.length)
             task.AddFlags(this.GetRole(), flags);
         task.Define(defs);
