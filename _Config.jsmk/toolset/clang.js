@@ -43,8 +43,8 @@ class Clang extends Foundation
                 CLANG_BIN: "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/Llvm/x64/bin"
             };
             map.EnvMap = {
-                INCLUDE: WinConfig[arch].INCLUDE,
-                LIB: WinConfig[arch].LIB,
+                INCLUDE: WinConfig[arch].INCLUDE, // compile searchpath
+                LIB: WinConfig[arch].LIB, // link searchpath
             };
         }
         else

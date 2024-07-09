@@ -10,6 +10,9 @@ class Link extends ToolCli
 {
     constructor(ts, buildso=false)
     {
+        // XXX: we really should use target-platform.
+        //  currently it appears that we're loaded prior
+        //  to knowing this and util.js PlatformInit.
         let platform = jsmk.GetHost().Platform;
         let exe = "clang++";
         let exepath = jsmk.path.join(ts.BuildVars.CLANG_BIN, exe);
@@ -20,7 +23,7 @@ class Link extends ToolCli
             {
                 Role: ToolCli.Role.Link,
                 Semantics: ToolCli.Semantics.ManyToOne,
-                DstExt: buildso ? "dylib" : "",
+                DstExt: buildso ? "dylib" : platform=="win32" ? "exe" : "",
                 ActionStage: "build",
                 Invocation: [arg0, 
                     "-o ${DSTFILE} ${SRCFILES} ${FLAGS} ${SEARCHPATHS} ${LIBS}"],
