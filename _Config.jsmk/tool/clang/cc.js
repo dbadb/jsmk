@@ -80,7 +80,6 @@ class Clang extends ToolCli
             win32: [
                 "-DWIN32",
                 "-D_WIN32",
-                "-gcodeview",
             ]
         }[platform];
         if(this.target == "mm")

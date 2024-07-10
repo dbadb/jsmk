@@ -44,6 +44,7 @@ class Link extends ToolCli
                 "-mmacosx-version-min=13.0", 
             ],
             win32: [
+                "-g", // produces .pdb files when used via visual studio
             ]
         }[platform];
         this.AddFlags(this.GetRole(), flags);

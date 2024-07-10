@@ -2,8 +2,9 @@ const Foundation = require("./foundation.js").Foundation;
 const WinConfig = require("./vs22.js").Config;
 
 // NB: 
-// Debugging with clang on windows (via VisualStudio) is tricky and not
-// yet fully functional.
+// Debugging with clang on windows (via VisualStudio) required
+// the addition of -g on the linker in order to produce vs-compatible .pdb 
+// files.
 //  https://www.metricpanda.com/rival-fortress-update-27-compiling-with-clang-on-windows/
 //
 class Clang extends Foundation
