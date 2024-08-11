@@ -18,9 +18,9 @@ class eigen extends Framework
         // user includes files via: #include <Eigen/Core>
         // so our only job is to point inside the required distribution
         let vers = version == "default" ? "3.4.0" : version;
-        for(let fw of LocalFrameworkDirs)
+        for(let fw of FrameworkDirs)
         {
-            let incdir = jsmk.path.join(FrameworkDir, `eigen-${vers}`);
+            let incdir = jsmk.path.join(fw, `eigen-${vers}`);
             if(jsmk.path.existsSync(incdir))
             {
                 this.m_incDir = incdir;
