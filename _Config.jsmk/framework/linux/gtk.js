@@ -5,7 +5,6 @@ let Framework = jsmk.Require("framework").Framework;
 let Tool = jsmk.Require("tool").Tool;
 let Toolset = jsmk.Require("toolset").Toolset;
 let Platform = jsmk.GetHost().Platform;
-let FrameworkDir = jsmk.GetPolicy().LocalFrameworkDir;
 
 class Gtk extends Framework
 {

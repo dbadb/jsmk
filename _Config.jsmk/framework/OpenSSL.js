@@ -5,7 +5,7 @@ let Framework = jsmk.Require("framework").Framework;
 let Tool = jsmk.Require("tool").Tool;
 let Toolset = jsmk.Require("toolset").Toolset;
 let Platform = jsmk.GetHost().Platform;
-let FrameworkDir = jsmk.GetPolicy().LocalFrameworkDir;
+let FrameworkDirs = jsmk.GetPolicy().LocalFrameworkDirs;
 
 // windows: https://kb.firedaemon.com/support/solutions/articles/4000121705-openssl-3-0-and-1-1-1-binary-distributions-for-microsoft-windows
 
@@ -44,8 +44,17 @@ class OpenSSL extends Framework
                     throw new Error("OpenSSL unsuppported arch " + 
                                     this.m_arch + "(" + Toolset.Arch.x86_64 + ")");
                 }
-                this.m_incDir = jsmk.path.join(FrameworkDir, `openssl/openssl-3/${eArch}/include`);
-                this.m_libDir = jsmk.path.join(FrameworkDir,`openssl/openssl-3/${eArch}/lib`);
+                for(let fw of FrameworkDirs)
+                {
+                    let incdir = jsmk.path.join(fw, `openssl/openssl-3/${eArch}/include`);
+                    let libdir = jsmk.path.join(fw,`openssl/openssl-3/${eArch}/lib`);
+                    if(jsmk.path.existsSync(incDir)
+                    {
+                        this.m_incDir = incdir;
+                        this.m_libDir = libdir
+                        break;
+                    }
+                }
                 if(this.m_toolset.Name.startsWith("clang"))
                 {
                     // hrm, -L doesn't work on window + clang?

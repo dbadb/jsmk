@@ -2,7 +2,7 @@ let Framework = jsmk.Require("framework").Framework;
 let Tool = jsmk.Require("tool").Tool;
 let Toolset = jsmk.Require("toolset").Toolset;
 let Platform = jsmk.GetHost().Platform;
-let FrameworkDir = jsmk.GetPolicy().LocalFrameworkDir;
+let FrameworkDirs = jsmk.GetPolicy().LocalFrameworkDirs;
 
 /* eigen is a header-only c++ library with semantic versioning.
  * 7/2024: version 3.4.0
@@ -18,7 +18,15 @@ class eigen extends Framework
         // user includes files via: #include <Eigen/Core>
         // so our only job is to point inside the required distribution
         let vers = version == "default" ? "3.4.0" : version;
-        this.m_incDir = jsmk.path.join(FrameworkDir, `eigen-${vers}`);
+        for(let fw of LocalFrameworkDirs)
+        {
+            let incdir = jsmk.path.join(FrameworkDir, `eigen-${vers}`);
+            if(jsmk.path.existsSync(incdir))
+            {
+                this.m_incDir = incdir;
+                break;
+            }
+        }
     }
 
     ConfigureTaskSettings(task) /* the preferred mode of operation */
