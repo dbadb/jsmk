@@ -96,7 +96,7 @@ class GCC extends ToolCli
             flags.push("-g");
             break;
         case "release":
-            if(flags.length == 0)
+            if(!task.BuildVars.OPTIMIZATION)
                 flags.push("-O3");
             break;
         }
