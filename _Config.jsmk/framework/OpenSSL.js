@@ -48,7 +48,7 @@ class OpenSSL extends Framework
                 {
                     let incdir = jsmk.path.join(fw, `openssl/openssl-3/${eArch}/include`);
                     let libdir = jsmk.path.join(fw,`openssl/openssl-3/${eArch}/lib`);
-                    if(jsmk.path.existsSync(incDir))
+                    if(jsmk.path.existsSync(incdir))
                     {
                         this.m_incDir = incdir;
                         this.m_libDir = libdir;
