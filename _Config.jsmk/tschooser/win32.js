@@ -33,6 +33,7 @@ exports.GetToolsets = function()
     {
         jsmk.DEBUG("tschooser: no arduino dev on windows "+err);
     }
+    
     try
     {
         result.push(new vs22(vs22.Arch.x86_64));
@@ -40,7 +41,8 @@ exports.GetToolsets = function()
     }
     catch(err)
     {
-        jsmk.DEBUG("tschooser: no c++ dev on windows " + err);
+        jsmk.WARNING("tschooser: no c++ dev on windows " + err);
     }
+    console.log(`win32 tschooser: ${result.length} toolsets.`);
     return result;
 };
