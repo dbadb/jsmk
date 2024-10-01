@@ -10,17 +10,37 @@ exports.GetToolsets = function()
     let vs22 = jsmk.LoadConfig("toolset/vs22.js").Toolset;
     let clang = jsmk.LoadConfig("toolset/clang.js").Toolset;
 
-    var result = [
-        new teensy("teensyLC"),
-        new teensy("teensy40"),
-        new teensy("teensy40_oc"),
-        new esp8266("robodyn"),
-        new esp8266("d1_mini"),
-        new esp8266("generic"),
-        new arduino("uno"),
-        //new vs17(vs17.Arch.x86_64),
-        new vs22(vs22.Arch.x86_64),
-        new clang(), //  uses Host.Arch
-    ];
+    let result = [];
+    try
+    {
+        result.push(new teensy("teensyLC"));
+        result.push(new teensy("teensy40"));
+        result.push(new teensy("teensy40_oc"));
+    }
+    catch(err)
+    {
+        jsmk.DEBUG("tschooser: no teensy dev on windows " + err);
+    }
+
+    try
+    {
+        result.push(new esp8266("robodyn"));
+        result.push(new esp8266("d1_mini"));
+        result.push(new esp8266("generic"));
+        result.push(new arduino("uno"));
+    }
+    catch(err)
+    {
+        jsmk.DEBUG("tschooser: no arduino dev on windows "+err);
+    }
+    try
+    {
+        result.push(new vs22(vs22.Arch.x86_64));
+        result.push(new clang());
+    }
+    catch(err)
+    {
+        jsmk.DEBUG("tschooser: no c++ dev on windows " + err);
+    }
     return result;
 };
