@@ -41,6 +41,7 @@ function getConfig(arch)
         msvcIncDir : `${msvcDir}/include`, // std library headers
         sdkBinDir : `${sdkRoot}/10/bin/${sdkVers}/${arch}`,
         sdkIncUmDir : `${sdkRoot}/10/Include/${sdkVers}/um`, // windows.h
+        sdkIncWrtDir : `${sdkRoot}/10/Include/${sdkVers}/winrt`, // audio client
         sdkIncSharedDir : `${sdkRoot}/10/Include/${sdkVers}/shared`, // winapifamily.h
         sdkIncCrtDir : `${sdkRoot}/10/Include/${sdkVers}/ucrt`,
         sdkLibUmDir : `${sdkRoot}/10/Lib/${sdkVers}/um/${arch}`, // dsound.lib
@@ -52,7 +53,7 @@ function getConfig(arch)
     // ideDir is places where IDE runtimes (dll are found 
     // (offref, VsRegistryDetour) (usefulness ?)
     c.ideDir = jsmk.path.join(vsDir, "Common7/IDE", arch);
-    c.INCLUDE = `${c.msvcIncDir};${c.sdkIncUmDir};${c.sdkIncSharedDir};${c.sdkIncCrtDir};`;
+    c.INCLUDE = `${c.msvcIncDir};${c.sdkIncUmDir};${c.sdkIncWrtDir};${c.sdkIncSharedDir};${c.sdkIncCrtDir};`;
     c.LIB = `${c.msvcLibDir};${c.sdkLibUmDir};${c.sdkLibCrtDir}`;
     c.BuildVars = {
         VSRootDir: vsDir,
