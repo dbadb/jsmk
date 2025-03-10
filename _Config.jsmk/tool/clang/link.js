@@ -38,10 +38,11 @@ class Link extends ToolCli
         );
         // https://setapp.com/how-to/full-list-of-all-macos-versions
         // keep in sync with cc.js (12.0, 2021 monterey)
+        //   15.0 sequoia, 2024 
         let flags = {
             darwin: [
                 ["-isysroot", "${MACOSX_SDK}"],     
-                "-mmacosx-version-min=13.0", 
+                "-mmacosx-version-min=15.0", 
             ],
             win32: [
                 "-g", // produces .pdb files when used via visual studio

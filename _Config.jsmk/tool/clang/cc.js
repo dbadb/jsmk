@@ -71,11 +71,12 @@ class Clang extends ToolCli
 
         // https://setapp.com/how-to/full-list-of-all-macos-versions
         // 14:mohave 15:catalina, 11.0: bigsur, 12.0 (monterey 2021), 13.0 (ventura 2022)
+        // 15:sequoia
         this.target = target;
         let xflags = {
             darwin: [
                 ["-isysroot", "${MACOSX_SDK}"],     
-                "-mmacosx-version-min=13.0", 
+                "-mmacosx-version-min=15.0", 
             ],
             win32: [
                 "-DWIN32",
