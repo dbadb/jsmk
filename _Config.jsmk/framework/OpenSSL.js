@@ -80,7 +80,6 @@ class OpenSSL extends Framework
                     `${this.m_libDir}/libssl.a`,
                     `${this.m_libDir}/libcrypto.a`
                 ];
-                // this.m_libs = ["-lssl", "-lcrypto"];
             }
             break;
         case "linux":
@@ -105,7 +104,13 @@ class OpenSSL extends Framework
         case Tool.Role.ArchiveDynamic:
             if(this.m_libDir)
                 task.AddSearchpaths(r, [this.m_libDir]);
-            task.AddLibs(this.m_libs);
+            // currently ssl operates more like syslibs and not deplibs.
+            // ie: our code (deplist) depend on them like syslibs.
+            console.assert(!this.m_deps || this.m_deps.length==0);
+            if(this.m_deps)
+                task.AddDeps(this.m_deps);
+            if(this.m_libs)
+                task.AddLibs(this.m_libs);
             break;
         }
     }
