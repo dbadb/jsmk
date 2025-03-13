@@ -18,12 +18,13 @@ class Link extends ToolCli
         let exepath = jsmk.path.join(ts.BuildVars.CLANG_BIN, exe);
         let arg0 = jsmk.path.resolveExeFile(exepath);
         if(!arg0) throw new Error(`Can't resolve ${exe} ${ts.BuildVar.CLANG_BIN}`);
-
+        let Role = buildso ? ToolCli.Role.ArchiveDynamic : ToolCli.Role.Link;
+        let DstExt = buildso ? "dylib" : platform=="win32" ? "exe" : "";
         super(ts, "clang/link",
             {
-                Role: ToolCli.Role.Link,
+                Role,
                 Semantics: ToolCli.Semantics.ManyToOne,
-                DstExt: buildso ? "dylib" : platform=="win32" ? "exe" : "",
+                DstExt,
                 ActionStage: "build",
                 Invocation: [arg0, 
                     "-o ${DSTFILE} ${SRCFILES} ${FLAGS} ${SEARCHPATHS} ${LIBS}"],
@@ -57,7 +58,17 @@ class Link extends ToolCli
     ConfigureTaskSettings(task)
     {
         super.ConfigureTaskSettings(task);
+
+        // console.log(`${this.m_name} ${this.m_role} ${this.m_dstExt}`);
+        if(this.m_dstExt == "dylib") // macos-only
+        {
+            task.AddFlags([["-install_name", task.GetName()]]);
+            let vers = task.GetBuildVar("VERSION");
+            if(vers)
+                task.AddFlags([["-current_version", vers]]);
+        }
     }
+
 }  // end of link
 
 exports.Link = Link;
