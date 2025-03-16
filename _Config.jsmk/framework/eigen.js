@@ -36,6 +36,7 @@ class eigen extends Framework
         switch(r)
         {
         case Tool.Role.Compile:
+            task.Define({"EIGEN_MPL2_ONLY": null});
             if(this.m_incDir)
                 task.AddSearchpaths(r, [this.m_incDir]);
             break;
