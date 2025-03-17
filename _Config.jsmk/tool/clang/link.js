@@ -19,7 +19,19 @@ class Link extends ToolCli
         let arg0 = jsmk.path.resolveExeFile(exepath);
         if(!arg0) throw new Error(`Can't resolve ${exe} ${ts.BuildVar.CLANG_BIN}`);
         let Role = buildso ? ToolCli.Role.ArchiveDynamic : ToolCli.Role.Link;
-        let DstExt = buildso ? "dylib" : platform=="win32" ? "exe" : "";
+        let DstExt; 
+        switch(platform)
+        {
+        case "darwin":
+            DstExt = buildso ? "dylib" : "";
+            break;
+        case "win32":
+            DstExt = buildso ? "dll" : "exe";
+            break;
+        default:
+            DstExt = buildso ? "so" : "";
+            break;
+        }
         super(ts, "clang/link",
             {
                 Role,
