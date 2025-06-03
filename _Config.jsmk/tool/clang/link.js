@@ -160,7 +160,10 @@ function GetClangFlags(platform, deployment, linktype)
                    ["-Xlinker", "-IGNORE:4217"], //  Still useful for benign __declspec(dllimport) warnings
                   );
         if(linktype == "exe")
-            flags.push(["-Xlinker", "-entry:mainCRTStartup"]); // <--- Explicitly define the entry point
+        {
+            // flags.push(["-Xlinker", "-entry:mainCRTStartup"]); // <--- Explicitly define the entry point
+            flags.push(["-Xlinker", "-SUBSYSTEM:CONSOLE"]); // <--- Explicitly define the entry point
+        }
     }
     return flags;
 }
