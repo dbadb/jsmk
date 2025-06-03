@@ -271,7 +271,7 @@ exports.Link = class Link extends ToolCli
       /MERGE:from=to
       /MIDL:@commandfile
       /NOASSEMBLY
-      /NODEFAULTLIB[:library]
+      /NODEFAULTLIB[:library] (unused)
       /NOENTRY
       /NOIMPLIB
       /NOLOGO

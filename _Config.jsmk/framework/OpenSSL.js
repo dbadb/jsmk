@@ -26,10 +26,23 @@ class OpenSSL extends Framework
         this.m_arch = this.m_toolset.TargetArch;
         switch(Platform)
         {
-        // NB: windows now ships with openssl libs in /Windows//System32
         case "win32": 
             {
+                // NB: there may or may not be a version of libcrypto & libssl
+                // in c:/Windows/System32.  If so they were installed there
+                // by a 3rd-party installer. We need to ensure that openssl
+                // components are both available and the expected version.
+                // On win, we have two options, ship the dll or direct-link.
+                // Direct-linkable libraries are a pain to build but happily
+                // there are some purveyors of such.  Here's one:
+                // https://slproweb.com/products/Win32OpenSSL.html
+                // NB: static libs are available in a subset of its packages.
+                // NNB: static libs depend upon runtime and threading settings
+                //  so there are a number of libs availabe (both VC and MING2).
+                // NNNB: VC libs are probably preferred and utilize various
+                //  win-native APIs.
                 let eArch;
+                let rootDir = "C:/Program Files (x86)/OpenSSL-WinUniversal";
                 switch(this.m_arch)
                 {
                 case "x64":
@@ -44,28 +57,15 @@ class OpenSSL extends Framework
                     throw new Error("OpenSSL unsuppported arch " + 
                                     this.m_arch + "(" + Toolset.Arch.x86_64 + ")");
                 }
-                for(let fw of FrameworkDirs)
-                {
-                    let incdir = jsmk.path.join(fw, `openssl/openssl-3/${eArch}/include`);
-                    let libdir = jsmk.path.join(fw,`openssl/openssl-3/${eArch}/lib`);
-                    if(jsmk.path.existsSync(incdir))
-                    {
-                        this.m_incDir = incdir;
-                        this.m_libDir = libdir;
-                        break;
-                    }
-                }
-                if(this.m_toolset.Name.startsWith("clang"))
-                {
-                    // hrm, -L doesn't work on window + clang?
-                    // this.m_libs = ["-lssl", "-lcrypto"];
-                    this.m_libs = [
-                            `${this.m_libDir}/libssl.lib`,
-                            `${this.m_libDir}/libcrypto.lib`
-                        ];
-                }
-                else
-                    this.m_libs = ["libssl.lib", "libcrypto.lib"];
+                this.m_incDir = jsmk.path.join(rootDir, `include/${eArch}`);
+                this.m_libDir = jsmk.path.join(rootDir, `lib/VC/${eArch}`);
+                // libdir includes various flavors (LINKER flags!!!),
+                // handled a ConfigTask below.
+                //   MD:  -> link with MSVCRT (dynamic crt)
+                //   MDd: -> link with MSVCRT debug
+                //   MT:  -> link with LIBCMT
+                //   MTd: -> LIBCMT debug.
+                this.m_libs = ["libssl_static.lib", "libcrypto_static.lib"];
             }
             break;
         case "darwin":
@@ -102,15 +102,41 @@ class OpenSSL extends Framework
             break;
         case Tool.Role.Link:
         case Tool.Role.ArchiveDynamic:
-            if(this.m_libDir)
-                task.AddSearchpaths(r, [this.m_libDir]);
             // currently ssl operates more like syslibs and not deplibs.
-            // ie: our code (deplist) depend on them like syslibs.
+            // ie: our code (deplist) depends on them like syslibs.
             console.assert(!this.m_deps || this.m_deps.length==0);
-            if(this.m_deps)
-                task.AddDeps(this.m_deps);
-            if(this.m_libs)
+            // if(this.m_deps) task.AddDeps(this.m_deps);
+
+            //   MD:  -> link with MSVCRT (dynamic crt)
+            //   MDd: -> link with MSVCRT debug
+            //   MT:  -> link with LIBCMT (static libc multithreaded)
+            //   MTd: -> LIBCMT debug.
+            if(Platform == "win32")
+            {
+                let libdir = this.m_libDir;
+                let tsname = tool.GetToolset().GetName();
+                if(tsname.includes("clang"))
+                    libdir = jsmk.path.join(libdir, "MDd");
+                else
+                switch(task.BuildVars.Deployment)
+                {
+                case "debug":
+                    libdir = jsmk.path.join(libdir, "MDd");
+                    break;
+                case "release":
+                case "releasesym":
+                    libdir = jsmk.path.join(libdir, "MD");
+                    break;
+                }
+                let libs = this.m_libs.map((l) => jsmk.path.join(libdir, l));
+                task.AddLibs(libs);
+            }
+            else
+            {
+                if(this.m_libDir)
+                    task.AddSearchpaths(r, [this.m_libDir]);
                 task.AddLibs(this.m_libs);
+            }
             break;
         }
     }

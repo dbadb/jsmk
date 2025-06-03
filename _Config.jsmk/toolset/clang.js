@@ -54,43 +54,52 @@ class Clang extends Foundation
             };
         }
         else
-            throw new Exception("unknown platform " + platform);
+        {
+            jsmk.WARN("clang toolset: unknown platform " + platform);
+            throw new Exception("clang toolset: unknown platform " + platform);
+        }
         super(__filename, "clang"+cfg.vers, cfg.arch);
         
         this.MergeSettings(map);
 
-        let cc = jsmk.LoadConfig("tool/clang/cc.js");
-        let link = jsmk.LoadConfig("tool/clang/link.js");
-        let misc = jsmk.LoadConfig("tool/clang/misc.js");
-
-        this.MergeToolMap(
+        try
+        {
+            let cc = jsmk.LoadConfig("tool/clang/cc.js");
+            let link = jsmk.LoadConfig("tool/clang/link.js");
+            let misc = jsmk.LoadConfig("tool/clang/misc.js");
+            this.MergeToolMap(
+                {
+                    "cpp->o": new cc.CPP(this),
+                    "c->o": new cc.CC(this),
+                    "cpp.o->exe": new link.Link(this),
+                    "cpp.o->so": new link.Link(this, true),
+                    "o->a": new misc.AR(this),
+                }
+            );
+            if(platform == "darwin")
             {
-                "cpp->o": new cc.CPP(this),
-                "c->o": new cc.CC(this),
-                "cpp.o->exe": new link.Link(this),
-                "cpp.o->so": new link.Link(this, true),
-                "o->a": new misc.AR(this),
+                this.MergeToolMap(
+                {
+                    "mm->o": new cc.MM(this),
+                    "y->c": new misc.YACC(this),
+                    "lex->c": new misc.LEX(this),
+                });
             }
-        );
-        if(platform == "darwin")
-        {
-            this.MergeToolMap(
+            else
+            if(platform == "win32")
             {
-                "mm->o": new cc.MM(this),
-                "y->c": new misc.YACC(this),
-                "lex->c": new misc.LEX(this),
-            });
+                let rc = new (jsmk.LoadConfig("tool/windows/vs/rc.js").RC)(WinConfig[arch], "22");
+                this.MergeToolMap(
+                {
+                    "rc->o": rc,
+                });
+            }
+            jsmk.DEBUG("clang toolset loaded");
         }
-        else
-        if(platform == "win32")
+        catch(err)
         {
-            let rc = new (jsmk.LoadConfig("tool/windows/vs/rc.js").RC)(WinConfig[arch], "22");
-            this.MergeToolMap(
-            {
-                "rc->o": rc,
-            });
+            jsmk.WARNING("clang error at " + err.stack);
         }
-        jsmk.DEBUG("clang toolset loaded");
     }
 }
 

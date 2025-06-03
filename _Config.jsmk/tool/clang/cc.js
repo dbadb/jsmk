@@ -1,4 +1,5 @@
 const ToolCli = jsmk.Require("tool_cli.js").Tool;
+const {GetClangFlags, GetClangDriver} = require("./link.js");
 
 // Clang is a tool that provides cc, mm or c++, toolset expected
 // to instantiate me thrice setting target appropriately.
@@ -37,16 +38,11 @@ class Clang extends ToolCli
 {
     constructor(ts, nm, target="c") // constructor called below
     { 
-        let exe = {
-            c: "clang",
-            cpp: "clang++",
-            mm: "clang++"
-        }[target];
-
         let platform = jsmk.GetHost().Platform;
+        let exe = GetClangDriver(platform, target);
         let exepath = jsmk.path.join(ts.BuildVars.CLANG_BIN, exe);
         let arg0 = jsmk.path.resolveExeFile(exepath);
-        if(!arg0) throw new Error(`Can't resolve ${exe} ${ts.BuildVar.CLANG_BIN}`);
+        if(!arg0) throw new Error(`Can't resolve ${exepath} under ${ts.BuildVars.CLANG_BIN}`);
         super(ts, nm, 
         {
             Role: ToolCli.Role.Compile,
@@ -105,6 +101,7 @@ class Clang extends ToolCli
         let flags = [];
         let defs = {};
 
+        let platform = jsmk.GetTargetPlatform();
         switch(this.target)
         {
         case "c":
@@ -121,6 +118,9 @@ class Clang extends ToolCli
             }
             break;
         }
+        let clangflags = GetClangFlags(platform, task.BuildVars.Deployment);
+        if(clangflags)
+            flags.push(...clangflags);
 
         // Optimize for size. -Os enables all -O2 optimizations except 
         // those that often increase code size.  A Project/Root can
@@ -152,7 +152,6 @@ class Clang extends ToolCli
         case "release":
             if(!task.BuildVars.OPTIMIZATION)
                 flags.push("-O3");
-            // jsmk.NOTICE("clang release build flags " + flags)
             defs.NDEBUG=null; // disables assertions
             break;
         }

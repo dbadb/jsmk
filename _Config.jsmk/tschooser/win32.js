@@ -3,9 +3,9 @@
 //      - common windows-specific toolsets
 exports.GetToolsets = function()
 {
-    let arduino = jsmk.LoadConfig("toolset/arduino.js").Toolset;
-    let teensy = jsmk.LoadConfig("toolset/teensy.js").Toolset;
-    let esp8266 = jsmk.LoadConfig("toolset/esp8266.js").Toolset;
+    //let arduino = jsmk.LoadConfig("toolset/arduino.js").Toolset;
+    //let teensy = jsmk.LoadConfig("toolset/teensy.js").Toolset;
+    //let esp8266 = jsmk.LoadConfig("toolset/esp8266.js").Toolset;
     //let vs17 = jsmk.LoadConfig("toolset/vs17.js").Toolset;
     let vs22 = jsmk.LoadConfig("toolset/vs22.js").Toolset;
     let clang = jsmk.LoadConfig("toolset/clang.js").Toolset;
@@ -13,9 +13,12 @@ exports.GetToolsets = function()
     let result = [];
     try
     {
-        result.push(new teensy("teensyLC"));
-        result.push(new teensy("teensy40"));
-        result.push(new teensy("teensy40_oc"));
+        if(teensy)
+        {
+            result.push(new teensy("teensyLC"));
+            result.push(new teensy("teensy40"));
+            result.push(new teensy("teensy40_oc"));
+        }
     }
     catch(err)
     {
@@ -24,10 +27,14 @@ exports.GetToolsets = function()
 
     try
     {
-        result.push(new esp8266("robodyn"));
-        result.push(new esp8266("d1_mini"));
-        result.push(new esp8266("generic"));
-        result.push(new arduino("uno"));
+        if(esp8266)
+        {
+            result.push(new esp8266("robodyn"));
+            result.push(new esp8266("d1_mini"));
+            result.push(new esp8266("generic"));
+        }
+        if(arduino)
+            result.push(new arduino("uno"));
     }
     catch(err)
     {
@@ -41,7 +48,7 @@ exports.GetToolsets = function()
     }
     catch(err)
     {
-        jsmk.WARNING("tschooser: no c++ dev on windows " + err);
+        jsmk.WARNING("tschooser ERROR: bad c++ toolset on windows " + err);
     }
     console.log(`win32 tschooser: ${result.length} toolsets.`);
     return result;
