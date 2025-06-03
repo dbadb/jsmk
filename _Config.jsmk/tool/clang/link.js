@@ -65,7 +65,6 @@ class Link extends ToolCli
                 "-mmacosx-version-min=15.0", 
             ],
             win32: [
-                "-g", // produces .pdb files when used via visual studio
             ]
         }[platform];
         this.AddFlags(this.GetRole(), flags);
@@ -136,12 +135,15 @@ function GetClangDriver(platform, target)
     }
 }
 
-function GetClangFlags(platform, deployment, linktype)
+// also invoked by cc...
+function GetClangFlags(platform, deployment, linktype) 
 {
     const dofms = platform == "win32";
     if(!dofms) return null;
 
     let flags = [];
+    if(deployment == "debug" || deployment == "releasesym")
+        flags.push("-g");
     switch(deployment)
     {
     case "debug":
@@ -162,7 +164,7 @@ function GetClangFlags(platform, deployment, linktype)
         if(linktype == "exe")
         {
             // flags.push(["-Xlinker", "-entry:mainCRTStartup"]); // <--- Explicitly define the entry point
-            flags.push(["-Xlinker", "-SUBSYSTEM:CONSOLE"]); // <--- Explicitly define the entry point
+            // flags.push(["-Xlinker", "-SUBSYSTEM:CONSOLE"]); // <--- Explicitly define the entry point
         }
     }
     return flags;

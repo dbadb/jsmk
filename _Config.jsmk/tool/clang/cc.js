@@ -146,8 +146,7 @@ class Clang extends ToolCli
         }
         switch(task.BuildVars.Deployment)
         {
-        case "debug":
-            flags.push("-g");
+        case "debug": // -g managed by GetLangFlags(), above.
             break;
         case "release":
             if(!task.BuildVars.OPTIMIZATION)
