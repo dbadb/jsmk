@@ -157,12 +157,18 @@ function GetClangFlags(platform, deployment, linktype)
     {
         // This represents the payback of a painful journey
         // to understand  how to use clang++ with MSV runtimes
-        // without resorting to clang-vc magic.  More in the explicit libs below.
+        // without resorting to clang-cl magic.  
+        // The gist: interacting with windows c-runtime for console
+        // in debug and no-debug is hidden from view by visual studio.
+        // To avoid switching to clang-cl, we implement the magic here
+        // and below. // More on the explicit libs in getClangLibs.
         flags.push(["-Xlinker", "-NODEFAULTLIB"],
                    ["-Xlinker", "-IGNORE:4217"], //  Still useful for benign __declspec(dllimport) warnings
                   );
         if(linktype == "exe")
         {
+            // dumpbin -headers shows that both appear to be equivalent
+            // and also the default behavior of clang-linking.
             // flags.push(["-Xlinker", "-entry:mainCRTStartup"]); // <--- Explicitly define the entry point
             // flags.push(["-Xlinker", "-SUBSYSTEM:CONSOLE"]); // <--- Explicitly define the entry point
         }
