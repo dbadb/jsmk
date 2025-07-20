@@ -171,11 +171,13 @@ class Clang extends ToolCli
             let depfileTxt = jsmk.file.read(jsmk.file.changeExtension(output, "d"));
             if(depfileTxt)
             {
-                let pat = /(?:[^\s]+\\ [^\s]+|[^\s]+)+/g;
+                // let pat = /(?:[^\s]+\\ [^\s]+|[^\s]+)+/g;
+                let pat = /(?:\\ |[^\s])+/g;
+                
                 // pat looks for filenames, potentially with embedded spaces.
-                // This also selects for line-continuation "\\" so we need
-                // to filter that.
-                // First line is the dependent file, so we slice it off.
+                // This also selects for line-continuation "\" so we need
+                // to filter those. Also, first line is the dependent file, 
+                // so we filter it too.
                 let files = depfileTxt.match(pat).filter((value)=>{
                     if(value[value.length-1] == ":")
                         return false;
