@@ -154,8 +154,6 @@ class Clang extends ToolCli
             defs.NDEBUG=null; // disables assertions
             break;
         }
-        if(!task.BuildVars.NoFastMath)
-            flags.push("-ffast-math"); // when not arm?
         if(flags.length)
             task.AddFlags(this.GetRole(), flags);
         task.Define(defs);
