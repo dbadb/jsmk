@@ -11,6 +11,16 @@
 //    via jsmk.GetFramework("CEF", vers?).ConfigureProject(Project, "compileC++Binding");
 //  - Project can resolve relative paths below itself (and into _frameworks/...)
 //    
+// issues:
+//  - on macos we must produce a collection of apps (to support secure subprocesses?)
+//    For Spotiy.spp/Frameworks: 
+//          Chromium Embedded Framework.framework/ 
+//          Spotify Helper (Renderer).app/
+//          Spotify Helper (GPU).app/              
+//          Spotify Helper.app/
+//          Spotify Helper (Plugin).app/
+//   and eg, refs to cross-app dylibs are relative:
+//      ../../../Chromium Embedded Framework.framework/Libraries/libcef_sandbox.dylib
 //
 let Framework = jsmk.Require("framework").Framework;
 let Tool = jsmk.Require("tool").Tool;
