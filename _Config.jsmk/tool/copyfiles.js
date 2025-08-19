@@ -60,6 +60,10 @@ class CopyFiles extends Tool
                     pathobj.base = null;
                     outfile = jsmk.path.format(pathobj);
                 }
+                if(config.renametarget)
+                {
+                    outfile = config.renametarget(outfile);
+                }
                 outputs.push(outfile);
             }
             if(actionStage == "package")

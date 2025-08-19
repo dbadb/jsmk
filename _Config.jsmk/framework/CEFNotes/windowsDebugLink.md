@@ -1,3 +1,18 @@
+### compile resources
+C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\rc.exe 
+    /D _UNICODE /D UNICODE /D WIN32 /D _DEBUG /D _WINDOWS 
+    /D __STDC_CONSTANT_MACROS /D __STDC_FORMAT_MACROS 
+    /D _WIN32 /D UNICODE /D _UNICODE /D WINVER=0x0A00 
+    /D _WIN32_WINNT=0x0A00 /D NTDDI_VERSION=NTDDI_WIN10_FE 
+    /D NOMINMAX /D WIN32_LEAN_AND_MEAN /D _HAS_EXCEPTIONS=0 
+    /D CEF_USE_BOOTSTRAP /D CEF_USE_ATL 
+    /D "CMAKE_INTDIR=\\\"Debug\\\"" 
+    /D cefclient_EXPORTS /l"0x0409" 
+      /I"."
+      /nologo /fo"cefclient.dir\Debug\cefclient.res" 
+      "tests\cefclient\win\cefclient.rc"
+
+### link
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\link.exe 
     /ERRORREPORT:PROMPT 
     /OUT:".../.../cefclient.dll" 
