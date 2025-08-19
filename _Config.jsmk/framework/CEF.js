@@ -41,6 +41,8 @@ class CEF extends Framework
 
     ConfigureProject(proj, how=sDefaultConfigProj)
     {
+        if(typeof(how) == "string") how = [how];
+
         const ts = jsmk.GetActiveToolset();
         const tsname = ts.Name;
         const arch = ts.TargetArch;
@@ -58,13 +60,17 @@ class CEF extends Framework
             __STDC_FORMAT_MACROS:null,
             CEF_USE_BOOTSTRAP: null,
             CEF_USE_ATL: null,
-            WRAPPING_CEF_SHARED: null,
+            WRAPPING_CEF_SHARED: 1,
         };
         this.m_ccflags = [];
         this.m_lnkflags = [];
+        const debug = this.m_deploy == "debug";
+        proj.SetBuildVar("CppStd", "c++17"); // CEF's preferred mode.
+        this.m_syslibs = [];
         switch(plt)
         {
         case "win32":
+            proj.SetBuildVar("Win32Console","static"); // CEF's preferred mode.
             this.m_ccdefs = Object.assign(this.m_ccdefs, {
                 NOMINMAX: null,
                 WINVER: "0x0A00",
@@ -74,28 +80,38 @@ class CEF extends Framework
                 _HAS_EXCEPTIONS: 0,
                 UNICODE: null,
                 _UNICODE: null,
+                _CRT_SECURE_NO_WARNINGS: null, // fopen (also covered by vc's wd4996)
             });
+            this.m_libcef = jsmk.path.join(this.m_fwdir, 
+                                    (debug?"Debug":"Release"), "libcef.lib");
             if(tsname == "clang")
-                this.appendClangFlags(this.m_ccflags, this.m_deploy==="debug");
+                this.appendWin32ClangFlags(this.m_ccflags, this.m_lnkflags, debug);
             else
-                this.appendMSVFlags(this.m_ccflags, this.m_deploy==="debug");
+                this.appendMSVFlags(this.m_ccflags, this.m_lnkflags, debug);
             break;
         case "darwin":
             break;
         case "linux":
             break;
         }
-        switch(how)
+
+        for(let h of how)
         {
-        case sDefaultConfigProj:
-            this.addBindingToProj(proj);
-            break;
-        default:
-            throw Error(`CEF can't config project ${how}`);
+            switch(h)
+            {
+            case sDefaultConfigProj:
+                this.addBindingToProj(proj);
+                break;
+            case "buildTestClient":
+                this.addTestClientToProj(proj);
+                break;
+            default:
+                throw Error(`CEF can't config project ${h}`);
+            }
         }
     }
 
-    appendClangFlags(ccflags, debug)
+    appendWin32ClangFlags(ccflags, lnkflags, debug)
     {
         if(debug)
             ccflags.push("-O0", "-g");
@@ -118,59 +134,122 @@ class CEF extends Framework
             "-fno-threadsafe-statics", //  Don't generate thread-safe statics
             "-fobjc-call-cxx-cdtors", //  Call the constructor/destructor of C++ instance variables in ObjC objects
             "-fvisibility-inlines-hidden", //  Give hidden visibility to inlined class member functions
-            "-std=c++17", //  Use the C++17 language standard
             "-Wno-narrowing", //  Don't warn about type narrowing
             "-Wsign-compare", //  Warn about mixed signed/unsigned type comparisons
             "-Wno-undefined-var-template", // Don't warn about potentially uninstantiated static members
         );
         if(this.m_plt == "win32")
             ccflags.push("-Wno-cast-function-type"); // cef_util_win.cc
+        this.appendWin32LinkFlags(lnkflags, debug);
     }
 
-    appendMSVFlags(ccflags, debug)
+    appendMSVFlags(ccflags, lnkflags, debug)
     {
         if(debug)
         {
             ccflags.push(
-                "/MTd",
-                "/RTC1", // disable optimizations
-                "/Od",
-                "/Ob0"
+                "-RTC1", // disable optimizations
+                "-Od",
+                "-Ob0"
             );
         }
         else
         {
             ccflags.push(
-                "/MT",
-                "/O2", // max speeed
-                "/Ob2", // inline
-                "/GF", // string pooling
+                "-O2", // max speeed
+                "-Ob2", // inline
+                "-GF", // string pooling
             );
         }
         ccflags.push(
-            "/Zi",
-            "/MP", // multiprocess, not needed since we parallelize
-            "/Gy",  // function-level linking
-            "/GR-", // disable RTTI
-            "/W4", // warning level
-            "/WX", // warnings are errors
-            "/Gm-", 
-            "/EHsc", 
-            "/GS", 
-            "/fp:precise", 
-            "/Zc:wchar_t", "/Zc:forScope", "/Zc:inline", 
-            "/std:c++17",
-            "/wd4100", // Ignore "unreferenced formal parameter" warning
-            "/wd4127", // Ignore "conditional expression is constant" warning
-            "/wd4244", // Ignore "conversion possible loss of data" warning
-            "/wd4324", // Ignore "structure was padded due to alignment specifier" warning
-            "/wd4481", // Ignore "nonstandard extension used: override" warning
-            "/wd4512", // Ignore "assignment operator could not be generated" warning
-            "/wd4701", // Ignore "potentially uninitialized local variable" warning
-            "/wd4702", // Ignore "unreachable code" warning
-            "/wd4996", // Ignore "function or variable may be unsafe" warning
+            "-Zi",
+            "-MP", // multiprocess, not needed since we parallelize
+            "-Gy",  // function-level linking
+            "-GR-", // disable RTTI
+            "-W4", // warning level
+            "-WX", // warnings are errors
+            "-Gm-", 
+            "-EHsc", 
+            "-GS", 
+            "-fp:precise", 
+            "-Zc:wchar_t", 
+            "-Zc:forScope", 
+            "-Zc:inline", 
+            "-wd4100", // Ignore "unreferenced formal parameter" warning
+            "-wd4127", // Ignore "conditional expression is constant" warning
+            "-wd4244", // Ignore "conversion possible loss of data" warning
+            "-wd4324", // Ignore "structure was padded due to alignment specifier" warning
+            "-wd4481", // Ignore "nonstandard extension used: override" warning
+            "-wd4512", // Ignore "assignment operator could not be generated" warning
+            "-wd4701", // Ignore "potentially uninitialized local variable" warning
+            "-wd4702", // Ignore "unreachable code" warning
+            "-wd4996", // Ignore "function or variable may be unsafe" warning (CRT_SECURE...)
         );
+        this.appendWin32LinkFlags(lnkflags, debug);
     }
+
+    appendWin32LinkFlags(lnkflags, debug)
+    {
+        this.m_syslibs = [
+           "comctl32.lib", "crypt32.lib", "delayimp.lib", "gdi32.lib", 
+           "rpcrt4.lib", "shlwapi.lib", "wintrust.lib",
+           "ws2_32.lib", "d3d11.lib", "glu32.lib", "imm32.lib", 
+           "opengl32.lib", "oleacc.lib", "kernel32.lib", "user32.lib",
+           "gdi32.lib", "winspool.lib", "shell32.lib", "ole32.lib", 
+           "oleaut32.lib", "uuid.lib", "comdlg32.lib", "advapi32.lib",
+           "Delayimp.lib"
+        ];
+        // delayload makes for faster startup.
+        /*
+        lnkflags.push("/DELAYLOAD:libcef.dll",
+            '/DELAYLOAD:"api-ms-win-core-winrt-error-l1-1-0.dll"',
+            '/DELAYLOAD:"api-ms-win-core-winrt-l1-1-0.dll"', 
+            '/DELAYLOAD:"api-ms-win-core-winrt-string-l1-1-0.dll"',
+            "/DELAYLOAD:advapi32.dll", "/DELAYLOAD:comctl32.dll", 
+            "/DELAYLOAD:comdlg32.dll", "/DELAYLOAD:credui.dll",
+            "/DELAYLOAD:cryptui.dll", "/DELAYLOAD:d3d11.dll", 
+            "/DELAYLOAD:d3d9.dll", "/DELAYLOAD:dwmapi.dll",
+            "/DELAYLOAD:dxgi.dll", "/DELAYLOAD:dxva2.dll", 
+            "/DELAYLOAD:esent.dll", "/DELAYLOAD:gdi32.dll",
+            "/DELAYLOAD:hid.dll", "/DELAYLOAD:imagehlp.dll",
+            "/DELAYLOAD:imm32.dll /DELAYLOAD:msi.dll",
+            "/DELAYLOAD:netapi32.dll /DELAYLOAD:ncrypt.dll",
+            "/DELAYLOAD:ole32.dll", "/DELAYLOAD:oleacc.dll",
+            "/DELAYLOAD:propsys.dll", "/DELAYLOAD:psapi.dll",
+            "/DELAYLOAD:rpcrt4.dll", "/DELAYLOAD:rstrtmgr.dll",
+            "/DELAYLOAD:setupapi.dll", "/DELAYLOAD:shell32.dll",
+            "/DELAYLOAD:shlwapi.dll", "/DELAYLOAD:uiautomationcore.dll",
+            "/DELAYLOAD:urlmon.dll", "/DELAYLOAD:user32.dll",
+            "/DELAYLOAD:usp10.dll", "/DELAYLOAD:uxtheme.dll",
+            "/DELAYLOAD:wer.dll", "/DELAYLOAD:wevtapi.dll",
+            "/DELAYLOAD:wininet.dll", "/DELAYLOAD:winusb.dll",
+            "/DELAYLOAD:wsock32.dll", "/DELAYLOAD:wtsapi32.dll",
+            "/DELAYLOAD:crypt32.dll", "/DELAYLOAD:dbghelp.dll",
+            "/DELAYLOAD:dhcpcsvc.dll", "/DELAYLOAD:dwrite.dll",
+            "/DELAYLOAD:iphlpapi.dll", "/DELAYLOAD:oleaut32.dll",
+            "/DELAYLOAD:secur32.dll", "/DELAYLOAD:userenv.dll",
+            "/DELAYLOAD:winhttp.dll", "/DELAYLOAD:winmm.dll",
+            "/DELAYLOAD:winspool.drv", "/DELAYLOAD:wintrust.dll",
+            "/DELAYLOAD:ws2_32.dll", "/DELAYLOAD:glu32.dll",
+            "/DELAYLOAD:oleaut32.dll", "/DELAYLOAD:opengl32.dll",
+        );
+        */
+    }
+
+    // cl.exe _frameworks/CEF/x86_64-win32/139/libcef_dll/ctocpp/media_router_ctocpp.cc 
+    //   -Fo_built/vs22-x86_64-win32-avx2-debug/CEFBinding/media_router_ctocpp.cc.obj 
+    //   -I_frameworks/CEF/x86_64-win32/139 
+    //    /MTd /RTC1 /Od /Ob0 /Zi /MP /Gy /GR- /W4 /WX 
+    //    /Gm- /EHsc /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++17 
+    //    /wd4100 /wd4127 /wd4244 /wd4324 /wd4481 /wd4512 /wd4701 /wd4702 /wd4996 -c 
+    //    -EHsc -Gd -Gm- -GS- -Gy -W3 -WX- -Zc:__cplusplus -TP -Zc:inline 
+    //   -Zc:wchar_t -Zc:forScope -showIncludes -std:c++17 
+    //   -FdC:/Users/dana/Documents/src/github.cannerycoders/CEFapp/_built/vs22-x86_64-win32-avx2-debug/CEFBinding/media_router_ctocpp.cc.obj.pdb 
+    //   -Ob0 -Od -RTC1 -Zi -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS 
+    //   -DCEF_USE_BOOTSTRAP -DCEF_USE_ATL -DWRAPPING_CEF_SHARED -DNOMINMAX -DWINVER=0x0A00 
+    //   -D_WIN32_WINNT=0x0A00 -DNTDDI_VERSION=NTDDI_WIN10_FE -DWIN32_LEAN_AND_MEAN 
+    //   -D_HAS_EXCEPTIONS=0 -DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -D_WIN32 
+    //   -DWIN32 -D_DEBUG
 
     ConfigureTaskSettings(task)
     {
@@ -187,11 +266,14 @@ class CEF extends Framework
                 task.Define(this.m_ccdefs);
             break;
         case Tool.Role.Link:
+        case Tool.Role.Archive:
         case Tool.Role.ArchiveDynamic:
-            if(this.m_lnklags)
+            if(this.m_lnkflags)
                 task.AddFlags(r, this.m_lnkflags);
             if(this.m_libs)
                 task.AddLibs(this.m_libs);
+            if(this.m_syslibs)
+                task.AddLibs(this.m_syslibs);
             break;
         }
     }
@@ -209,6 +291,7 @@ class CEF extends Framework
         srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/cpptoc/test/*.cc`));
         srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/cpptoc/views/*.cc`));
         srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/ctocpp/*.cc`));
+        srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/ctocpp/views/*.cc`));
         srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/wrapper/*.cc`));
         let tcomp = m.NewTask("compileCEFBinding", "cpp->o", {
                         inputs: srcfiles, 
@@ -216,24 +299,124 @@ class CEF extends Framework
         m.NewTask("libCEFBinding", "o->a", {
             inputs: tcomp.GetOutputs(),
         });
+        this.m_cefBindingModule = m;
+        this.m_libs = [this.m_libcef, ...m.GetOutputs()];
+    }
+
+    addTestClientToProj(proj) // see tests/cefclient/CMakeLists.txt
+    {
+        const m = proj.NewModule("CEFTestClient");
+        const srcdir = jsmk.path.join(this.m_fwdir, "tests");
+        const clientPlatformSrc = {
+            win32: [
+                "cefclient/cefclient_win.cc",
+                "cefclient/browser/browser_window_osr_win.cc",
+                "cefclient/browser/browser_window_std_win.cc",
+                "cefclient/browser/main_context_impl_win.cc",
+                "cefclient/browser/main_message_loop_multithreaded_win.cc",
+                "cefclient/browser/osr_accessibility_helper.cc",
+                "cefclient/browser/osr_accessibility_node.cc",
+                "cefclient/browser/osr_accessibility_node_win.cc",
+                "cefclient/browser/osr_d3d11_win.cc",
+                "cefclient/browser/osr_dragdrop_win.cc",
+                "cefclient/browser/osr_ime_handler_win.cc",
+                "cefclient/browser/osr_render_handler_win.cc",
+                "cefclient/browser/osr_render_handler_win_d3d11.cc",
+                "cefclient/browser/osr_render_handler_win_gl.cc",
+                "cefclient/browser/osr_window_win.cc",
+                "cefclient/browser/resource_util_win_idmap.cc",
+                "cefclient/browser/root_window_win.cc",
+                "cefclient/browser/temp_window_win.cc",
+                "cefclient/browser/window_test_runner_win.cc",
+                "shared/browser/main_message_loop_external_pump_win.cc",
+                "shared/browser/resource_util_win.cc",
+                "shared/browser/util_win.cc",
+            ],
+        }[this.m_plt];
+        const clientBrowserSrc = [
+            "cefclient/browser/base_client_handler.cc",
+            "cefclient/browser/binary_transfer_test.cc",
+            "cefclient/browser/binding_test.cc",
+            "cefclient/browser/browser_window.cc",
+            "cefclient/browser/bytes_write_handler.cc",
+            "cefclient/browser/client_app_delegates_browser.cc",
+            "cefclient/browser/client_browser.cc",
+            "cefclient/browser/client_handler.cc",
+            "cefclient/browser/client_handler_osr.cc",
+            "cefclient/browser/client_handler_std.cc",
+            "cefclient/browser/client_prefs.cc",
+            "cefclient/browser/config_test.cc",
+            "cefclient/browser/default_client_handler.cc",
+            "cefclient/browser/dialog_test.cc",
+            "cefclient/browser/hang_test.cc",
+            "cefclient/browser/image_cache.cc",
+            "cefclient/browser/main_context.cc",
+            "cefclient/browser/main_context_impl.cc",
+            "cefclient/browser/media_router_test.cc",
+            "cefclient/browser/osr_renderer.cc",
+            "cefclient/browser/preferences_test.cc",
+            "cefclient/browser/response_filter_test.cc",
+            "cefclient/browser/root_window.cc",
+            "cefclient/browser/root_window_create.cc",
+            "cefclient/browser/root_window_manager.cc",
+            "cefclient/browser/root_window_views.cc",
+            "cefclient/browser/scheme_test.cc",
+            "cefclient/browser/server_test.cc",
+            "cefclient/browser/task_manager_test.cc",
+            "cefclient/browser/test_runner.cc",
+            "cefclient/browser/urlrequest_test.cc",
+            "cefclient/browser/views_menu_bar.cc",
+            "cefclient/browser/views_overlay_browser.cc",
+            "cefclient/browser/views_overlay_controls.cc",
+            "cefclient/browser/views_style.cc",
+            "cefclient/browser/views_window.cc",
+            "cefclient/browser/window_test.cc",
+            "cefclient/browser/window_test_runner.cc",
+            "cefclient/browser/window_test_runner_views.cc",
+        ];
+        const clientCommonSrc = [
+            "cefclient/common/client_app_delegates_common.cc",
+            "cefclient/common/scheme_test_common.cc",
+        ];
+        const clientRendererSrc = [
+            "cefclient/renderer/client_app_delegates_renderer.cc",
+            "cefclient/renderer/client_renderer.cc",
+            "cefclient/renderer/ipc_performance_test.cc",
+            "cefclient/renderer/performance_test.cc",
+            "cefclient/renderer/performance_test_tests.cc",
+        ];
+
+        const sharedBrowserSrc = [
+            "shared/browser/client_app_browser.cc",
+            "shared/browser/file_util.cc",
+            "shared/browser/geometry_util.cc",
+            "shared/browser/main_message_loop.cc",
+            "shared/browser/main_message_loop_external_pump.cc",
+            "shared/browser/main_message_loop_std.cc",
+        ];
+        const sharedCommonSrc = [
+            "shared/common/binary_value_utils.cc",
+            "shared/common/client_app.cc",
+            "shared/common/client_app_other.cc",
+            "shared/common/client_switches.cc",
+            "shared/common/string_util.cc",
+        ];
+        const sharedRendererSrc = [
+            "shared/renderer/client_app_renderer.cc",
+        ];
+        const tcomp = m.NewTask("ccTestClient", "cpp->o", {
+            inputs: [...clientBrowserSrc, ...clientCommonSrc,  ...clientRendererSrc,
+                     ...clientPlatformSrc,
+                     ...sharedBrowserSrc, ...sharedCommonSrc, ...sharedRendererSrc,
+                    ].map((v) => jsmk.path.join(srcdir,v)),
+        });
+        // nb: crt static-vs-dynamic is controlled by -MT vs -MD flags 
+        //     at compile-time
+        const tlink = m.NewTask("CEFTestClient", "cpp.o->so", {
+            inputs: tcomp.GetOutputs(),
+            // add link flags, etc.
+        });
     }
 }
 
 exports.Framework = CEF;
-
-
-/* windebug msvc
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c 
-/I"C:\Users\dana\Documents\src\github.cannerycoders\CEFapp\_frameworks\CEF\x86_64-win32\139" 
-/Zi /nologo 
-/W4 /WX 
-/diagnostics:column /MP /Od /Ob0 
-/D _UNICODE /D UNICODE /D WIN32 /D _WINDOWS /D __STDC_CONSTANT_MACROS /D __STDC_FORMAT_MACROS /D _WIN32 
-/D UNICODE /D _UNICODE /D WINVER=0x0A00 /D _WIN32_WINNT=0x0A00 /D NTDDI_VERSION=NTDDI_WIN10_FE 
-/D NOMINMAX /D WIN32_LEAN_AND_MEAN 
-/D _HAS_EXCEPTIONS=0 /D CEF_USE_BOOTSTRAP /D CEF_USE_ATL /D WRAPPING_CEF_SHARED 
-/D "CMAKE_INTDIR=\"Debug\"" 
-/Gm- /EHsc /RTC1 /MTd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR- /std:c++17 
-/Fo"libcef_dll_wrapper.dir\Debug\\" /Fd"C:\Users\dana\Documents\src\github.cannerycoders\CEFapp\_frameworks\CEF\x86_64-win32\139\build\libcef_dll_wrapper\Debug\libcef_dll_wrapper.pdb" 
-/external:W4 /Gd /TP /wd4100 /wd4127 /wd4244 /wd4324 /wd4481 /wd4512 /wd4701 /wd4702 /wd4996 /errorReport:prompt 
-*/

@@ -39,10 +39,10 @@ class cl extends ToolCli
             "-Gd",   // specifies __cdecl calling convention for ...
             "-Gm-", // minimal rebuild disabled (for now)
             // "-GR-", // disabled RTTI  (leave this to projects)
-            "-GS-", // no security checks
+            // "-GS-", // no security checks
             "-Gy", // separate functions for linker
-            "-W3", // warning level
-            "-WX-", // warnings aren't errors
+            // "-W3", // warning level
+            // "-WX-", // warnings aren't errors
             "-Zc:__cplusplus", // https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
             asC ?  "-TC" : "-TP",
             "-Zc:inline", //
@@ -81,13 +81,36 @@ class cl extends ToolCli
             break;
         }
 
+        let cmode = task.BuildVars.Win32Console || "dynamic";
+        switch(task.BuildVars.Win32Console || "dynamic")
+        {
+        case "dynamic":
+            if(task.BuildVars.Deployment == "debug")
+                flags.push("-MDd");
+            else
+                flags.push("-MD");
+            break;
+        case "static":
+            if(task.BuildVars.Deployment == "debug")
+                flags.push("-MTd");
+            else
+                flags.push("-MT");
+            break;
+        default:
+            throw new Error("Unimplemented Win32Console mode " + cmode);
+        }
+
+        if(task.BuildVars.WinConsole)
+        {
+
+        }
+
         switch(task.BuildVars.Deployment)
         {
         case "debug":
             defs._DEBUG = null;
             flags.push(...[
                 "-Fd${DSTFILE}.pdb",
-                "-MDd", // debugging dynamic c runtime (crt)
                 "-Ob0", // inline expansion
                 "-Od",  // disable optimizations
                 "-RTC1", // runtime error checking
@@ -97,7 +120,6 @@ class cl extends ToolCli
         case "release":
             defs.NDEBUG = null;
             flags.push(...[
-                "-MD", // non-debugging dynamic crt
                 "-O3",
                 "-Ob2", // inline expansion
             ]);
@@ -105,7 +127,6 @@ class cl extends ToolCli
         case "releasesym":
             defs.NDEBUG = null;
             flags.push(...[
-                "-MD", // non-debugging crt
                 "-O3",
                 "-Ob1", // inline expansion
                 "-Zi",  // debugging symbols

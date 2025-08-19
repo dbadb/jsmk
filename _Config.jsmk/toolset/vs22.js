@@ -39,6 +39,8 @@ function getConfig(arch)
     let c = {
         msvcLibDir : `${msvcDir}/Lib/${arch}`, // delayimp.lib
         msvcIncDir : `${msvcDir}/include`, // std library headers
+        atlIncDir : `${msvcDir}/atlmfc/include`,
+        atlLibDir : `${msvcDir}/atlmfc/lib/${arch}`,
         sdkBinDir : `${sdkRoot}/10/bin/${sdkVers}/${arch}`,
         sdkIncUmDir : `${sdkRoot}/10/Include/${sdkVers}/um`, // windows.h
         sdkIncWrtDir : `${sdkRoot}/10/Include/${sdkVers}/winrt`, // audio client
@@ -53,8 +55,8 @@ function getConfig(arch)
     // ideDir is places where IDE runtimes (dll are found 
     // (offref, VsRegistryDetour) (usefulness ?)
     c.ideDir = jsmk.path.join(vsDir, "Common7/IDE", arch);
-    c.INCLUDE = `${c.msvcIncDir};${c.sdkIncUmDir};${c.sdkIncWrtDir};${c.sdkIncSharedDir};${c.sdkIncCrtDir};`;
-    c.LIB = `${c.msvcLibDir};${c.sdkLibUmDir};${c.sdkLibCrtDir}`;
+    c.INCLUDE = `${c.msvcIncDir};${c.atlIncDir};${c.sdkIncUmDir};${c.sdkIncWrtDir};${c.sdkIncSharedDir};${c.sdkIncCrtDir};`;
+    c.LIB = `${c.msvcLibDir};${c.atlLibDir};${c.sdkLibUmDir};${c.sdkLibCrtDir}`;
     c.BuildVars = {
         VSRootDir: vsDir,
         VSSDKDir: sdkRoot, // unused ?
