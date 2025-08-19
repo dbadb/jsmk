@@ -43,9 +43,12 @@ class RC extends ToolCli
             ActionStage: "build",
             Semantics: ToolCli.Semantics.ManyToOne,
             DstExt: "res",
-            Invocation: [arg0, "-fo ${DSTFILE} ${FLAGS} ${SRCFILES}"],
+            Invocation: [arg0, "-fo ${DSTFILE} ${SEARCHPATHS} ${FLAGS} ${DEFINES} ${SRCFILES}"],
             Syntax: {
-                Flag: "${VAL}"
+                Flag: "${VAL}",
+                Searchpath: "-i${VAL}",
+                Define: "-D${KEY}=${VAL}",
+                DefineNoVal: "-D${KEY}",
             }
         });
 

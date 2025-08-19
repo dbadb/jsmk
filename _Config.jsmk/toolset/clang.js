@@ -89,6 +89,7 @@ class Clang extends Foundation
             if(platform == "win32")
             {
                 let rc = new (jsmk.LoadConfig("tool/windows/vs/rc.js").RC)(WinConfig[arch], "22");
+                rc.MergeSettings(map);
                 this.MergeToolMap(
                 {
                     "rc->o": rc,

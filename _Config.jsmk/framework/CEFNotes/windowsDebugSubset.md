@@ -4984,7 +4984,18 @@ Build started at 11:55 AM...
 3>    All source files are not up-to-date: missing command TLog "C:\Users\dana\Documents\src\github.cannerycoders\CEFapp\_frameworks\CEF\x86_64-win32\139\build\tests\cefclient\cefclient.dir\Debug\cefclient.tlog\rc.command.1.tlog".
 3>    Environment Variables passed to tool:
 3>      TRACKER_CONSOLEPAGE=65001
-3>    C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\rc.exe /D _UNICODE /D UNICODE /D WIN32 /D _DEBUG /D _WINDOWS /D __STDC_CONSTANT_MACROS /D __STDC_FORMAT_MACROS /D _WIN32 /D UNICODE /D _UNICODE /D WINVER=0x0A00 /D _WIN32_WINNT=0x0A00 /D NTDDI_VERSION=NTDDI_WIN10_FE /D NOMINMAX /D WIN32_LEAN_AND_MEAN /D _HAS_EXCEPTIONS=0 /D CEF_USE_BOOTSTRAP /D CEF_USE_ATL /D "CMAKE_INTDIR=\\\"Debug\\\"" /D cefclient_EXPORTS /l"0x0409" /I"C:\Users\dana\Documents\src\github.cannerycoders\CEFapp\_frameworks\CEF\x86_64-win32\139" /nologo /fo"cefclient.dir\Debug\cefclient.res" "C:\Users\dana\Documents\src\github.cannerycoders\CEFapp\_frameworks\CEF\x86_64-win32\139\tests\cefclient\win\cefclient.rc"
+3>    C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\rc.exe 
+            /D _UNICODE /D UNICODE /D WIN32 /D _DEBUG /D _WINDOWS 
+            /D __STDC_CONSTANT_MACROS /D __STDC_FORMAT_MACROS /D _WIN32 
+            /D UNICODE /D _UNICODE /D WINVER=0x0A00 
+            /D _WIN32_WINNT=0x0A00 /D NTDDI_VERSION=NTDDI_WIN10_FE 
+            /D NOMINMAX /D WIN32_LEAN_AND_MEAN /D _HAS_EXCEPTIONS=0 
+            /D CEF_USE_BOOTSTRAP /D CEF_USE_ATL 
+            /D "CMAKE_INTDIR=\\\"Debug\\\"" 
+            /D cefclient_EXPORTS /l"0x0409" 
+            /I"C:\Users\dana\Documents\src\github.cannerycoders\CEFapp\_frameworks\CEF\x86_64-win32\139" 
+            /nologo /fo"cefclient.dir\Debug\cefclient.res" 
+            "C:\Users\dana\Documents\src\github.cannerycoders\CEFapp\_frameworks\CEF\x86_64-win32\139\tests\cefclient\win\cefclient.rc"
 3>    Tracking command:
 3>    C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\Tracker.exe /d "C:\Program Files (x86)\MSBuild\15.0\FileTracker\FileTracker32.dll" /i C:\Users\dana\Documents\src\github.cannerycoders\CEFapp\_frameworks\CEF\x86_64-win32\139\build\tests\cefclient\cefclient.dir\Debug\cefclient.tlog /r C:\USERS\DANA\DOCUMENTS\SRC\GITHUB.CANNERYCODERS\CEFAPP\_FRAMEWORKS\CEF\X86_64-WIN32\139\TESTS\CEFCLIENT\WIN\CEFCLIENT.RC /b MSBuildConsole_CancelEventcd390f83d28446358b40d27ac2c72891  /c "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\rc.exe"  /D _UNICODE /D UNICODE /D WIN32 /D _DEBUG /D _WINDOWS /D __STDC_CONSTANT_MACROS /D __STDC_FORMAT_MACROS /D _WIN32 /D UNICODE /D _UNICODE /D WINVER=0x0A00 /D _WIN32_WINNT=0x0A00 /D NTDDI_VERSION=NTDDI_WIN10_FE /D NOMINMAX /D WIN32_LEAN_AND_MEAN /D _HAS_EXCEPTIONS=0 /D CEF_USE_BOOTSTRAP /D CEF_USE_ATL /D "CMAKE_INTDIR=\\\"Debug\\\"" /D cefclient_EXPORTS /l"0x0409" /I"C:\Users\dana\Documents\src\github.cannerycoders\CEFapp\_frameworks\CEF\x86_64-win32\139" /nologo /fo"cefclient.dir\Debug\cefclient.res" "C:\Users\dana\Documents\src\github.cannerycoders\CEFapp\_frameworks\CEF\x86_64-win32\139\tests\cefclient\win\cefclient.rc"
 3>  Done executing task "RC".

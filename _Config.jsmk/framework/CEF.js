@@ -309,10 +309,13 @@ class CEF extends Framework
         switch(r)
         {
         case Tool.Role.Compile:
+            if(task.GetRule() == "rc->o")
+                jsmk.NOTICE("rccompile");
+            else
+            if(cefProjState.ccflags)
+                task.AddFlags(r, cefProjState.ccflags);
             if(cefProjState.incdirs)
                 task.AddSearchpaths(r, cefProjState.incdirs);
-            if(cefProjState.ccflags && task.GetRule() != "rc->o")
-                task.AddFlags(r, cefProjState.ccflags);
             if(cefProjState.ccdefs)
                 task.Define(cefProjState.ccdefs);
             break;
