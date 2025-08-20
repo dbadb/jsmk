@@ -57,6 +57,8 @@ function getConfig(arch)
     c.ideDir = jsmk.path.join(vsDir, "Common7/IDE", arch);
     c.INCLUDE = `${c.msvcIncDir};${c.atlIncDir};${c.sdkIncUmDir};${c.sdkIncWrtDir};${c.sdkIncSharedDir};${c.sdkIncCrtDir};`;
     c.LIB = `${c.msvcLibDir};${c.atlLibDir};${c.sdkLibUmDir};${c.sdkLibCrtDir}`;
+    c.PATH = `${process.env.PATH};${c.sdkBinDir.replace(/\//g, "\\")}`;
+
     c.BuildVars = {
         VSRootDir: vsDir,
         VSSDKDir: sdkRoot, // unused ?
@@ -91,6 +93,7 @@ exports.Toolset = class vs22 extends Foundation
         {
             INCLUDE: Config[arch].INCLUDE,
             LIB: Config[arch].LIB,
+            PATH: Config[arch].PATH,
             // XXX: add 32bit
         };
 

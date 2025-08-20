@@ -245,6 +245,12 @@ class CEF extends Framework
            "oleaut32.lib", "uuid.lib", "comdlg32.lib", "advapi32.lib",
            "Delayimp.lib"
         ];
+
+        let man1 = "tests/cefclient/win/compatibility.manifest";
+        let man2 = "tests/cefclient/win/cefclient.exe.manifest";
+        lnkflags.push("/MANIFEST:embed", 
+                    `/MANIFESTINPUT:${man1}`, 
+                    `/MANIFESTINPUT:${man2}`);
         if(delayLoad) // delayload makes for faster startup, not supported by clang-windows
         {
             lnkflags.push("/DELAYLOAD:libcef.dll",
@@ -310,7 +316,9 @@ class CEF extends Framework
         {
         case Tool.Role.Compile:
             if(task.GetRule() == "rc->o")
-                jsmk.NOTICE("rccompile");
+            {
+                // don't add all the cc flags
+            }
             else
             if(cefProjState.ccflags)
                 task.AddFlags(r, cefProjState.ccflags);
@@ -321,162 +329,163 @@ class CEF extends Framework
             break;
         case Tool.Role.Link:
         case Tool.Role.Archive:
-            case Tool.Role.ArchiveDynamic:
-                if(cefProjState.lnkflags)
-                    task.AddFlags(r, cefProjState.lnkflags);
-                if(cefProjState.libs)
-                    task.AddLibs(cefProjState.libs);
-                if(cefProjState.syslibs)
-                    task.AddLibs(cefProjState.syslibs);
-                break;
-            }
+        case Tool.Role.ArchiveDynamic:
+            if(cefProjState.lnkflags)
+                task.AddFlags(r, cefProjState.lnkflags);
+            if(cefProjState.libs)
+                task.AddLibs(cefProjState.libs);
+            if(cefProjState.syslibs)
+                task.AddLibs(cefProjState.syslibs);
+            break;
         }
+    }
 
-        addBindingToProj(cefProjState, proj)
-        {
-            proj.AddFrameworks([this.GetName()]);
+    addBindingToProj(cefProjState, proj)
+    {
+        proj.AddFrameworks([this.GetName()]);
 
-            let m = proj.NewModule("CEFBinding");
-            let srcfiles = [];
-            let fwdir = cefProjState.fwdir;
-            srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/*.cc`));
-            srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/base/*.cc`));
-            srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/cpptoc/*.cc`));
-            srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/cpptoc/test/*.cc`));
-            srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/cpptoc/views/*.cc`));
-            srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/ctocpp/*.cc`));
-            srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/ctocpp/views/*.cc`));
-            srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/wrapper/*.cc`));
-            let tcomp = m.NewTask("compileCEFBinding", "cpp->o", {
-                            inputs: srcfiles, 
-                        });
-            m.NewTask("libCEFBinding", "o->a", {
-                inputs: tcomp.GetOutputs(),
-            });
-            cefProjState.cefBindingModule = m;
-            cefProjState.libs = [cefProjState.libcef, ...m.GetOutputs()];
-        }
+        let m = proj.NewModule("CEFBinding");
+        let srcfiles = [];
+        let fwdir = cefProjState.fwdir;
+        srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/*.cc`));
+        srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/base/*.cc`));
+        srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/cpptoc/*.cc`));
+        srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/cpptoc/test/*.cc`));
+        srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/cpptoc/views/*.cc`));
+        srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/ctocpp/*.cc`));
+        srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/ctocpp/views/*.cc`));
+        srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/wrapper/*.cc`));
+        let tcomp = m.NewTask("compileCEFBinding", "cpp->o", {
+                        inputs: srcfiles, 
+                    });
+        m.NewTask("libCEFBinding", "o->a", {
+            inputs: tcomp.GetOutputs(),
+        });
+        cefProjState.cefBindingModule = m;
+        cefProjState.libs = [cefProjState.libcef, ...m.GetOutputs()];
+    }
 
-        addTestClientToProj(cefProjState, proj) // see tests/cefclient/CMakeLists.txt
-        {
-            const m = proj.NewModule("CEFTestClient");
-            const srcdir = jsmk.path.join(cefProjState.fwdir, "tests");
-            const clientRC = {
-                win32: [`${srcdir}/cefclient/win/cefclient.rc`],
-            }[cefProjState.plt] || [];
-            const clientPlatformSrc = {
-                win32: [
-                    "cefclient/cefclient_win.cc",
-                    "cefclient/browser/browser_window_osr_win.cc",
-                    "cefclient/browser/browser_window_std_win.cc",
-                    "cefclient/browser/main_context_impl_win.cc",
-                    "cefclient/browser/main_message_loop_multithreaded_win.cc",
-                    "cefclient/browser/osr_accessibility_helper.cc",
-                    "cefclient/browser/osr_accessibility_node.cc",
-                    "cefclient/browser/osr_accessibility_node_win.cc",
-                    "cefclient/browser/osr_d3d11_win.cc",
-                    "cefclient/browser/osr_dragdrop_win.cc",
-                    "cefclient/browser/osr_ime_handler_win.cc",
-                    "cefclient/browser/osr_render_handler_win.cc",
-                    "cefclient/browser/osr_render_handler_win_d3d11.cc",
-                    "cefclient/browser/osr_render_handler_win_gl.cc",
-                    "cefclient/browser/osr_window_win.cc",
-                    "cefclient/browser/resource_util_win_idmap.cc",
-                    "cefclient/browser/root_window_win.cc",
-                    "cefclient/browser/temp_window_win.cc",
-                    "cefclient/browser/window_test_runner_win.cc",
-                    "shared/browser/main_message_loop_external_pump_win.cc",
-                    "shared/browser/resource_util_win.cc",
-                    "shared/browser/util_win.cc",
-                ],
-            }[cefProjState.plt];
-            const clientBrowserSrc = [
-                "cefclient/browser/base_client_handler.cc",
-                "cefclient/browser/binary_transfer_test.cc",
-                "cefclient/browser/binding_test.cc",
-                "cefclient/browser/browser_window.cc",
-                "cefclient/browser/bytes_write_handler.cc",
-                "cefclient/browser/client_app_delegates_browser.cc",
-                "cefclient/browser/client_browser.cc",
-                "cefclient/browser/client_handler.cc",
-                "cefclient/browser/client_handler_osr.cc",
-                "cefclient/browser/client_handler_std.cc",
-                "cefclient/browser/client_prefs.cc",
-                "cefclient/browser/config_test.cc",
-                "cefclient/browser/default_client_handler.cc",
-                "cefclient/browser/dialog_test.cc",
-                "cefclient/browser/hang_test.cc",
-                "cefclient/browser/image_cache.cc",
-                "cefclient/browser/main_context.cc",
-                "cefclient/browser/main_context_impl.cc",
-                "cefclient/browser/media_router_test.cc",
-                "cefclient/browser/osr_renderer.cc",
-                "cefclient/browser/preferences_test.cc",
-                "cefclient/browser/response_filter_test.cc",
-                "cefclient/browser/root_window.cc",
-                "cefclient/browser/root_window_create.cc",
-                "cefclient/browser/root_window_manager.cc",
-                "cefclient/browser/root_window_views.cc",
-                "cefclient/browser/scheme_test.cc",
-                "cefclient/browser/server_test.cc",
-                "cefclient/browser/task_manager_test.cc",
-                "cefclient/browser/test_runner.cc",
-                "cefclient/browser/urlrequest_test.cc",
-                "cefclient/browser/views_menu_bar.cc",
-                "cefclient/browser/views_overlay_browser.cc",
-                "cefclient/browser/views_overlay_controls.cc",
-                "cefclient/browser/views_style.cc",
-                "cefclient/browser/views_window.cc",
-                "cefclient/browser/window_test.cc",
-                "cefclient/browser/window_test_runner.cc",
-                "cefclient/browser/window_test_runner_views.cc",
-            ];
-            const clientCommonSrc = [
-                "cefclient/common/client_app_delegates_common.cc",
-                "cefclient/common/scheme_test_common.cc",
-            ];
-            const clientRendererSrc = [
-                "cefclient/renderer/client_app_delegates_renderer.cc",
-                "cefclient/renderer/client_renderer.cc",
-                "cefclient/renderer/ipc_performance_test.cc",
-                "cefclient/renderer/performance_test.cc",
-                "cefclient/renderer/performance_test_tests.cc",
-            ];
+    addTestClientToProj(cefProjState, proj) // see tests/cefclient/CMakeLists.txt
+    {
+        const m = proj.NewModule("CEFTestClient");
+        const srcdir = jsmk.path.join(cefProjState.fwdir, "tests");
+        const clientRC = {
+            win32: [`${srcdir}/cefclient/win/cefclient.rc`],
+        }[cefProjState.plt] || [];
+        const clientPlatformSrc = {
+            win32: [
+                "cefclient/cefclient_win.cc",
+                "cefclient/browser/browser_window_osr_win.cc",
+                "cefclient/browser/browser_window_std_win.cc",
+                "cefclient/browser/main_context_impl_win.cc",
+                "cefclient/browser/main_message_loop_multithreaded_win.cc",
+                "cefclient/browser/osr_accessibility_helper.cc",
+                "cefclient/browser/osr_accessibility_node.cc",
+                "cefclient/browser/osr_accessibility_node_win.cc",
+                "cefclient/browser/osr_d3d11_win.cc",
+                "cefclient/browser/osr_dragdrop_win.cc",
+                "cefclient/browser/osr_ime_handler_win.cc",
+                "cefclient/browser/osr_render_handler_win.cc",
+                "cefclient/browser/osr_render_handler_win_d3d11.cc",
+                "cefclient/browser/osr_render_handler_win_gl.cc",
+                "cefclient/browser/osr_window_win.cc",
+                "cefclient/browser/resource_util_win_idmap.cc",
+                "cefclient/browser/root_window_win.cc",
+                "cefclient/browser/temp_window_win.cc",
+                "cefclient/browser/window_test_runner_win.cc",
+                "shared/browser/main_message_loop_external_pump_win.cc",
+                "shared/browser/resource_util_win.cc",
+                "shared/browser/util_win.cc",
+            ],
+        }[cefProjState.plt];
+        const clientBrowserSrc = [
+            "cefclient/browser/base_client_handler.cc",
+            "cefclient/browser/binary_transfer_test.cc",
+            "cefclient/browser/binding_test.cc",
+            "cefclient/browser/browser_window.cc",
+            "cefclient/browser/bytes_write_handler.cc",
+            "cefclient/browser/client_app_delegates_browser.cc",
+            "cefclient/browser/client_browser.cc",
+            "cefclient/browser/client_handler.cc",
+            "cefclient/browser/client_handler_osr.cc",
+            "cefclient/browser/client_handler_std.cc",
+            "cefclient/browser/client_prefs.cc",
+            "cefclient/browser/config_test.cc",
+            "cefclient/browser/default_client_handler.cc",
+            "cefclient/browser/dialog_test.cc",
+            "cefclient/browser/hang_test.cc",
+            "cefclient/browser/image_cache.cc",
+            "cefclient/browser/main_context.cc",
+            "cefclient/browser/main_context_impl.cc",
+            "cefclient/browser/media_router_test.cc",
+            "cefclient/browser/osr_renderer.cc",
+            "cefclient/browser/preferences_test.cc",
+            "cefclient/browser/response_filter_test.cc",
+            "cefclient/browser/root_window.cc",
+            "cefclient/browser/root_window_create.cc",
+            "cefclient/browser/root_window_manager.cc",
+            "cefclient/browser/root_window_views.cc",
+            "cefclient/browser/scheme_test.cc",
+            "cefclient/browser/server_test.cc",
+            "cefclient/browser/task_manager_test.cc",
+            "cefclient/browser/test_runner.cc",
+            "cefclient/browser/urlrequest_test.cc",
+            "cefclient/browser/views_menu_bar.cc",
+            "cefclient/browser/views_overlay_browser.cc",
+            "cefclient/browser/views_overlay_controls.cc",
+            "cefclient/browser/views_style.cc",
+            "cefclient/browser/views_window.cc",
+            "cefclient/browser/window_test.cc",
+            "cefclient/browser/window_test_runner.cc",
+            "cefclient/browser/window_test_runner_views.cc",
+        ];
+        const clientCommonSrc = [
+            "cefclient/common/client_app_delegates_common.cc",
+            "cefclient/common/scheme_test_common.cc",
+        ];
+        const clientRendererSrc = [
+            "cefclient/renderer/client_app_delegates_renderer.cc",
+            "cefclient/renderer/client_renderer.cc",
+            "cefclient/renderer/ipc_performance_test.cc",
+            "cefclient/renderer/performance_test.cc",
+            "cefclient/renderer/performance_test_tests.cc",
+        ];
 
-            const sharedBrowserSrc = [
-                "shared/browser/client_app_browser.cc",
-                "shared/browser/file_util.cc",
-                "shared/browser/geometry_util.cc",
-                "shared/browser/main_message_loop.cc",
-                "shared/browser/main_message_loop_external_pump.cc",
-                "shared/browser/main_message_loop_std.cc",
-            ];
-            const sharedCommonSrc = [
-                "shared/common/binary_value_utils.cc",
-                "shared/common/client_app.cc",
-                "shared/common/client_app_other.cc",
-                "shared/common/client_switches.cc",
-                "shared/common/string_util.cc",
-            ];
-            const sharedRendererSrc = [
-                "shared/renderer/client_app_renderer.cc",
-            ];
-            const tcomp = m.NewTask("ccTestClient", "cpp->o", {
-                inputs: [...clientBrowserSrc, ...clientCommonSrc,  ...clientRendererSrc,
-                        ...clientPlatformSrc,
-                        ...sharedBrowserSrc, ...sharedCommonSrc, ...sharedRendererSrc,
-                        ].map((v) => jsmk.path.join(srcdir,v)),
-            });
+        const sharedBrowserSrc = [
+            "shared/browser/client_app_browser.cc",
+            "shared/browser/file_util.cc",
+            "shared/browser/geometry_util.cc",
+            "shared/browser/main_message_loop.cc",
+            "shared/browser/main_message_loop_external_pump.cc",
+            "shared/browser/main_message_loop_std.cc",
+        ];
+        const sharedCommonSrc = [
+            "shared/common/binary_value_utils.cc",
+            "shared/common/client_app.cc",
+            "shared/common/client_app_other.cc",
+            "shared/common/client_switches.cc",
+            "shared/common/string_util.cc",
+        ];
+        const sharedRendererSrc = [
+            "shared/renderer/client_app_renderer.cc",
+        ];
+        const tcomp = m.NewTask("ccTestClient", "cpp->o", {
+            inputs: [...clientBrowserSrc, ...clientCommonSrc,  ...clientRendererSrc,
+                    ...clientPlatformSrc,
+                    ...sharedBrowserSrc, ...sharedCommonSrc, ...sharedRendererSrc,
+                    ].map((v) => jsmk.path.join(srcdir,v)),
+        });
 
-            const rccomp = m.NewTask("rcTestClient", "rc->o", {
-                            inputs: clientRC,
-                        });
+        const rccomp = m.NewTask("rcTestClient", "rc->o", {
+                        inputs: clientRC,
+                    });
 
         // nb: crt static-vs-dynamic is controlled by -MT vs -MD flags 
         //     at compile-time
         const tlink = m.NewTask("CEFTestClient", "cpp.o->so", {
             inputs: [...tcomp.GetOutputs(), ...rccomp.GetOutputs()],
             // add link flags, etc.
+            // 
         });
         // on windows, this dll exports RunWinMain
 
