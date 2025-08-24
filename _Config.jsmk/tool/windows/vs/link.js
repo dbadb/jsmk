@@ -152,7 +152,7 @@ exports.Link = class Link extends ToolCli
                 // and not for win+clang.  For explicit+portable control over
                 // Manifest, it's recommended to add them to an rc file
                 // explicitly.
-                task.AddFlags("/MANIFEST"); // provides default manifest.
+                task.AddFlags(this.role, ["/MANIFEST"]); // provides default manifest.
             }
 
             if(task.BuildVars.WindowsApp)
