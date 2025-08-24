@@ -134,7 +134,7 @@ class CEF extends Framework
             //      locales_dir_path → where locales\ lives.
             cefProjState.libcef = jsmk.path.join(rtbindir,  "libcef.lib");
             cefProjState.runtimeComponents.etc = [
-                jsmk.path.join(projdir, "etc/win/example.manifest"), // rename-me!
+                jsmk.path.join(projdir, "etc/win32/example.manifest"), // rename-me!
             ]
             cefProjState.runtimeComponents.bin = [
                 jsmk.path.join(rtbindir, "bootstrap.exe"), // rename-me!
