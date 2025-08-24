@@ -24,6 +24,8 @@
 //
 let Framework = jsmk.Require("framework").Framework;
 let Tool = jsmk.Require("tool").Tool;
+let Platform = jsmk.GetHost().Platform;
+let FrameworkDirs = jsmk.GetPolicy().LocalFrameworkDirs;
 
 const sDefaultCEFVers = "139"; // 8/25
 const sDefaultConfigProj = "compileDLLBinding";
@@ -36,9 +38,29 @@ class CEF extends Framework
         super(name, version);
         if(version == "default")
             this.m_version = sDefaultCEFVers;
+
+        const ts = jsmk.GetActiveToolset();
+        const arch = ts.TargetArch;
+        const plt = Platform;
+        const key = `${arch}-${plt}`;
+        const fwdir = `CEF/${key}/${this.GetVersion()}`; // root-relative
+        for(let fw of FrameworkDirs)
+        {
+            // CEF's own files refer to themselfs via "include/"
+            // so we follow suit and point to its parent.
+            let fwpath = jsmk.path.join(fw, fwdir); 
+            if(jsmk.path.existsSync(fwpath))
+            {
+                this.m_fwpath = fwpath;
+                this.m_incdir = fwpath;
+                break;
+            }
+        }
+        if(!this.m_fwpath)
+            throw new Exception("CEF framework can't be found in " + FrameworkDirs);
     }
 
-    ConfigureProject(proj, how=sDefaultConfigProj)
+    ConfigureProject(proj, how=sDefaultConfigProj, cfg) // CEF-specific
     {
         if(typeof(how) == "string") how = [how];
 
@@ -54,12 +76,13 @@ class CEF extends Framework
             resources: [],
         };
         proj.SetBuildVar("CEFProjState", cefProjState);
+        proj.SetBuildVar("DefaultManifest", false);
         cefProjState.arch = arch;
         cefProjState.plt = plt;
         cefProjState.key = key;
         cefProjState.deploy = proj.GetBuildVar("Deployment");
-        cefProjState.fwdir = `_frameworks/CEF/${key}/${this.GetVersion()}`;
-        cefProjState.incdirs = [cefProjState.fwdir]; // include/* found here.
+        cefProjState.fwdir = this.m_fwpath;
+        cefProjState.incdirs = [this.m_incdir];
         cefProjState.ccdefs = {
             // support for eg: UINT8_MAX, etc
             __STDC_CONSTANT_MACROS:null,
@@ -70,10 +93,11 @@ class CEF extends Framework
         };
         cefProjState.ccflags = [];
         cefProjState.lnkflags = [] 
-        cefProjState.instRoot = proj.EvaluateBuildVar("InstallDir");
-        cefProjState.instInfo = proj.EvaluateBuildVar("InstallInfo");
-        if(!cefProjState.instInfo)
-            jsmk.NOTICE("CEF requires InstallInfo from embedding proj.");
+        cefProjState.installRoot = proj.EvaluateBuildVar("InstallDir");
+        if(!cfg.installInfo)
+            throw new Error("CEF requires InstallInfo from embedding proj.");
+        else
+            cefProjState.installInfo = cfg.installInfo;
 
         const debug = cefProjState.deploy == "debug";
         if(proj.GetBuildVar("CppStd") != "c++17")
@@ -97,33 +121,40 @@ class CEF extends Framework
                 _UNICODE: null,
                 _CRT_SECURE_NO_WARNINGS: null, // fopen (also covered by vc's wd4996)
             });
-            const pdir = jsmk.path.join(cefProjState.fwdir, (debug?"Debug":"Release")); 
-            const rezdir = jsmk.path.join(cefProjState.fwdir, "Resources"); 
+            // currently copyfile doesn't support searchpaths and since
+            // installs occur relative to a subproject, we either need a relative
+            // ref or fully qualified.
+            const projdir = proj.ProjectDir;
+            const rtbindir = jsmk.path.join(this.m_fwpath, (debug?"Debug":"Release")); 
+            const rtrezdir = jsmk.path.join(this.m_fwpath, "Resources"); 
             // By default, CEF assumes all resources are in the same directory 
             // as the EXE (or libcef.dll).  At startup, you can override this 
             // with fields in cef_settings_t:
             //      resources_dir_path → where .pak files are located.
             //      locales_dir_path → where locales\ lives.
-            cefProjState.libcef = jsmk.path.join(pdir,  "libcef.lib");
+            cefProjState.libcef = jsmk.path.join(rtbindir,  "libcef.lib");
+            cefProjState.runtimeComponents.etc = [
+                jsmk.path.join(projdir, "etc/win/example.manifest"), // rename-me!
+            ]
             cefProjState.runtimeComponents.bin = [
-                jsmk.path.join(pdir, "bootstrap.exe"), // rename-me!
+                jsmk.path.join(rtbindir, "bootstrap.exe"), // rename-me!
                     // -or- jsmk.path.join(pdir,  "bootstrapc.exe"), // rename-me!
-                jsmk.path.join(pdir, "chrome_elf.dll"),
-                jsmk.path.join(pdir, "d3dcompiler_47.dll"),
-                jsmk.path.join(pdir, "dxcompiler.dll"),
-                jsmk.path.join(pdir, "dxil.dll"),
-                jsmk.path.join(pdir, "libcef.dll"),
-                jsmk.path.join(pdir, "libEGL.dll"),
-                jsmk.path.join(pdir, "libGLESv2.dll"),
-                jsmk.path.join(pdir, "v8_context_snapshot.bin"),
-                jsmk.path.join(pdir, "vk_swiftshader.dll"),
-                jsmk.path.join(pdir, "vk_swiftshader_icd.json"),
-                jsmk.path.join(pdir, "vulkan-1.dll"),
-                jsmk.path.join(rezdir, "chrome_100_percent.pak"),
-                jsmk.path.join(rezdir, "chrome_200_percent.pak"),
-                jsmk.path.join(rezdir, "icudtl.dat"),
-                jsmk.path.join(rezdir, "locales"), // directory
-                jsmk.path.join(rezdir, "resources.pak"),
+                jsmk.path.join(rtbindir, "chrome_elf.dll"),
+                jsmk.path.join(rtbindir, "d3dcompiler_47.dll"),
+                jsmk.path.join(rtbindir, "dxcompiler.dll"),
+                jsmk.path.join(rtbindir, "dxil.dll"),
+                jsmk.path.join(rtbindir, "libcef.dll"),
+                jsmk.path.join(rtbindir, "libEGL.dll"),
+                jsmk.path.join(rtbindir, "libGLESv2.dll"),
+                jsmk.path.join(rtbindir, "v8_context_snapshot.bin"),
+                jsmk.path.join(rtbindir, "vk_swiftshader.dll"),
+                jsmk.path.join(rtbindir, "vk_swiftshader_icd.json"),
+                jsmk.path.join(rtbindir, "vulkan-1.dll"),
+                jsmk.path.join(rtrezdir, "chrome_100_percent.pak"),
+                jsmk.path.join(rtrezdir, "chrome_200_percent.pak"),
+                jsmk.path.join(rtrezdir, "icudtl.dat"),
+                jsmk.path.join(rtrezdir, "locales"), // directory
+                jsmk.path.join(rtrezdir, "resources.pak"),
             ];
             if(tsname == "clang")
                 this.appendWin32ClangFlags(cefProjState, debug);
@@ -136,12 +167,15 @@ class CEF extends Framework
             break;
         }
 
+        this.addBindingToProj(cefProjState, proj); // not negotiable
         for(let h of how)
         {
             switch(h)
             {
-            case sDefaultConfigProj:
-                this.addBindingToProj(cefProjState, proj);
+            case sDefaultConfigProj: // already done
+                break;
+            case "buildSimpleClient":
+                this.addSimpleClientToProj(cefProjState, proj);
                 break;
             case "buildTestClient":
                 this.addTestClientToProj(cefProjState, proj);
@@ -152,6 +186,141 @@ class CEF extends Framework
         }
     }
 
+    CreateSubprojApp(proj, name, projDir, cfg) // CEF-specific
+    {
+        const cefProjState = proj.GetBuildVar("CEFProjState");
+        if(cefProjState == null)
+            throw new Error("CEF can't configure a subproject on an unconfigured root proj");
+
+        proj.NewProject(name, {
+            ProjectDir:  projDir,
+            init: function(subProj)
+            {
+                let instInfo = cfg.installInfo || cefProjState.installInfo;
+                if(instInfo.Package)
+                {
+                    // this must precede module creation?
+                    if(instInfo.AppName)
+                        subProj.SetBuildVar("AppName", instInfo.AppName)
+                    subProj.SetBuildVar("Package", instInfo.Package)
+                    subProj.SetBuildVar("InstallDir", subProj.EvaluateBuildVar("InstallDirTmplt"));
+                    // jsmk.WARNING("subproj installdir " + subProj.EvaluateBuildVar("InstallDir"));
+                }
+
+                let m = subProj.NewModule(`${name}_mod`);
+                let {cppinputs, rcinputs} = cfg;
+                if(cppinputs && cppinputs.length)
+                    cppinputs = cppinputs.flatMap((v) => subProj.Glob(v));
+                if(rcinputs && rcinputs.length)
+                    rcinputs = rcinputs.flatMap((v) => subProj.Glob(v));
+
+                const tcomp = m.NewTask("compile", "cpp->o", {
+                    inputs: cppinputs,
+                    define: {
+                        APP_NAME: Project.GetBuildVar("AppName"),
+                    }
+                });
+                const rccomp = m.NewTask("rccomp", "rc->o", {
+                    inputs: rcinputs
+                });
+
+                // nb: crt static-vs-dynamic is controlled by -MT vs -MD flags 
+                //     at compile-time
+                const tlink = m.NewTask(name, "cpp.o->so", {
+                    inputs: [...tcomp.GetOutputs(), ...rccomp.GetOutputs()],
+                    // add link flags, etc.
+                // 
+                });
+
+
+                // on windows, our newly minted dll exports RunWinMain, etc
+                m.NewTask(`install${name}`, "install", {
+                    inputs: tlink.GetOutputs(),
+                    installdir: instInfo.binDir
+                });
+                m.NewTask("installCEFRuntimeEtc", "install", {
+                    inputs: cefProjState.runtimeComponents.etc,
+                    installdir: instInfo.binDir,
+                    renametarget: (tname) =>
+                    {
+                        if(!tname.endsWith(".manifest")) return tname;
+                        return tname.replace(/example/, name);
+                    },
+                });
+                m.NewTask("installCEFRuntimeBin", "install", {
+                    inputs: cefProjState.runtimeComponents.bin,
+                    installdir: instInfo.binDir,
+                    renametarget: (tname) =>
+                    {
+                        if(!tname.includes("bootstrap")) return tname;
+                        return tname.replace(/bootstrap/, name);
+                    },
+                });
+                m.NewTask("installCEFRuntimeRez", "install", {
+                    inputs: cefProjState.runtimeComponents.resources,
+                    installdir: instInfo.resourceDir
+                });
+            } // end init
+        });
+    }
+
+    ConfigureTaskSettings(task) // per-subtask callback: all frameworks must implement
+    {
+        // const fwpath = jsmk.path.join(proj.GetRootDir(), cefProjState.fwdir);
+        // given; /foo/var/root/_frameworks/..., /foo/var/root/subproj/proj1
+        //  =>  "../../_frameworks/..."
+        const cefProjState = task.GetBuildVar("CEFProjState");
+
+        let rootDir = task.GetRootDir(); // perhaps domain dir is more accurate?
+        let projDir = task.GetProjectDir();
+        let incdirs = cefProjState.incdirs;
+        if(incdirs && rootDir !== projDir)
+        {
+            // relativize searchpaths
+            // eg: path.relative(projdir, projroot+fwpath)
+            //     '..\\..\\_framework\\cef\\139'
+            incdirs = incdirs.map((v) =>
+            {
+                if(jsmk.path.isAbsolute(v)) return v;
+                let sp = jsmk.path.join(rootDir, v);
+                return jsmk.path.relative(projDir, sp);
+            });
+        }
+
+        let tool = task.GetTool();
+        let r = tool.GetRole();
+
+        if(incdirs)
+            task.AddSearchpaths(r, incdirs);
+
+        switch(r)
+        {
+        case Tool.Role.Compile:
+            if(task.GetRule() == "rc->o")
+            {
+                // don't add all the cc flags
+            }
+            else
+            if(cefProjState.ccflags)
+                task.AddFlags(r, cefProjState.ccflags);
+            if(cefProjState.ccdefs)
+                task.Define(cefProjState.ccdefs);
+            break;
+        case Tool.Role.Archive: // no link flags.
+            break;
+        case Tool.Role.Link:
+        case Tool.Role.ArchiveDynamic:
+            if(cefProjState.lnkflags)
+                task.AddFlags(r, cefProjState.lnkflags);
+            if(cefProjState.libs)
+                task.AddLibs(cefProjState.libs);
+            if(cefProjState.syslibs)
+                task.AddLibs(cefProjState.syslibs);
+            break;
+        }
+    }
+
+    /* ------------------------------------------------------------------- */
     appendMSVFlags(cefProjState, debug)
     {
         let {ccflags} = cefProjState;
@@ -246,17 +415,13 @@ class CEF extends Framework
            "Delayimp.lib"
         ];
 
-        let man1 = "tests/cefclient/win/compatibility.manifest";
-        let man2 = "tests/cefclient/win/cefclient.exe.manifest";
-        lnkflags.push("/MANIFEST:embed", 
-                    `/MANIFESTINPUT:${man1}`, 
-                    `/MANIFESTINPUT:${man2}`);
+        // see comments in etc/win/readme.md regarding
+        // manifests on windows.
         if(delayLoad) // delayload makes for faster startup, not supported by clang-windows
         {
             lnkflags.push("/DELAYLOAD:libcef.dll",
-                "/DELAYLOAD:oleaut32.dll", "/DELAYLOAD:opengl32.dll",
-                "/DELAYLOAD:d3d11.dll", 
                 /* most generate a warning eg: 'no imports found from secur32.dll'
+                "/DELAYLOAD:oleaut32.dll", "/DELAYLOAD:opengl32.dll", "/DELAYLOAD:d3d11.dll",  // used by tests/cefclient
                 '/DELAYLOAD:"api-ms-win-core-winrt-error-l1-1-0.dll"',
                 '/DELAYLOAD:"api-ms-win-core-winrt-l1-1-0.dll"', 
                 '/DELAYLOAD:"api-ms-win-core-winrt-string-l1-1-0.dll"',
@@ -292,220 +457,178 @@ class CEF extends Framework
         }
     }
 
-    // cl.exe _frameworks/CEF/x86_64-win32/139/libcef_dll/ctocpp/media_router_ctocpp.cc 
-    //   -Fo_built/vs22-x86_64-win32-avx2-debug/CEFBinding/media_router_ctocpp.cc.obj 
-    //   -I_frameworks/CEF/x86_64-win32/139 
-    //    /MTd /RTC1 /Od /Ob0 /Zi /MP /Gy /GR- /W4 /WX 
-    //    /Gm- /EHsc /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++17 
-    //    /wd4100 /wd4127 /wd4244 /wd4324 /wd4481 /wd4512 /wd4701 /wd4702 /wd4996 -c 
-    //    -EHsc -Gd -Gm- -GS- -Gy -W3 -WX- -Zc:__cplusplus -TP -Zc:inline 
-    //   -Zc:wchar_t -Zc:forScope -showIncludes -std:c++17 
-    //   -FdC:/Users/dana/Documents/src/github.cannerycoders/CEFapp/_built/vs22-x86_64-win32-avx2-debug/CEFBinding/media_router_ctocpp.cc.obj.pdb 
-    //   -Ob0 -Od -RTC1 -Zi -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS 
-    //   -DCEF_USE_BOOTSTRAP -DCEF_USE_ATL -DWRAPPING_CEF_SHARED -DNOMINMAX -DWINVER=0x0A00 
-    //   -D_WIN32_WINNT=0x0A00 -DNTDDI_VERSION=NTDDI_WIN10_FE -DWIN32_LEAN_AND_MEAN 
-    //   -D_HAS_EXCEPTIONS=0 -DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -D_WIN32 
-    //   -DWIN32 -D_DEBUG
-
-    ConfigureTaskSettings(task)
-    {
-        const cefProjState = task.GetBuildVar("CEFProjState");
-        let tool = task.GetTool();
-        let r = tool.GetRole();
-        switch(r)
-        {
-        case Tool.Role.Compile:
-            if(task.GetRule() == "rc->o")
-            {
-                // don't add all the cc flags
-            }
-            else
-            if(cefProjState.ccflags)
-                task.AddFlags(r, cefProjState.ccflags);
-            if(cefProjState.incdirs)
-                task.AddSearchpaths(r, cefProjState.incdirs);
-            if(cefProjState.ccdefs)
-                task.Define(cefProjState.ccdefs);
-            break;
-        case Tool.Role.Link:
-        case Tool.Role.Archive:
-        case Tool.Role.ArchiveDynamic:
-            if(cefProjState.lnkflags)
-                task.AddFlags(r, cefProjState.lnkflags);
-            if(cefProjState.libs)
-                task.AddLibs(cefProjState.libs);
-            if(cefProjState.syslibs)
-                task.AddLibs(cefProjState.syslibs);
-            break;
-        }
-    }
-
+    // build the binding between cpp and the dll's c-only interface.
     addBindingToProj(cefProjState, proj)
     {
         proj.AddFrameworks([this.GetName()]);
-
-        let m = proj.NewModule("CEFBinding");
-        let srcfiles = [];
-        let fwdir = cefProjState.fwdir;
-        srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/*.cc`));
-        srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/base/*.cc`));
-        srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/cpptoc/*.cc`));
-        srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/cpptoc/test/*.cc`));
-        srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/cpptoc/views/*.cc`));
-        srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/ctocpp/*.cc`));
-        srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/ctocpp/views/*.cc`));
-        srcfiles.push(...proj.Glob(`${fwdir}/libcef_dll/wrapper/*.cc`));
-        let tcomp = m.NewTask("compileCEFBinding", "cpp->o", {
+        const fwdir = cefProjState.fwdir;
+        proj.NewProject("CEFBinding", {
+            ProjectDir:  jsmk.path.join(fwdir, "libcef_dll"),
+            init: function(subProj)
+            {
+                let m = subProj.NewModule("CEFBinding_mod");
+                let srcfiles = [];
+                srcfiles.push(...subProj.Glob("*.cc"));
+                srcfiles.push(...subProj.Glob("base/*.cc"));
+                srcfiles.push(...subProj.Glob("cpptoc/*.cc"));
+                srcfiles.push(...subProj.Glob("cpptoc/test/*.cc"));
+                srcfiles.push(...subProj.Glob("cpptoc/views/*.cc"));
+                srcfiles.push(...subProj.Glob("ctocpp/*.cc"));
+                srcfiles.push(...subProj.Glob("ctocpp/views/*.cc"));
+                srcfiles.push(...subProj.Glob("wrapper/*.cc"));
+                let tcomp = m.NewTask("compileCEFBinding", "cpp->o", {
                         inputs: srcfiles, 
                     });
-        m.NewTask("libCEFBinding", "o->a", {
-            inputs: tcomp.GetOutputs(),
-        });
-        cefProjState.cefBindingModule = m;
-        cefProjState.libs = [cefProjState.libcef, ...m.GetOutputs()];
+                m.NewTask("libCEFBinding", "o->a", {
+                    inputs: tcomp.GetOutputs(),
+                });
+                cefProjState.cefBindingModule = m;
+                cefProjState.libs = [cefProjState.libcef, ...m.GetOutputs()];
+            }
+        }).EstablishBarrier("after");
+
+    }
+
+    addSimpleClientToProj(cefProjState, proj) // see tests/cefsimple/CMakeLists.txt
+    {
+        let subprojDir = `${cefProjState.fwdir}/tests/cefsimple`;
+        let cfg = {
+            cppinputs: [],
+            rcinputs: []
+        };
+
+        cfg.cppinputs.push(
+            "simple_app.cc", 
+            "simple_handler.cc"
+        );
+
+        switch(cefProjState.plt) // platform
+        {
+        case "win32":
+            cfg.rcinputs.push("win/cefsimple.rc");
+            cfg.cppinputs.push(
+                "cefsimple_win.cc",
+                "simple_handler_win.cc"
+            );
+            break;
+        case "darwin":
+            cfg.cppinputs.push(
+                "cefsimple_mac.mm",
+                "simple_handler_mac.mm",
+                "../shared/process_helper_mac.cc"
+            );
+            break;
+        case "linux":
+            throw new Error("implement me!");
+        }
+        this.CreateSubprojApp(proj, "CEFTestSimple", subprojDir, cfg);
     }
 
     addTestClientToProj(cefProjState, proj) // see tests/cefclient/CMakeLists.txt
     {
-        const m = proj.NewModule("CEFTestClient");
-        const srcdir = jsmk.path.join(cefProjState.fwdir, "tests");
-        const clientRC = {
-            win32: [`${srcdir}/cefclient/win/cefclient.rc`],
-        }[cefProjState.plt] || [];
-        const clientPlatformSrc = {
-            win32: [
-                "cefclient/cefclient_win.cc",
-                "cefclient/browser/browser_window_osr_win.cc",
-                "cefclient/browser/browser_window_std_win.cc",
-                "cefclient/browser/main_context_impl_win.cc",
-                "cefclient/browser/main_message_loop_multithreaded_win.cc",
-                "cefclient/browser/osr_accessibility_helper.cc",
-                "cefclient/browser/osr_accessibility_node.cc",
-                "cefclient/browser/osr_accessibility_node_win.cc",
-                "cefclient/browser/osr_d3d11_win.cc",
-                "cefclient/browser/osr_dragdrop_win.cc",
-                "cefclient/browser/osr_ime_handler_win.cc",
-                "cefclient/browser/osr_render_handler_win.cc",
-                "cefclient/browser/osr_render_handler_win_d3d11.cc",
-                "cefclient/browser/osr_render_handler_win_gl.cc",
-                "cefclient/browser/osr_window_win.cc",
-                "cefclient/browser/resource_util_win_idmap.cc",
-                "cefclient/browser/root_window_win.cc",
-                "cefclient/browser/temp_window_win.cc",
-                "cefclient/browser/window_test_runner_win.cc",
-                "shared/browser/main_message_loop_external_pump_win.cc",
-                "shared/browser/resource_util_win.cc",
-                "shared/browser/util_win.cc",
-            ],
-        }[cefProjState.plt];
-        const clientBrowserSrc = [
-            "cefclient/browser/base_client_handler.cc",
-            "cefclient/browser/binary_transfer_test.cc",
-            "cefclient/browser/binding_test.cc",
-            "cefclient/browser/browser_window.cc",
-            "cefclient/browser/bytes_write_handler.cc",
-            "cefclient/browser/client_app_delegates_browser.cc",
-            "cefclient/browser/client_browser.cc",
-            "cefclient/browser/client_handler.cc",
-            "cefclient/browser/client_handler_osr.cc",
-            "cefclient/browser/client_handler_std.cc",
-            "cefclient/browser/client_prefs.cc",
-            "cefclient/browser/config_test.cc",
-            "cefclient/browser/default_client_handler.cc",
-            "cefclient/browser/dialog_test.cc",
-            "cefclient/browser/hang_test.cc",
-            "cefclient/browser/image_cache.cc",
-            "cefclient/browser/main_context.cc",
-            "cefclient/browser/main_context_impl.cc",
-            "cefclient/browser/media_router_test.cc",
-            "cefclient/browser/osr_renderer.cc",
-            "cefclient/browser/preferences_test.cc",
-            "cefclient/browser/response_filter_test.cc",
-            "cefclient/browser/root_window.cc",
-            "cefclient/browser/root_window_create.cc",
-            "cefclient/browser/root_window_manager.cc",
-            "cefclient/browser/root_window_views.cc",
-            "cefclient/browser/scheme_test.cc",
-            "cefclient/browser/server_test.cc",
-            "cefclient/browser/task_manager_test.cc",
-            "cefclient/browser/test_runner.cc",
-            "cefclient/browser/urlrequest_test.cc",
-            "cefclient/browser/views_menu_bar.cc",
-            "cefclient/browser/views_overlay_browser.cc",
-            "cefclient/browser/views_overlay_controls.cc",
-            "cefclient/browser/views_style.cc",
-            "cefclient/browser/views_window.cc",
-            "cefclient/browser/window_test.cc",
-            "cefclient/browser/window_test_runner.cc",
-            "cefclient/browser/window_test_runner_views.cc",
-        ];
-        const clientCommonSrc = [
-            "cefclient/common/client_app_delegates_common.cc",
-            "cefclient/common/scheme_test_common.cc",
-        ];
-        const clientRendererSrc = [
-            "cefclient/renderer/client_app_delegates_renderer.cc",
-            "cefclient/renderer/client_renderer.cc",
-            "cefclient/renderer/ipc_performance_test.cc",
-            "cefclient/renderer/performance_test.cc",
-            "cefclient/renderer/performance_test_tests.cc",
-        ];
+        let subprojDir = `${cefProjState.fwdir}/tests/cefclient`;
+        let cfg = {
+            cppinputs: [],
+            rcinputs: []
+        };
 
-        const sharedBrowserSrc = [
-            "shared/browser/client_app_browser.cc",
-            "shared/browser/file_util.cc",
-            "shared/browser/geometry_util.cc",
-            "shared/browser/main_message_loop.cc",
-            "shared/browser/main_message_loop_external_pump.cc",
-            "shared/browser/main_message_loop_std.cc",
-        ];
-        const sharedCommonSrc = [
-            "shared/common/binary_value_utils.cc",
-            "shared/common/client_app.cc",
-            "shared/common/client_app_other.cc",
-            "shared/common/client_switches.cc",
-            "shared/common/string_util.cc",
-        ];
-        const sharedRendererSrc = [
-            "shared/renderer/client_app_renderer.cc",
-        ];
-        const tcomp = m.NewTask("ccTestClient", "cpp->o", {
-            inputs: [...clientBrowserSrc, ...clientCommonSrc,  ...clientRendererSrc,
-                    ...clientPlatformSrc,
-                    ...sharedBrowserSrc, ...sharedCommonSrc, ...sharedRendererSrc,
-                    ].map((v) => jsmk.path.join(srcdir,v)),
-        });
+        cfg.cppinputs.push(
+            "browser/base_client_handler.cc",
+            "browser/binary_transfer_test.cc",
+            "browser/binding_test.cc",
+            "browser/browser_window.cc",
+            "browser/bytes_write_handler.cc",
+            "browser/client_app_delegates_browser.cc",
+            "browser/client_browser.cc",
+            "browser/client_handler.cc",
+            "browser/client_handler_osr.cc",
+            "browser/client_handler_std.cc",
+            "browser/client_prefs.cc",
+            "browser/config_test.cc",
+            "browser/default_client_handler.cc",
+            "browser/dialog_test.cc",
+            "browser/hang_test.cc",
+            "browser/image_cache.cc",
+            "browser/main_context.cc",
+            "browser/main_context_impl.cc",
+            "browser/media_router_test.cc",
+            "browser/osr_renderer.cc",
+            "browser/preferences_test.cc",
+            "browser/response_filter_test.cc",
+            "browser/root_window.cc",
+            "browser/root_window_create.cc",
+            "browser/root_window_manager.cc",
+            "browser/root_window_views.cc",
+            "browser/scheme_test.cc",
+            "browser/server_test.cc",
+            "browser/task_manager_test.cc",
+            "browser/test_runner.cc",
+            "browser/urlrequest_test.cc",
+            "browser/views_menu_bar.cc",
+            "browser/views_overlay_browser.cc",
+            "browser/views_overlay_controls.cc",
+            "browser/views_style.cc",
+            "browser/views_window.cc",
+            "browser/window_test.cc",
+            "browser/window_test_runner.cc",
+            "browser/window_test_runner_views.cc",
+            "common/client_app_delegates_common.cc",
+            "common/scheme_test_common.cc",
+            "renderer/client_app_delegates_renderer.cc",
+            "renderer/client_renderer.cc",
+            "renderer/ipc_performance_test.cc",
+            "renderer/performance_test.cc",
+            "renderer/performance_test_tests.cc",
+            "../shared/browser/client_app_browser.cc",
+            "../shared/browser/file_util.cc",
+            "../shared/browser/geometry_util.cc",
+            "../shared/browser/main_message_loop.cc",
+            "../shared/browser/main_message_loop_external_pump.cc",
+            "../shared/browser/main_message_loop_std.cc",
+            "../shared/common/binary_value_utils.cc",
+            "../shared/common/client_app.cc",
+            "../shared/common/client_app_other.cc",
+            "../shared/common/client_switches.cc",
+            "../shared/common/string_util.cc",
+            "../shared/renderer/client_app_renderer.cc",
+        );
 
-        const rccomp = m.NewTask("rcTestClient", "rc->o", {
-                        inputs: clientRC,
-                    });
+        switch(cefProjState.plt) // platform
+        {
+        case "win32":
+            cfg.rcinputs.push("win/cefclient.rc");
+            cfg.cppinputs.push(
+                "cefclient_win.cc",
+                "browser/browser_window_osr_win.cc",
+                "browser/browser_window_std_win.cc",
+                "browser/main_context_impl_win.cc",
+                "browser/main_message_loop_multithreaded_win.cc",
+                "browser/osr_accessibility_helper.cc",
+                "browser/osr_accessibility_node.cc",
+                "browser/osr_accessibility_node_win.cc",
+                "browser/osr_d3d11_win.cc",
+                "browser/osr_dragdrop_win.cc",
+                "browser/osr_ime_handler_win.cc",
+                "browser/osr_render_handler_win.cc",
+                "browser/osr_render_handler_win_d3d11.cc",
+                "browser/osr_render_handler_win_gl.cc",
+                "browser/osr_window_win.cc",
+                "browser/resource_util_win_idmap.cc",
+                "browser/root_window_win.cc",
+                "browser/temp_window_win.cc",
+                "browser/window_test_runner_win.cc",
+                "../shared/browser/main_message_loop_external_pump_win.cc",
+                "../shared/browser/resource_util_win.cc",
+                "../shared/browser/util_win.cc",
 
-        // nb: crt static-vs-dynamic is controlled by -MT vs -MD flags 
-        //     at compile-time
-        const tlink = m.NewTask("CEFTestClient", "cpp.o->so", {
-            inputs: [...tcomp.GetOutputs(), ...rccomp.GetOutputs()],
-            // add link flags, etc.
-            // 
-        });
-        // on windows, this dll exports RunWinMain
-
-        m.NewTask("installCEFTestClient", "install", {
-            inputs: tlink.GetOutputs(),
-            installdir: cefProjState.instInfo.binDir
-        });
-        m.NewTask("installCEFRuntimeBin", "install", {
-            inputs: cefProjState.runtimeComponents.bin,
-            installdir: cefProjState.instInfo.binDir,
-            renametarget: (tname) =>
-            {
-                if(!tname.includes("bootstrap")) return tname;
-                return tname.replace(/bootstrap/, "CEFTestClient");
-            },
-        });
-        m.NewTask("installCEFRuntimeRez", "install", {
-            inputs: cefProjState.runtimeComponents.resources,
-            installdir: cefProjState.instInfo.resourceDir
-        });
+            );
+            break;
+        case "darwin":
+            break;
+        case "linux":
+            throw new Error("implement me!");
+        }
+        this.CreateSubprojApp(proj, "CEFTestClient", subprojDir, cfg);
     }
 }
 

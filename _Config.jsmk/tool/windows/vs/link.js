@@ -54,7 +54,6 @@ exports.Link = class Link extends ToolCli
             "/NOLOGO",
             "/INCREMENTAL:NO",
             "/DYNAMICBASE",
-            "/MANIFEST",
             "/NXCOMPAT",
             "/TLBID:1",
             "/OPT:ICF",
@@ -146,6 +145,16 @@ exports.Link = class Link extends ToolCli
 
         if(this.m_role == ToolCli.Role.Link)
         {
+            if(task.BuildVars.DefaultManifest == true || 
+               task.BuildVars.DefaultManifest == null)
+            {
+                // default manifest behavior only valid for vs linker
+                // and not for win+clang.  For explicit+portable control over
+                // Manifest, it's recommended to add them to an rc file
+                // explicitly.
+                task.AddFlags("/MANIFEST"); // provides default manifest.
+            }
+
             if(task.BuildVars.WindowsApp)
             {
                 // console.log("a windows app may have another /ENTRY");
