@@ -208,11 +208,12 @@ class CEF extends Framework
                 }
 
                 let m = subProj.NewModule(`${name}_mod`);
-                let {cppinputs, rcinputs} = cfg;
+                let {cppinputs, rcinputs, libs} = cfg;
                 if(cppinputs && cppinputs.length)
                     cppinputs = cppinputs.flatMap((v) => subProj.Glob(v));
                 if(rcinputs && rcinputs.length)
                     rcinputs = rcinputs.flatMap((v) => subProj.Glob(v));
+                if(libs == null) libs = [];
 
                 const tcomp = m.NewTask("compile", "cpp->o", {
                     inputs: cppinputs,
@@ -227,11 +228,10 @@ class CEF extends Framework
                 // nb: crt static-vs-dynamic is controlled by -MT vs -MD flags 
                 //     at compile-time
                 const tlink = m.NewTask(name, "cpp.o->so", {
-                    inputs: [...tcomp.GetOutputs(), ...rccomp.GetOutputs()],
+                    inputs: [...tcomp.GetOutputs(), ...rccomp.GetOutputs(), ...libs],
                     // add link flags, etc.
                 // 
                 });
-
 
                 // on windows, our newly minted dll exports RunWinMain, etc
                 m.NewTask(`install${name}`, "install", {
