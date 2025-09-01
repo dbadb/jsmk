@@ -22,7 +22,8 @@ const {GetClangFlags, GetClangDriver} = require("./link.js");
 // Code Generation Options
 //  -O0, -O1, -O2, -O3, -Ofast, -Os, -Oz, -Og, -O, -O4
 //  -g (works best with -O0)
-//  -fexceptions (defaults to on)
+//  -fexceptions (default) vs  -fno-exceptions
+//  -frtti (default) vs  -fno-rtti
 //  also: fvisibility, tlsmodel
 // Driver Options:
 //  Wl,<args> for linker (also -Wa, -Wp, -Xanalyzer, ..)
@@ -111,6 +112,19 @@ class Clang extends ToolCli
             }
             break;
         case "cpp":
+            {
+                let std = task.BuildVars.CppStd || this.defaultStd;
+                flags.push(`-std=${std}`);
+                if(task.BuildVars.CppNoExceptions)
+                    flags.push("-fno-exceptions"); 
+                else
+                    flags.push("-fexceptions");
+                if(task.BuildVars.CppNoRTTI)
+                     flags.push("-fno-rtti");
+                else
+                     flags.push("-frtti");
+            }
+            break;
         case "mm":
             {
                 let std = task.BuildVars.CppStd || this.defaultStd;

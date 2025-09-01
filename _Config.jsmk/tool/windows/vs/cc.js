@@ -32,9 +32,28 @@ class cl extends ToolCli
             "c": null,
         }[this.target];
 
+        // on c++ exceptions
+        // /EHsc -  Standard C++ only.
+        //    Enables C++ exceptions, assumes extern "C" functions 
+        //    won’t throw.  This is the most common / recommended 
+        //    if you want exceptions.
+        // /EHa - Asynchronous exceptions + C++ exceptions.
+        //    Handles both C++ throw and Windows SEH (structured 
+        //    exceptions, e.g. access violations, divide-by-zero).
+        //    Much slower, generates extra unwind code everywhere. 
+        //   Rarely used today.
+        // /EHs Synchronous C++ exceptions only, but doesn’t assume 
+        // extern "C" won’t throw.  Slightly more permissive than /EHsc.
+        // /EHc- Disables the assumption that extern "C" functions don’
+        //    throw.  Typically combined with /EHs.  
+        // /EHs-c-  What Chromium and CEF use.
+        //    Means: “synchronous C++ exceptions model, but actually 
+        //    don’t enable exception handling.   Effectively exceptions 
+        //    are off — compiler doesn’t generate unwind tables or 
+        //    try/catch support.
+
         this.AddFlags(this.GetRole(), [
             "-c",
-            "-EHsc", // C++ exceptions
             // "-fp:precise",
             "-Gd",   // specifies __cdecl calling convention for ...
             "-Gm-", // minimal rebuild disabled (for now)
@@ -77,6 +96,14 @@ class cl extends ToolCli
                 let std = task.BuildVars.CppStd || this.defaultStd;
                 if(std)
                     flags.push(`-std:${std}`);
+                if(task.BuildVars.CppNoExceptions)
+                    flags.push("-EHs-c-"); // disabled: see comments above
+                else
+                    flags.push("-EHsc"); // enabled: default case.
+                if(task.BuildVars.CppNoRTTI)
+                    flags.push("-GR-"); // disabled
+                else
+                    flags.push("-GR"); // enabled: default case.
             }
             break;
         }

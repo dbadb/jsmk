@@ -27,7 +27,7 @@ let Tool = jsmk.Require("tool").Tool;
 let Platform = jsmk.GetHost().Platform;
 let FrameworkDirs = jsmk.GetPolicy().LocalFrameworkDirs;
 
-const sDefaultCEFVers = "139"; // 8/25
+const sDefaultCEFVers = "139"; // on 9/25: stable/preferred
 const sDefaultConfigProj = "compileDLLBinding";
 
 class CEF extends Framework
@@ -100,7 +100,8 @@ class CEF extends Framework
             cefProjState.installInfo = cfg.installInfo;
 
         const debug = cefProjState.deploy == "debug";
-        if(proj.GetBuildVar("CppStd") != "c++17")
+        let cppStd = proj.GetBuildVar("CppStd"); // c++17, c++20, c++23
+        if(!cppStd || parseInt(cppStd.slice(3)) < 17)
         {
             jsmk.NOTICE("CEF overriding CppStd to c++17");
             proj.SetBuildVar("CppStd", "c++17");
@@ -137,7 +138,7 @@ class CEF extends Framework
                 jsmk.path.join(projdir, "etc/win32/example.manifest"), // rename-me!
             ]
             cefProjState.runtimeComponents.bin = [
-                jsmk.path.join(rtbindir, "bootstrap.exe"), // rename-me!
+                    // jsmk.path.join(rtbindir, "bootstrap.exe"), // rename-me!
                     // -or- jsmk.path.join(pdir,  "bootstrapc.exe"), // rename-me!
                 jsmk.path.join(rtbindir, "chrome_elf.dll"),
                 jsmk.path.join(rtbindir, "d3dcompiler_47.dll"),
@@ -186,28 +187,30 @@ class CEF extends Framework
         }
     }
 
-    CreateSubprojApp(proj, name, projDir, cfg) // CEF-specific
+    CreateSubprojApp(proj, appName, projDir, cfg) // CEF-specific
     {
+        const plt = jsmk.GetHost().Platform;
         const cefProjState = proj.GetBuildVar("CEFProjState");
         if(cefProjState == null)
             throw new Error("CEF can't configure a subproject on an unconfigured root proj");
 
-        proj.NewProject(name, {
+        return proj.NewProject(appName, {
             ProjectDir:  projDir,
             init: function(subProj)
             {
+                subProj.SetBuildVar("AppName", appName);
+
                 let instInfo = cfg.installInfo || cefProjState.installInfo;
                 if(instInfo.Package)
                 {
                     // this must precede module creation?
-                    if(instInfo.AppName)
-                        subProj.SetBuildVar("AppName", instInfo.AppName)
                     subProj.SetBuildVar("Package", instInfo.Package)
                     subProj.SetBuildVar("InstallDir", subProj.EvaluateBuildVar("InstallDirTmplt"));
                     // jsmk.WARNING("subproj installdir " + subProj.EvaluateBuildVar("InstallDir"));
+                    if(instInfo.AppName && appName != instInfo.AppName)
+                        jsmk.DEBUG(`${appName} overrides Package appName ${instInfo.AppName}`);
                 }
-
-                let m = subProj.NewModule(`${name}_mod`);
+                let m = subProj.NewModule(`${appName}_mod`);
                 let {cppinputs, rcinputs, libs} = cfg;
                 if(cppinputs && cppinputs.length)
                     cppinputs = cppinputs.flatMap((v) => subProj.Glob(v));
@@ -218,23 +221,24 @@ class CEF extends Framework
                 const tcomp = m.NewTask("compile", "cpp->o", {
                     inputs: cppinputs,
                     define: {
-                        APP_NAME: Project.GetBuildVar("AppName"),
-                    }
+                        APP_NAME: appName
+                    },
                 });
                 const rccomp = m.NewTask("rccomp", "rc->o", {
-                    inputs: rcinputs
+                    inputs: rcinputs,
                 });
 
                 // nb: crt static-vs-dynamic is controlled by -MT vs -MD flags 
-                //     at compile-time
-                const tlink = m.NewTask(name, "cpp.o->so", {
+                //     at compile-time. AI says static is generally preferred
+                //     to simply distribution (and enlarge the distro).
+                const tlink = m.NewTask(appName, "cpp.o->so", {
                     inputs: [...tcomp.GetOutputs(), ...rccomp.GetOutputs(), ...libs],
                     // add link flags, etc.
                 // 
                 });
 
                 // on windows, our newly minted dll exports RunWinMain, etc
-                m.NewTask(`install${name}`, "install", {
+                m.NewTask(`install${appName}`, "install", {
                     inputs: tlink.GetOutputs(),
                     installdir: instInfo.binDir
                 });
@@ -244,7 +248,7 @@ class CEF extends Framework
                     renametarget: (tname) =>
                     {
                         if(!tname.endsWith(".manifest")) return tname;
-                        return tname.replace(/example/, name);
+                        return tname.replace(/example/, appName);
                     },
                 });
                 m.NewTask("installCEFRuntimeBin", "install", {
@@ -253,13 +257,20 @@ class CEF extends Framework
                     renametarget: (tname) =>
                     {
                         if(!tname.includes("bootstrap")) return tname;
-                        return tname.replace(/bootstrap/, name);
+                        return tname.replace(/bootstrap/, appName);
                     },
                 });
                 m.NewTask("installCEFRuntimeRez", "install", {
                     inputs: cefProjState.runtimeComponents.resources,
                     installdir: instInfo.resourceDir
                 });
+                if(cfg.bootstrapSrc)
+                {
+                    m.NewTask("installAppBootstrap", "install", {
+                        inputs: [cfg.bootstrapSrc],
+                        installdir: instInfo.binDir,
+                    });
+                }
             } // end init
         });
     }
@@ -348,7 +359,6 @@ class CEF extends Framework
             "-W4", // warning level
             "-WX", // warnings are errors
             "-Gm-", 
-            "-EHsc", 
             "-GS", 
             "-fp:precise", 
             "-Zc:wchar_t", 
@@ -386,8 +396,6 @@ class CEF extends Framework
             "-Wnewline-eof", // about no newline at end of file
             "-Wno-missing-field-initializers", // warn about missing field initializers
             "-Wno-unused-parameter", // warn about unused parameters
-            "-fno-exceptions", //  Disable exceptions
-            "-fno-rtti", //  Disable real-time type information
             "-fno-threadsafe-statics", //  Don't generate thread-safe statics
             "-fobjc-call-cxx-cdtors", //  Call the constructor/destructor of C++ instance variables in ObjC objects
             "-fvisibility-inlines-hidden", //  Give hidden visibility to inlined class member functions
@@ -466,6 +474,12 @@ class CEF extends Framework
             ProjectDir:  jsmk.path.join(fwdir, "libcef_dll"),
             init: function(subProj)
             {
+                // apply these only to the binding library
+                // leave it up to project for its own code.
+                subProj.SetBuildVar("CppNoExceptions", 1);
+                subProj.SetBuildVar("CppNoRTTI", 1);
+
+                // here's our binding module, produces .a (archive)
                 let m = subProj.NewModule("CEFBinding_mod");
                 let srcfiles = [];
                 srcfiles.push(...subProj.Glob("*.cc"));
@@ -483,7 +497,8 @@ class CEF extends Framework
                     inputs: tcomp.GetOutputs(),
                 });
                 cefProjState.cefBindingModule = m;
-                cefProjState.libs = [cefProjState.libcef, ...m.GetOutputs()];
+                cefProjState.libs = [cefProjState.libcef, 
+                                        ...m.GetOutputs()];
             }
         }).EstablishBarrier("after");
 
