@@ -134,8 +134,8 @@ class CEF extends Framework
             //      resources_dir_path → where .pak files are located.
             //      locales_dir_path → where locales\ lives.
             cefProjState.libcef = jsmk.path.join(rtbindir,  "libcef.lib");
-            cefProjState.runtimeComponents.etc = [
-                jsmk.path.join(projdir, "etc/win32/example.manifest"), // rename-me!
+            cefProjState.runtimeComponents.build = [
+                jsmk.path.join(projdir, "build/win32/example.manifest"), // rename-me!
             ]
             cefProjState.runtimeComponents.bin = [
                     // jsmk.path.join(rtbindir, "bootstrap.exe"), // rename-me!
@@ -242,8 +242,8 @@ class CEF extends Framework
                     inputs: tlink.GetOutputs(),
                     installdir: instInfo.binDir
                 });
-                m.NewTask("installCEFRuntimeEtc", "install", {
-                    inputs: cefProjState.runtimeComponents.etc,
+                m.NewTask("installCEFRuntimeBuild", "install", {
+                    inputs: cefProjState.runtimeComponents.build,
                     installdir: instInfo.binDir,
                     renametarget: (tname) =>
                     {
