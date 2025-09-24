@@ -182,6 +182,7 @@ class CEF extends Framework
                     rezdir,
                     // includes Info.plist, af.lproj/locale.pak, etc.
                 ];
+                cefProjState.frameworks = ["AppKit", "CoreServices", "CoreFoundation"]
                 this.appendDarwinClangFlags(cefProjState, debug);
             }
             break;
@@ -365,6 +366,8 @@ class CEF extends Framework
                 task.AddLibs(cefProjState.libs);
             if(cefProjState.syslibs)
                 task.AddLibs(cefProjState.syslibs);
+            if(cefProjState.frameworks)
+                task.AddFrameworks(cefProjState.frameworks);
             break;
         }
     }
@@ -556,14 +559,27 @@ class CEF extends Framework
                 let tcomp = m.NewTask("compileCEFBinding", "cpp->o", {
                         inputs: srcfiles, 
                     });
+                let outputs = tcomp.GetOutputs();
+                if(Platform == "darwin")
+                {
+                    let mmcomp = m.NewTask("compileCEFBinding", "cpp->o", {
+                        inputs: subProj.Glob("wrapper/*.mm")
+                    });
+                    outputs.push(...mmcomp.GetOutputs());
+                }
                 m.NewTask("libCEFBinding", "o->a", {
-                    inputs: tcomp.GetOutputs(),
+                    inputs: outputs
                 });
                 cefProjState.cefBindingModule = m;
                 if(cefProjState.libcef)
                     cefProjState.libs = [cefProjState.libcef, ...m.GetOutputs()];
                 else
+                {
+                    // no libcef?
+                    // - on darwin, we must dynamically load + resolve
+                    //  this via Libraries/Chromium Embedded Framework
                     cefProjState.libs = [...m.GetOutputs()];
+                }
             }
         }).EstablishBarrier("after");
 
