@@ -27,7 +27,8 @@ let Tool = jsmk.Require("tool").Tool;
 let Platform = jsmk.GetHost().Platform;
 let FrameworkDirs = jsmk.GetPolicy().LocalFrameworkDirs;
 
-const sDefaultCEFVers = "139"; // on 9/25: stable/preferred
+// const sDefaultCEFVers = "139"; // 9/1/25
+const sDefaultCEFVers = "140"; // 9/22/25
 const sDefaultConfigProj = "compileDLLBinding";
 
 class CEF extends Framework
@@ -57,7 +58,10 @@ class CEF extends Framework
             }
         }
         if(!this.m_fwpath)
-            throw new Exception("CEF framework can't be found in " + FrameworkDirs);
+        {
+            jsmk.ERROR(`${fwdir} can't be found`);
+            throw new Error("CEF framework botch");
+        }
     }
 
     ConfigureProject(proj, how=sDefaultConfigProj, cfg) // CEF-specific
@@ -84,12 +88,10 @@ class CEF extends Framework
         cefProjState.fwdir = this.m_fwpath;
         cefProjState.incdirs = [this.m_incdir];
         cefProjState.ccdefs = {
-            // support for eg: UINT8_MAX, etc
-            __STDC_CONSTANT_MACROS:null,
-            __STDC_FORMAT_MACROS:null,
             CEF_USE_BOOTSTRAP: null,
-            CEF_USE_ATL: null,
             WRAPPING_CEF_SHARED: 1,
+            __STDC_CONSTANT_MACROS:null, // support for eg: UINT8_MAX, etc
+            __STDC_FORMAT_MACROS:null,
         };
         cefProjState.ccflags = [];
         cefProjState.lnkflags = [] 
@@ -107,11 +109,18 @@ class CEF extends Framework
             proj.SetBuildVar("CppStd", "c++17");
         }
         cefProjState.syslibs = [];
+        // currently copyfile doesn't support searchpaths and since
+        // installs occur relative to a subproject, we either need a relative
+        // ref or fully qualified.
+        const projdir = proj.ProjectDir;
+        const rtbindir = jsmk.path.join(this.m_fwpath, (debug?"Debug":"Release")); 
         switch(plt)
         {
         case "win32":
             proj.SetBuildVar("Win32Console","static"); // CEF's preferred mode.
+            const rtrezdir = jsmk.path.join(this.m_fwpath, "Resources"); 
             cefProjState.ccdefs = Object.assign(cefProjState.ccdefs, {
+                CEF_USE_ATL: null,
                 NOMINMAX: null,
                 WINVER: "0x0A00",
                 _WIN32_WINNT: "0x0A00",
@@ -122,12 +131,6 @@ class CEF extends Framework
                 _UNICODE: null,
                 _CRT_SECURE_NO_WARNINGS: null, // fopen (also covered by vc's wd4996)
             });
-            // currently copyfile doesn't support searchpaths and since
-            // installs occur relative to a subproject, we either need a relative
-            // ref or fully qualified.
-            const projdir = proj.ProjectDir;
-            const rtbindir = jsmk.path.join(this.m_fwpath, (debug?"Debug":"Release")); 
-            const rtrezdir = jsmk.path.join(this.m_fwpath, "Resources"); 
             // By default, CEF assumes all resources are in the same directory 
             // as the EXE (or libcef.dll).  At startup, you can override this 
             // with fields in cef_settings_t:
@@ -163,6 +166,24 @@ class CEF extends Framework
                 this.appendMSVFlags(cefProjState, debug);
             break;
         case "darwin":
+            {
+                const fwdir = jsmk.path.join(rtbindir, "Chromium Embedded Framework");
+                const libdir = jsmk.path.join(fwdir, "Libraries");
+                const rezdir = jsmk.path.join(fwdir, "Resources"); 
+                cefProjState.runtimeComponents.bin = [
+                    jsmk.path.join(fwdir, "Chromium Embedded Framework"), // dylib
+
+                    jsmk.path.join(libdir, "libEGL.dylib"),
+                    jsmk.path.join(libdir, "libGLESv2.dylib"),
+                    jsmk.path.join(libdir, "libcef_sandbox.dylib"),
+                    jsmk.path.join(libdir, "libvk_swiftshader.dylib"),
+                    jsmk.path.join(libdir, "vk_swiftshader.json"),
+
+                    rezdir,
+                    // includes Info.plist, af.lproj/locale.pak, etc.
+                ];
+                this.appendDarwinClangFlags(cefProjState, debug);
+            }
             break;
         case "linux":
             break;
@@ -211,9 +232,11 @@ class CEF extends Framework
                         jsmk.DEBUG(`${appName} overrides Package appName ${instInfo.AppName}`);
                 }
                 let m = subProj.NewModule(`${appName}_mod`);
-                let {cppinputs, rcinputs, libs} = cfg;
+                let {cppinputs, mminputs, rcinputs, libs} = cfg;
                 if(cppinputs && cppinputs.length)
                     cppinputs = cppinputs.flatMap((v) => subProj.Glob(v));
+                if(mminputs && mminputs.length)
+                    mminputs = mminputs.flatMap((v) => subProj.Glob(v));
                 if(rcinputs && rcinputs.length)
                     rcinputs = rcinputs.flatMap((v) => subProj.Glob(v));
                 if(libs == null) libs = [];
@@ -224,20 +247,35 @@ class CEF extends Framework
                         APP_NAME: appName
                     },
                 });
-                const rccomp = m.NewTask("rccomp", "rc->o", {
-                    inputs: rcinputs,
-                });
+                let compileOuts = tcomp.GetOutputs();
+                if(mminputs && mminputs.length)
+                {
+                    const mmcomp = m.NewTask("mmcomp", "mm->o", {
+                        inputs: mminputs,
+                    });
+                    compileOuts.push(...mmcomp.GetOutputs());
+                }
+                if(rcinputs && rcinputs.length)
+                {
+                    const rccomp = m.NewTask("rccomp", "rc->o", {
+                        inputs: rcinputs,
+                    });
+                    compileOuts.push(...rccomp.GetOutputs());
+                }
 
-                // nb: crt static-vs-dynamic is controlled by -MT vs -MD flags 
-                //     at compile-time. AI says static is generally preferred
-                //     to simply distribution (and enlarge the distro).
+                // NB: crt static-vs-dynamic is controlled by -MT vs -MD flags 
+                //  at compile-time. AI says static is generally preferred
+                //  to simply distribution (and enlarge the distro).
                 const tlink = m.NewTask(appName, "cpp.o->so", {
-                    inputs: [...tcomp.GetOutputs(), ...rccomp.GetOutputs(), ...libs],
+                    inputs: [...compileOuts],
                     // add link flags, etc.
-                // 
+                    deps: [],
+                    libs,
+                    frameworks: [],
+                    flags: [],
                 });
 
-                // on windows, our newly minted dll exports RunWinMain, etc
+                // on windows, our newly minted dll exports RunWinMain, et
                 m.NewTask(`install${appName}`, "install", {
                     inputs: tlink.GetOutputs(),
                     installdir: instInfo.binDir
@@ -463,9 +501,34 @@ class CEF extends Framework
             */
             );
         }
+    } // win32 link
+
+    /* ------------------------------------------------------------------- */
+    appendDarwinClangFlags(cefProjState, debug)
+    {
+        let {ccflags} = cefProjState;
+        if(debug)
+            ccflags.push("-g"); // could add "-O0"?
+        else
+            ccflags.push("-O3");
+        // no-rtti and no-exceptions are handled by buildvars
+        // macosx-version-min and sdk are handled out-of-band.
+        let flags = [
+            "-fno-strict-aliasing", 
+            "-fstack-protector",
+            "-funwind-tables", 
+            "-fvisibility=hidden",
+            "-Wall", "-Werror", "-Wextra", "-Wendif-labels", "-Wnewline-eof", 
+            "-Wno-missing-field-initializers", "-Wno-unused-parameter", 
+            "-fno-threadsafe-statics", "-fobjc-call-cxx-cdtors", 
+            "-fvisibility-inlines-hidden", "-Wno-narrowing", 
+            "-Wsign-compare", "-Wno-undefined-var-template"];
+        ccflags.push(...flags)
     }
 
+    /* ------------------------------------------------------------------- */
     // build the binding between cpp and the dll's c-only interface.
+    // result is an static archive (.a).
     addBindingToProj(cefProjState, proj)
     {
         proj.AddFrameworks([this.GetName()]);
@@ -497,8 +560,10 @@ class CEF extends Framework
                     inputs: tcomp.GetOutputs(),
                 });
                 cefProjState.cefBindingModule = m;
-                cefProjState.libs = [cefProjState.libcef, 
-                                        ...m.GetOutputs()];
+                if(cefProjState.libcef)
+                    cefProjState.libs = [cefProjState.libcef, ...m.GetOutputs()];
+                else
+                    cefProjState.libs = [...m.GetOutputs()];
             }
         }).EstablishBarrier("after");
 
