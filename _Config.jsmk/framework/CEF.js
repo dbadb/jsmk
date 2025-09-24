@@ -264,17 +264,22 @@ class CEF extends Framework
                     compileOuts.push(...rccomp.GetOutputs());
                 }
 
-                // NB: crt static-vs-dynamic is controlled by -MT vs -MD flags 
-                //  at compile-time. AI says static is generally preferred
-                //  to simply distribution (and enlarge the distro).
-                const tlink = m.NewTask(appName, "cpp.o->so", {
-                    inputs: [...compileOuts],
-                    // add link flags, etc.
-                    deps: [],
-                    libs,
-                    frameworks: [],
-                    flags: [],
-                });
+                // win32 notes:
+                //  - create a dylib that is loaded by bootstrap.exe
+                //  - wrt static-vs-dynamic is controlled by -MT vs -MD flags 
+                //   at compile-time. AI says static is generally preferred
+                //   to simplify distribution (but enlarge the distro).
+                // 
+                let rule = (Platform == "win32") ? "cpp.o->so" : "cpp.o->exe";
+                const tlink = m.NewTask(appName, rule, 
+                    {
+                        inputs: [...compileOuts],
+                        // add link flags, etc.
+                        deps: [],
+                        libs,
+                        frameworks: [],
+                        flags: [],
+                    });
 
                 // on windows, our newly minted dll exports RunWinMain, et
                 m.NewTask(`install${appName}`, "install", {
