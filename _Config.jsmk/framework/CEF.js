@@ -169,22 +169,13 @@ class CEF extends Framework
             break;
         case "darwin":
             {
-                const fwdir = jsmk.path.join(rtbindir, "Chromium Embedded Framework");
-                const libdir = jsmk.path.join(fwdir, "Libraries");
-                const rezdir = jsmk.path.join(fwdir, "Resources"); 
-                cefProjState.runtimeComponents.bin = [
-                    jsmk.path.join(fwdir, "Chromium Embedded Framework"), // dylib
+                const ceffw = jsmk.path.join(rtbindir, "Chromium Embedded Framework.framework");
+                cefProjState.runtimeComponents.framework = [ ceffw ];
 
-                    jsmk.path.join(libdir, "libEGL.dylib"),
-                    jsmk.path.join(libdir, "libGLESv2.dylib"),
-                    jsmk.path.join(libdir, "libcef_sandbox.dylib"),
-                    jsmk.path.join(libdir, "libvk_swiftshader.dylib"),
-                    jsmk.path.join(libdir, "vk_swiftshader.json"),
-
-                    rezdir,
-                    // includes Info.plist, af.lproj/locale.pak, etc.
-                ];
-                cefProjState.frameworks = ["AppKit", "CoreServices", "CoreFoundation"]
+                // const libdir = jsmk.path.join(rtbindir, "Libraries");
+                // const rezdir = jsmk.path.join(fwdir, "Resources"); 
+                cefProjState.frameworks = ["AppKit", "CoreServices", 
+                                            "CoreFoundation"]
                 this.appendDarwinClangFlags(cefProjState, debug);
             }
             break;
@@ -213,11 +204,10 @@ class CEF extends Framework
 
     CreateSubprojApp(proj, appName, projDir, cfg) // CEF-specific
     {
-        const plt = jsmk.GetHost().Platform;
+        const self = this;
         const cefProjState = proj.GetBuildVar("CEFProjState");
         if(cefProjState == null)
             throw new Error("CEF can't configure a subproject on an unconfigured root proj");
-
         return proj.NewProject(appName, {
             ProjectDir:  projDir,
             init: function(subProj)
@@ -250,11 +240,14 @@ class CEF extends Framework
                         APP_NAME: appName
                     },
                 });
-                let compileOuts = tcomp.GetOutputs();
+                let compileOuts = tcomp.GetOutputs().slice(); // clone
                 if(mminputs && mminputs.length)
                 {
                     const mmcomp = m.NewTask("mmcomp", "mm->o", {
                         inputs: mminputs,
+                        define: {
+                            APP_NAME: appName
+                        },
                     });
                     compileOuts.push(...mmcomp.GetOutputs());
                 }
@@ -267,7 +260,7 @@ class CEF extends Framework
                 }
 
                 // win32 notes:
-                //  - create a dylib that is loaded by bootstrap.exe
+                //  - create a dll that is loaded by bootstrap.exe
                 //  - wrt static-vs-dynamic is controlled by -MT vs -MD flags 
                 //   at compile-time. AI says static is generally preferred
                 //   to simplify distribution (but enlarge the distro).
@@ -282,43 +275,176 @@ class CEF extends Framework
                         frameworks: [],
                         flags: [],
                     });
-
-                // on windows, our newly minted dll exports RunWinMain, et
                 m.NewTask(`install${appName}`, "install", {
                     inputs: tlink.GetOutputs(),
                     installdir: instInfo.binDir
                 });
-                m.NewTask("installCEFRuntimeBuild", "install", {
-                    inputs: cefProjState.runtimeComponents.build,
-                    installdir: instInfo.binDir,
-                    renametarget: (tname) =>
-                    {
-                        if(!tname.endsWith(".manifest")) return tname;
-                        return tname.replace(/example/, appName);
-                    },
-                });
-                m.NewTask("installCEFRuntimeBin", "install", {
-                    inputs: cefProjState.runtimeComponents.bin,
-                    installdir: instInfo.binDir,
-                    renametarget: (tname) =>
-                    {
-                        if(!tname.includes("bootstrap")) return tname;
-                        return tname.replace(/bootstrap/, appName);
-                    },
-                });
-                m.NewTask("installCEFRuntimeRez", "install", {
-                    inputs: cefProjState.runtimeComponents.resources,
-                    installdir: instInfo.resourceDir
-                });
-                if(cfg.bootstrapSrc)
-                {
-                    m.NewTask("installAppBootstrap", "install", {
-                        inputs: [cfg.bootstrapSrc],
-                        installdir: instInfo.binDir,
-                    });
-                }
+
+                self[`extendSubprojApp_${Platform}`](appName, subProj, m, cfg, 
+                                                cefProjState, instInfo,
+                                                tcomp.GetOutputs(),
+                                                libs
+                                            );
             } // end init
         });
+    }
+
+    extendSubprojApp_win32(appName, subProj, m, cfg, cefProjState, instInfo, 
+                        appObjsUnused, appLibs)
+    {
+        // on windows, our newly minted dll exports RunWinMain, et
+        m.NewTask("installCEFRuntimeBuild", "install", {
+            inputs: cefProjState.runtimeComponents.build,
+            installdir: instInfo.binDir,
+            renametarget: (tname) =>
+            {
+                if(!tname.endsWith(".manifest")) return tname;
+                return tname.replace(/example/, appName);
+            },
+        });
+        m.NewTask("installCEFRuntimeBin", "install", {
+            inputs: cefProjState.runtimeComponents.bin,
+            installdir: instInfo.binDir,
+            renametarget: (tname) =>
+            {
+                if(!tname.includes("bootstrap")) return tname;
+                return tname.replace(/bootstrap/, appName);
+            },
+        });
+        m.NewTask("installCEFRuntimeRez", "install", {
+            inputs: cefProjState.runtimeComponents.resources,
+            installdir: instInfo.resourceDir
+        });
+        if(cfg.bootstrapSrc)
+        {
+            m.NewTask("installAppBootstrap", "install", {
+                inputs: [cfg.bootstrapSrc],
+                installdir: instInfo.binDir,
+            });
+        }
+    }
+
+    extendSubprojApp_darwin(appName, subProj, m, cfg, 
+            cefProjState, instInfo, 
+            appObjs, appLibs)
+    {
+        // build all the helpers exes
+        const plistTemplate = cfg.darwin.plistTemplate;
+        const plistHelperTemplate = cfg.darwin.plistHelperTemplate;
+        const helperInputs = subProj.Glob(cfg.darwin.helperSrc);
+        const resources = subProj.Glob(cfg.darwin.resources);
+        const bundleExtMap = {};
+        let helperOutputs = [];
+        let plistBase = {
+            EXECUTABLE_NAME: appName,
+            PRODUCT_NAME: appName,
+            VERSION_SHORT: instInfo.AppVers,
+            BUNDLE_ID: instInfo.AppBundle,
+            BUNDLE_ID_SUFFIX: "",
+        };
+
+        let t0 = m.NewTask("installAppPlist", "install", {
+                inputs: [plistTemplate],
+                installdir: jsmk.path.dirname(instInfo.binDir),
+            });
+        t0.onFilter = (str) =>
+            {
+                // nb: this runs later so referenced values must
+                //  be 'stable'.
+                return str.replace(/\$\{\w+\}/g, (match) =>
+                { 
+                    let key = match.slice(2, -1);
+                    return plistBase[key] || match;
+                });
+            };
+        // mac-specific resources here.-----------
+        m.NewTask("installAppRez", "install", { 
+            inputs: resources,
+            installdir: instInfo.resourceDir
+        });
+
+        for(let h of [ " (Alerts)", " (GPU)", " (Plugin)",
+                        " (Renderer)", ""])
+        {
+            let mnm = `${appName} Helper${h}`;
+
+            // (Alerts) => alerts
+            bundleExtMap[mnm] = h.trim()
+                                .toLowerCase()
+                                .replace(/[\(\)]/g, "");
+            let m = subProj.NewModule(mnm+"_mod");
+            let mcomp = m.NewTask("mcomp", "mm->o", {
+                inputs: helperInputs,
+                define: {
+                    APP_NAME: appName
+                },
+            });
+
+            // link phase
+            let t = m.NewTask(mnm, "cpp.o->exe",
+            {
+                inputs: [...mcomp.GetOutputs(), ...appObjs],
+                // nb: configure task (herein) does work too!
+                deps: [],
+                libs: appLibs,
+                frameworks: [],
+                flags: [],
+            });
+            helperOutputs.push(...t.GetOutputs());
+            // need to add to install
+        }
+        // XXX: MacOS frameworks support versioning vs sym-links
+        //   for now we can punt since our frameworks are private and
+        //   packaged per-release.
+        const fwDst = jsmk.path.join(instInfo.binDir, "../Frameworks");
+        for(let ho of helperOutputs)
+        {
+            let hoBase = jsmk.path.basename(ho);
+            let helperAppDir = jsmk.path.join(fwDst, 
+                            `${hoBase}.app`, "Contents/MacOS");
+            m.NewTask(`installExe${hoBase}`, "install", {
+                inputs: [ho],
+                installdir: helperAppDir
+            });
+            let lplist = Object.assign({}, plistBase);
+            lplist.EXECUTABLE_NAME = hoBase;
+            if(bundleExtMap[hoBase].length == 0)
+                lplist.BUNDLE_ID_SUFFIX = ".helper";
+            else
+                lplist.BUNDLE_ID_SUFFIX = `.helper.${bundleExtMap[hoBase]}`;
+
+            let t = m.NewTask(`installPlist${hoBase}`, "install", {
+                inputs: [plistHelperTemplate],
+                installdir: jsmk.path.dirname(helperAppDir),
+            });
+            t.onFilter = (str) =>
+                {
+                    // nb: this runs later so referred values must
+                    //  be 'stable'.
+                    return str.replace(/\$\{\w+\}/g, (match) =>
+                    { 
+                        let key = match.slice(2, -1);
+                        return lplist[key] || match;
+                    });
+                };
+        }
+        m.NewTask("installCEFRuntimeFramework", "install", {
+            inputs: cefProjState.runtimeComponents.framework,
+            installdir: fwDst,
+            renametarget: (tname) =>
+            {
+                return tname;
+            },
+        });
+        m.NewTask("installCEFRuntimeRez", "install", {
+            inputs: cefProjState.runtimeComponents.resources,
+            installdir: instInfo.resourceDir
+        });
+    }
+
+    extendSubprojApp_linux(appName, subProj, m, cfg, cefProjState, instInfo)
+    {
+        throw new Error("Unimplemented platform: linux");
     }
 
     ConfigureTaskSettings(task) // per-subtask callback: all frameworks must implement
@@ -589,7 +715,6 @@ class CEF extends Framework
                 }
             }
         }).EstablishBarrier("after");
-
     }
 
     addSimpleClientToProj(cefProjState, proj) // see tests/cefsimple/CMakeLists.txt

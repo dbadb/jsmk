@@ -99,8 +99,12 @@ class CopyFiles extends Tool
         //  console.log("copyfiles to: " + outputdir);
         // jsmk.path.makedirs(outputdir); // often redundant
 
-        let config = task.GetToolConfig();
-        let contentfilter = (config && config.filter) ? config.filter : null;
+        let contentfilter = task.onFilter; 
+        if(!contentfilter)
+        {
+            let config = task.GetToolConfig();
+            contentfilter = (config && config.filter) ? config.filter : null;
+        }
         let params = task.GetParameters();
         for(let i = 0; i < inputs.length; i++)
         {
@@ -132,69 +136,49 @@ class CopyFiles extends Tool
             return w;
         }
 
-        if(!contentfilter)
+        let istat = fs.lstatSync(infile);
+        if(isdir)
         {
             // handles permissions and subtrees
-            let istat = fs.lstatSync(infile);
-            if(istat.isDirectory())
+            return this.deepCopy(infile, outfile, params); // single task
+        }
+        else
+        if(!contentfilter)
+        {
+            let ostat;
+            try
             {
-                return this.deepCopy(infile, outfile, params); // single task
+                ostat = fs.lstatSync(outfile);
+            }
+            catch(err)
+            {
+                // enoent
+            }
+            if(!ostat || ostat.mtime < istat.mtime)
+            {
+                jsmk.INFO(`copy from: ${infile}`);
+                jsmk.INFO(`       to: ${outfile}`);
+                return fse.copy(infile, outfile); // returns a promise
             }
             else
             {
-                let ostat;
-                try
-                {
-                    ostat = fs.lstatSync(outfile);
-                }
-                catch(err)
-                {
-                    // enoent
-                }
-                if(!ostat || ostat.mtime < istat.mtime)
-                {
-                    jsmk.INFO(`copy from: ${infile} ${contentfilter?'(filtered)':''}`);
-                    jsmk.INFO(`       to: ${outfile}`);
-                    return fse.copy(infile, outfile); // returns a promise
-                }
-                else
-                {
-                    let w = new Promise((resolve, reject) => 
-                    { 
-                        resolve(0); 
-                    });
-                    w._name = "copyfile-noop";
-                    return w;
-                }
+                let w = new Promise((resolve, reject) => 
+                { 
+                    resolve(0); 
+                });
+                w._name = "copyfile-noop";
+                return w;
             }
         }
-        else
+        else // contentfilter provided, assume text file.
         {
             w = new Promise((resolve, reject) =>
             {
                 jsmk.path.makedirs(jsmk.path.dirname(outfile));
-                let istream = fs.createReadStream(infile, { encoding: "binary" });
-                istream.on("error", reject);
-                let ostream = fs.createWriteStream(outfile, { encoding: "binary" });
-                ostream.on("error", reject);
-                if(!contentfilter)
-                {
-                    ostream.on("close", resolve);
-                    istream.pipe(ostream);
-                }
-                else
-                {
-                    istream.on("end", () =>
-                    {
-                        ostream.end();
-                        jsmk.file.touch(outfile); // updates timestamp cache
-                        resolve();
-                    });
-                    istream.on("data", (chunk) =>
-                    {
-                        ostream.write(contentfilter(infile, chunk));
-                    });
-                }
+                let data = fs.readFileSync(infile, "utf8");
+                let ndata = contentfilter(data);
+                fs.writeFileSync(outfile, ndata);
+                resolve();
             });
         }
         w._name = "copyfile";
