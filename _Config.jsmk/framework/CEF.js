@@ -28,9 +28,9 @@ let Platform = jsmk.GetHost().Platform;
 let FrameworkDirs = jsmk.GetPolicy().LocalFrameworkDirs;
 
 // const sDefaultCEFVers = "139"; // 9/1/25
-// NB: windows needs work to support 140 (?app needs to request permissions?)
-//  https://chromium.googlesource.com/chromium/src/+/refs/heads/main/docs/design/sandbox.md#lpac-file-system-permissions
-const sDefaultCEFVers = Platform == "win32" ? "139" : "140"; // 9/22/25
+const sDefaultCEFVers = "140"; // 9/22/25
+// NB: when upgrading CEF vesion for windows you must manually update
+//   app+cef-vers--specific bootstrap.exe.
 const sDefaultConfigProj = "compileDLLBinding";
 
 class CEF extends Framework
