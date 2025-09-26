@@ -1,12 +1,13 @@
 //
 // A Framework for CEF - Chromium Embedded Framework.
+// API Overview here: https://bitbucket.org/chromiumembedded/cef/wiki/GeneralUsage.md
 //
 // assumes: 
 //  - binary release-mode distribution downloaded from eg: 
 //         https://cef-builds.spotifycdn.com/index.html
 //    and placed below ${PROJ}/_frameworks/CEF/${ARCH}/${CEFVERS}/...
-//    eg: _frameworks/CEF/x86_64-win32/139/...  (NB: distributes are large so can't
-//         be checked in).
+//    eg: _frameworks/CEF/x86_64-win32/139/...  (NB: distributions are 
+//         large so can't be checked in).
 //  - Project is extended to include compilation of C++ dll-bridge components
 //    via jsmk.GetFramework("CEF", vers?).ConfigureProject(Project, "compileC++Binding");
 //  - Project can resolve relative paths below itself (and into _frameworks/...)
