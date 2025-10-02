@@ -78,9 +78,11 @@ class Clang extends Foundation
             );
             if(platform == "darwin")
             {
+                let rc = jsmk.LoadConfig("tool/clang/rc.js");
                 this.MergeToolMap(
                 {
                     "mm->o": new cc.MM(this),
+                    "xib->nib": new rc.IBTOOL(this),
                     "y->c": new misc.YACC(this),
                     "lex->c": new misc.LEX(this),
                 });

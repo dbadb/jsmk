@@ -336,6 +336,21 @@ class CEF extends Framework
         const plistHelperTemplate = cfg.darwin.plistHelperTemplate;
         const helperInputs = subProj.Glob(cfg.darwin.helperSrc);
         const resources = subProj.Glob(cfg.darwin.resources);
+        if(cfg.darwin.mainMenu)
+        {
+            let xib = cfg.darwin.mainMenu.xib;
+            let nibname = jsmk.path.basenameNoExt(xib);
+            let tm = m.NewTask(nibname, "xib->nib", {
+                inputs: xib
+            });
+            let nib = tm.GetOutputs();
+            // compile a .xib to .nib in module output
+            // install result into eg: Resources/English.lproj
+            m.NewTask("installNIB", "install", {
+                inputs: nib,
+                installdir: jsmk.path.join(instInfo.resourceDir, cfg.darwin.mainMenu.dst)
+            });
+        }
         const bundleExtMap = {};
         let helperOutputs = [];
         let plistBase = {
@@ -345,7 +360,7 @@ class CEF extends Framework
             BUNDLE_ID: instInfo.AppBundle,
             BUNDLE_ID_SUFFIX: "",
         };
-
+        
         let t0 = m.NewTask("installAppPlist", "install", {
                 inputs: [plistTemplate],
                 installdir: jsmk.path.dirname(instInfo.binDir),
