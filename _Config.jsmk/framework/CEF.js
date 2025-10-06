@@ -91,7 +91,7 @@ class CEF extends Framework
         cefProjState.fwdir = this.m_fwpath;
         cefProjState.incdirs = [this.m_incdir];
         cefProjState.ccdefs = {
-            CEF_USE_BOOTSTRAP: null,
+            CEF_USE_SANDBOX: null,
             WRAPPING_CEF_SHARED: 1,
             __STDC_CONSTANT_MACROS:null, // support for eg: UINT8_MAX, etc
             __STDC_FORMAT_MACROS:null,
@@ -124,6 +124,7 @@ class CEF extends Framework
             const rtrezdir = jsmk.path.join(this.m_fwpath, "Resources"); 
             cefProjState.ccdefs = Object.assign(cefProjState.ccdefs, {
                 CEF_USE_ATL: null,
+                CEF_USE_BOOTSTRAP: null,
                 NOMINMAX: null,
                 WINVER: "0x0A00",
                 _WIN32_WINNT: "0x0A00",
@@ -235,6 +236,7 @@ class CEF extends Framework
                     rcinputs = rcinputs.flatMap((v) => subProj.Glob(v));
                 if(libs == null) libs = [];
 
+                // ccdefs, etc are applied at task level.
                 const tcomp = m.NewTask("compile", "cpp->o", {
                     inputs: cppinputs,
                     define: {
@@ -271,8 +273,8 @@ class CEF extends Framework
                     {
                         inputs: [...compileOuts],
                         // add link flags, etc.
-                        deps: [],
-                        libs,
+                        deps: libs,
+                        libs: [],
                         frameworks: [],
                         flags: [],
                     });
@@ -334,6 +336,21 @@ class CEF extends Framework
         const plistHelperTemplate = cfg.darwin.plistHelperTemplate;
         const helperInputs = subProj.Glob(cfg.darwin.helperSrc);
         const resources = subProj.Glob(cfg.darwin.resources);
+        if(cfg.darwin.mainMenu)
+        {
+            let xib = cfg.darwin.mainMenu.xib;
+            let nibname = jsmk.path.basenameNoExt(xib);
+            let tm = m.NewTask(nibname, "xib->nib", {
+                inputs: xib
+            });
+            let nib = tm.GetOutputs();
+            // compile a .xib to .nib in module output
+            // install result into eg: Resources/English.lproj
+            m.NewTask("installNIB", "install", {
+                inputs: nib,
+                installdir: jsmk.path.join(instInfo.resourceDir, cfg.darwin.mainMenu.dst)
+            });
+        }
         const bundleExtMap = {};
         let helperOutputs = [];
         let plistBase = {
@@ -343,7 +360,7 @@ class CEF extends Framework
             BUNDLE_ID: instInfo.AppBundle,
             BUNDLE_ID_SUFFIX: "",
         };
-
+        
         let t0 = m.NewTask("installAppPlist", "install", {
                 inputs: [plistTemplate],
                 installdir: jsmk.path.dirname(instInfo.binDir),
@@ -386,8 +403,8 @@ class CEF extends Framework
             {
                 inputs: [...mcomp.GetOutputs(), ...appObjs],
                 // nb: configure task (herein) does work too!
-                deps: [],
-                libs: appLibs,
+                deps: appLibs,
+                libs: [],
                 frameworks: [],
                 flags: [],
             });
